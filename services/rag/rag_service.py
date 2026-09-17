@@ -91,24 +91,61 @@ def answer_product_question(product_id: Optional[str], question: str) -> dict[st
 
     q_lower = question.lower()
 
-    # Match against specifications dictionary keys
+    # Synonym mapping for common natural language terms
+    field_synonyms = {
+        "charging": ["charging", "charge", "charged", "charger", "fast charging", "port"],
+        "connectivity": ["connectivity", "connect", "connection", "bluetooth", "aux", "wireless", "wired"],
+        "battery_life": ["battery", "battery life", "battery_life", "run time", "runtime"],
+        "driver_size": ["driver", "driver size", "driver_size", "drivers", "transducer"],
+        "noise_cancellation": ["noise cancellation", "noise cancelling", "anc", "noise_cancellation"],
+        "weight": ["weight", "weigh", "heavy", "mass"],
+        "type": ["form factor", "headphone type", "chair type", "shoe type"],
+    }
+
+    # Match against specifications dictionary keys (prioritize longer/specific keys over generic ones like 'type')
     matched_value = None
     matched_field = None
 
-    for key, val in specs.items():
+    sorted_keys = sorted(specs.keys(), key=lambda k: len(k), reverse=True)
+
+    for key in sorted_keys:
+        val = specs[key]
         key_normalized = key.replace("_", " ").lower()
-        if key_normalized in q_lower or any(word in q_lower for word in key_normalized.split()):
+        synonyms = field_synonyms.get(key, [key_normalized])
+
+        if key_normalized in q_lower or any(syn in q_lower for syn in synonyms):
             matched_value = val
             matched_field = key
             break
 
+    # Build retrieved context block from catalog
+    context_str = (
+        f"Product ID: {product_id}\n"
+        f"Product Name: {display_name}\n"
+        f"Category: {product.get('category', '')}\n"
+        f"Description: {description}\n"
+        f"Specifications: {json.dumps(specs, indent=2)}\n"
+        f"Features: {json.dumps(features)}"
+    )
+
+    from services.llm import generate_grounded_answer
+
     if matched_value:
-        answer = f"The {matched_field.replace('_', ' ')} of the {display_name} is {matched_value}."
+        llm_answer = generate_grounded_answer(
+            user_question=question,
+            retrieved_context=context_str,
+            system_instruction=(
+                f"You are VisionIQ's Strict Grounded Product Assistant. "
+                f"Answer the user's question accurately using ONLY the verbatim retrieved product specifications for {display_name}. "
+                f"State the exact value '{matched_value}' concisely. Do NOT add external real-world assumptions or qualifiers not found in the context."
+            ),
+        )
+
         return {
             "product_id": product_id,
             "product_name": name,
             "question": question,
-            "answer": answer,
+            "answer": llm_answer,
             "requires_clarification": False,
             "is_available": True,
             "grounded_field": matched_field,
@@ -117,11 +154,23 @@ def answer_product_question(product_id: Optional[str], question: str) -> dict[st
         }
 
     # If field is absent from catalog specifications
+    llm_answer = generate_grounded_answer(
+        user_question=question,
+        retrieved_context=context_str,
+        system_instruction=(
+            f"You are VisionIQ's Strict Grounded Product Assistant. "
+            f"The user is asking about a specification for {display_name}. "
+            f"Since the requested information is not present in the retrieved specifications, respond strictly with:\n"
+            f"'This information is not specified in the product catalog for {display_name}.'\n"
+            f"Do NOT give buying recommendations, external advice, or assumptions."
+        ),
+    )
+
     return {
         "product_id": product_id,
         "product_name": name,
         "question": question,
-        "answer": f"This information is not specified in the product catalog for {display_name}.",
+        "answer": llm_answer,
         "requires_clarification": False,
         "is_available": False,
         "grounded_field": None,

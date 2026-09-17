@@ -296,7 +296,27 @@ def grounded_video_qa(
     transcript_text = best_match["transcript"]
     topic = best_match["topic"]
 
-    answer = f"Between {start_t:.1f}s and {end_t:.1f}s ({topic}), the video covers: \"{transcript_text}\""
+    video_context = (
+        f"Video ID: {video_id}\n"
+        f"Relevant Timestamp Interval: {start_t:.1f}s to {end_t:.1f}s\n"
+        f"Segment Topic: {topic}\n"
+        f"Spoken Transcript Segment: \"{transcript_text}\""
+    )
+
+    try:
+        from services.llm import generate_grounded_answer
+        answer = generate_grounded_answer(
+            user_question=question,
+            retrieved_context=video_context,
+            system_instruction=(
+                f"You are VisionIQ's Grounded Video Intelligence Assistant. "
+                f"Answer the user's question accurately using ONLY the provided timestamped video segment ({start_t:.1f}s-{end_t:.1f}s). "
+                f"Cite the exact start and end timestamps and explain what was said or shown. Do not hallucinate."
+            ),
+        )
+    except Exception as e:
+        logger.warning(f"LLM generation bypassed/failed ({e}); using timestamped transcript format.")
+        answer = f"Between {start_t:.1f}s and {end_t:.1f}s ({topic}), the video covers: \"{transcript_text}\""
 
     return {
         "video_id": video_id,

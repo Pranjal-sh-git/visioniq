@@ -28,6 +28,11 @@ class Settings(BaseSettings):
     AZURE_FOUNDRY_ENDPOINT: str = os.getenv("AZURE_FOUNDRY_ENDPOINT", "")
     AZURE_FOUNDRY_KEY: str = os.getenv("AZURE_FOUNDRY_KEY", "")
 
+    # Azure OpenAI Inference
+    AZURE_OPENAI_ENDPOINT: str = os.getenv("AZURE_OPENAI_ENDPOINT", "")
+    AZURE_OPENAI_DEPLOYMENT_NAME: str = os.getenv("AZURE_OPENAI_DEPLOYMENT_NAME", "gpt-5-mini")
+    AZURE_OPENAI_API_KEY: str = os.getenv("AZURE_OPENAI_API_KEY", "")
+
     # Azure AI Search
     AZURE_SEARCH_ENDPOINT: str = os.getenv("AZURE_SEARCH_ENDPOINT", "")
     AZURE_SEARCH_KEY: str = os.getenv("AZURE_SEARCH_KEY", "")

@@ -1,7 +1,7 @@
-"""Agent orchestration module for VisionIQ using Microsoft Foundry Agent Service.
+"""Agent orchestration module for VisionIQ using Microsoft Foundry Azure OpenAI Agent Service.
 
-Uses model-based tool calling (function calling) with OpenAI/Foundry tool schemas
-so the model decides which tool to invoke based on full prompt context and parameters.
+Directly invokes the deployed Azure OpenAI model (gpt-5-mini) for tool selection
+via JSON function-calling schemas over the full conversation context.
 """
 
 import json
@@ -30,12 +30,13 @@ from agent.tools import (
     search_product_knowledge,
     search_video,
 )
+from services.llm import get_azure_openai_client
 
 logger = logging.getLogger("visioniq.agent")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 
 # ============================================================================
-# Microsoft Foundry Agent Tool Definitions (JSON Schemas)
+# Microsoft Foundry Agent Tool Definitions (OpenAI Function Schemas)
 # ============================================================================
 
 FOUNDRY_TOOL_DEFINITIONS: list[dict[str, Any]] = [
@@ -171,14 +172,16 @@ class VisionIQAgent:
         self,
         endpoint: Optional[str] = None,
         api_key: Optional[str] = None,
+        deployment_name: Optional[str] = None,
     ) -> None:
-        """Initializes the VisionIQ Agent with Microsoft Foundry tools and client configuration."""
-        self.endpoint = endpoint or settings.AZURE_FOUNDRY_ENDPOINT
-        self.api_key = api_key or settings.AZURE_FOUNDRY_KEY
+        """Initializes the VisionIQ Agent with Microsoft Foundry tools and Azure OpenAI client."""
+        self.endpoint = endpoint or settings.AZURE_OPENAI_ENDPOINT
+        self.api_key = api_key or settings.AZURE_OPENAI_API_KEY
+        self.deployment_name = deployment_name or settings.AZURE_OPENAI_DEPLOYMENT_NAME
         self.system_prompt = SYSTEM_PROMPT
         self.tool_definitions = FOUNDRY_TOOL_DEFINITIONS
 
-        # Map function names to actual implementations
+        # Map function names to actual tool implementations
         self.tool_map = {
             "identify_product": identify_product,
             "search_product_knowledge": search_product_knowledge,
@@ -193,99 +196,47 @@ class VisionIQAgent:
     def _select_tool_via_model(
         self,
         messages: list[dict[str, str]],
-        media_url: Optional[str] = None,
-        video_id: Optional[str] = None,
-        product_id: Optional[str] = None,
     ) -> tuple[str, dict[str, Any], str]:
-        """Model-driven tool selector using Microsoft Foundry / OpenAI tool calling protocols.
+        """Invokes the Azure OpenAI model for genuine tool calling / function calling.
 
-        Interprets the user intent, conversation history, and tool schemas to select
-        the exact tool function and extract typed arguments.
+        Raises a visible RuntimeError if the API call fails; no silent keyword fallbacks.
 
         Returns:
             tuple[str, dict[str, Any], str]: (selected_tool_name, tool_arguments, reasoning)
         """
-        user_message = messages[-1]["content"] if messages else ""
-        text = user_message.lower().strip()
+        client = get_azure_openai_client()
+        deployment = self.deployment_name
 
-        # 1. Try invoking Azure OpenAI / Foundry endpoint if active client available
         try:
-            from openai import AzureOpenAI
-            if self.endpoint and self.api_key and "openai.azure.com" in self.endpoint:
-                client = AzureOpenAI(
-                    azure_endpoint=self.endpoint,
-                    api_key=self.api_key,
-                    api_version="2024-06-01",
-                )
-                response = client.chat.completions.create(
-                    model="gpt-4o",
-                    messages=messages,
-                    tools=self.tool_definitions,
-                    tool_choice="auto",
-                    temperature=0.0,
-                )
-                choice = response.choices[0].message
-                if choice.tool_calls:
-                    call = choice.tool_calls[0]
-                    name = call.function.name
-                    args = json.loads(call.function.arguments or "{}")
-                    reasoning = f"Foundry LLM model selected tool '{name}' with arguments: {args}"
-                    return name, args, reasoning
+            response = client.chat.completions.create(
+                model=deployment,
+                messages=messages,
+                tools=self.tool_definitions,
+                tool_choice="auto",
+                max_completion_tokens=600,
+            )
+            logger.info(f"[AZURE OPENAI CALL] Deployment: {deployment} | Status: SUCCESS")
         except Exception as e:
-            logger.debug(f"Direct Foundry API call bypassed / not connected: {e}")
+            logger.error(f"[AZURE OPENAI ERROR] Deployment '{deployment}' tool selection failed: {e}")
+            raise RuntimeError(
+                f"Azure OpenAI tool selection failed for deployment '{deployment}'. "
+                f"Verify AZURE_OPENAI_ENDPOINT, AZURE_OPENAI_API_KEY, and AZURE_OPENAI_DEPLOYMENT_NAME: {str(e)}"
+            ) from e
 
-        # 2. Semantic Contextual Tool Decision based on Tool Schemas
-        # Evaluating semantic intent against tool schema capabilities:
-        if any(w in text for w in ["say about", "said about", "reviewer", "speaker", "in the video", "fit as an audience", "timestamp", "scene", "during the video", "mention in video"]) or (video_id and not any(w in text for w in ["similar", "spec", "battery", "price"])):
-            selected_tool = "search_video"
-            args = {
-                "video_id": video_id or "vid_df16da8f30f96fb6",
-                "query": user_message,
-                "top_k": 3,
-            }
-            reasoning = (
-                f"Matched function 'search_video': query '{user_message}' targets temporal spoken dialogues, "
-                f"reviewer commentary, or video scenes."
-            )
-            return selected_tool, args, reasoning
+        choice = response.choices[0].message
+        if choice.tool_calls:
+            call = choice.tool_calls[0]
+            tool_name = call.function.name
+            tool_args = json.loads(call.function.arguments or "{}")
+            reasoning = f"Azure OpenAI ({deployment}) function call: selected '{tool_name}' with parameters {tool_args}"
+            return tool_name, tool_args, reasoning
 
-        if any(w in text for w in ["similar", "alternative", "alternatives", "like this", "other options", "comparable", "recommend other", "recommend similar"]):
-            selected_tool = "find_similar_products"
-            args = {
-                "product_id": product_id,
-                "image_url": media_url,
-                "top_k": 4,
-            }
-            reasoning = (
-                f"Matched function 'find_similar_products': query '{user_message}' requests alternative "
-                f"or comparable product recommendations."
-            )
-            return selected_tool, args, reasoning
-
-        if any(w in text for w in ["what is this product", "what product is this", "what is this", "identify", "recognize", "what item", "which product"]) or (media_url and not any(w in text for w in ["spec", "battery", "weight", "price", "connect"])):
-            selected_tool = "identify_product"
-            args = {
-                "image_url": media_url,
-                "query": user_message,
-                "top_k": 3,
-            }
-            reasoning = (
-                f"Matched function 'identify_product': query '{user_message}' requests visual identification "
-                f"and attribute extraction for the product."
-            )
-            return selected_tool, args, reasoning
-
-        # Product Knowledge RAG (Specs, technical features)
-        selected_tool = "search_product_knowledge"
-        args = {
-            "query": user_message,
-            "product_id": product_id,
-        }
-        reasoning = (
-            f"Matched function 'search_product_knowledge': query '{user_message}' inquires about "
-            f"catalog specifications, battery life, weight, or technical capabilities."
+        # If model answered directly without tool invocation
+        return (
+            "search_product_knowledge",
+            {"query": messages[-1]["content"]},
+            f"Azure OpenAI ({deployment}) default selection for conversational text: {choice.content}",
         )
-        return selected_tool, args, reasoning
 
     def run(
         self,
@@ -295,7 +246,7 @@ class VisionIQAgent:
         video_id: Optional[str] = None,
         product_id: Optional[str] = None,
     ) -> dict[str, Any]:
-        """Executes the Microsoft Foundry Agent with model-driven tool selection.
+        """Executes the Microsoft Foundry Agent with real model-driven tool selection.
 
         Logs the selected tool and reasoning (no secrets).
         Guarantees that only a single tool is invoked for a single-intent question.
@@ -310,23 +261,37 @@ class VisionIQAgent:
         Returns:
             dict[str, Any]: Execution result containing selected tool, reasoning, and tool output.
         """
+        context_prompt = user_prompt
+        if product_id:
+            context_prompt = f"[Context: Product ID is {product_id}] {user_prompt}"
+        if video_id:
+            context_prompt = f"[Context: Video ID is {video_id}] {user_prompt}"
+        if media_url:
+            context_prompt = f"[Context: Image URL is {media_url}] {user_prompt}"
+
         messages = [
             {"role": "system", "content": self.system_prompt},
-            {"role": "user", "content": user_prompt},
+            {"role": "user", "content": context_prompt},
         ]
 
         # Model selects the tool and structured parameters
-        tool_name, tool_args, reasoning = self._select_tool_via_model(
-            messages=messages,
-            media_url=media_url,
-            video_id=video_id,
-            product_id=product_id,
-        )
+        tool_name, tool_args, reasoning = self._select_tool_via_model(messages=messages)
+
+        # Merge any explicitly supplied runtime inputs if missing from LLM arguments
+        if media_url and "image_url" not in tool_args:
+            tool_args["image_url"] = media_url
+        if video_id and "video_id" not in tool_args:
+            tool_args["video_id"] = video_id
+        if product_id and "product_id" not in tool_args:
+            tool_args["product_id"] = product_id
 
         # Log tool selection and reasoning (CRITICAL: no secrets)
         logger.info(f"[ROUTING] Selected tool: '{tool_name}' via Foundry Agent Tool-Calling | Parameters: {tool_args} | Reasoning: {reasoning}")
 
         # Execute ONLY the single selected tool
+        if tool_name not in self.tool_map:
+            raise ValueError(f"Unknown tool '{tool_name}' selected by model.")
+
         tool_func = self.tool_map[tool_name]
         tool_result: Any = None
 
