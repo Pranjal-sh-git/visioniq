@@ -1,101 +1,180 @@
-"""Tool definitions and stubs for the VisionIQ Agent.
+"""Tool definitions for the VisionIQ Foundry Agent.
 
-These tool functions will be exposed to the Microsoft Foundry Agent Service
-and local agent orchestration workflows.
+Wires existing implementations from services/ for multimodal product search,
+catalog RAG knowledge retrieval, temporal video search, and product recommendations.
 """
 
-from typing import Any, Optional
+import json
+import logging
+from pathlib import Path
+import sys
+from typing import Any, Optional, Union
+from PIL import Image
 
+# Ensure workspace root and backend are on sys.path
+BASE_DIR = Path(__file__).resolve().parent
+ROOT_DIR = BASE_DIR.parent
+for directory in (str(ROOT_DIR), str(ROOT_DIR / "backend")):
+    if directory not in sys.path:
+        sys.path.insert(0, directory)
 
-def analyze_media(
-    media_url: str,
-    media_type: str = "image",
-    custom_prompt: Optional[str] = None,
-) -> dict[str, Any]:
-    """Analyze media (image or video) using Azure Content Understanding / Vision.
+try:
+    from backend.config import settings
+except ImportError:
+    from config import settings
 
-    Args:
-        media_url (str): The URL or storage URI of the media file to analyze.
-        media_type (str): Type of media - 'image' or 'video'. Defaults to 'image'.
-        custom_prompt (Optional[str]): Optional custom extraction prompt or query.
+from services.product_search.matcher import (
+    identify_product as _identify_product,
+    identify_product_by_text as _identify_product_by_text,
+    get_search_client,
+)
+from services.rag.rag_service import (
+    answer_product_question as _answer_product_question,
+    retrieve_product_by_id,
+)
+from services.video.search import grounded_video_qa as _grounded_video_qa
 
-    Returns:
-        dict[str, Any]: Extracted metadata, visual tags, descriptions, and detected entities.
-    """
-    # TODO: Implement media analysis calling Azure Content Understanding / Azure Vision API.
-    # Should submit media payload, extract visual descriptors, OCR text, and structural tags.
-    raise NotImplementedError("analyze_media is a stub and will be implemented in the next phase.")
+logger = logging.getLogger(__name__)
 
 
 def identify_product(
-    image_url: str,
-    bounding_box: Optional[list[float]] = None,
+    image: Optional[Union[str, bytes, Path, Image.Image]] = None,
+    image_url: Optional[str] = None,
+    query: Optional[str] = None,
+    top_k: int = 3,
 ) -> dict[str, Any]:
-    """Identify a product within an image and extract identifying attributes.
+    """Identifies a product from an uploaded image or query description.
 
     Args:
-        image_url (str): The URL or storage URI of the product image.
-        bounding_box (Optional[list[float]]): Normalized coordinates [ymin, xmin, ymax, xmax] if cropped.
+        image: Local image file path, HTTP/HTTPS URL, raw image bytes, or PIL Image.
+        image_url: Image URL if passed separately.
+        query: Optional text description fallback.
+        top_k: Number of top candidate matches to retrieve.
 
     Returns:
-        dict[str, Any]: Identified product name, category, brand candidate, and confidence scores.
+        dict[str, Any]: Identified product details, top matches, and match confidence.
     """
-    # TODO: Implement product identification using multimodal LLM / Vision models to detect and label products.
-    raise NotImplementedError("identify_product is a stub and will be implemented in the next phase.")
+    target_img = image or image_url
+    if target_img:
+        matches = _identify_product(image=target_img, top_k=top_k)
+    elif query:
+        matches = _identify_product_by_text(query_text=query, top_k=top_k)
+    else:
+        return {
+            "success": False,
+            "error": "An image or text description is required to identify a product.",
+            "matches": [],
+        }
+
+    best_match = matches[0] if matches else None
+    return {
+        "success": True,
+        "best_match": best_match,
+        "all_matches": matches,
+        "identified_product_name": best_match["name"] if best_match else None,
+        "identified_product_id": best_match["id"] if best_match else None,
+        "is_confident": best_match.get("is_confident_match", False) if best_match else False,
+    }
 
 
 def search_product_knowledge(
     query: str,
-    filters: Optional[dict[str, Any]] = None,
-    top_k: int = 5,
-) -> list[dict[str, Any]]:
-    """Search the product knowledge base using Azure AI Search (Hybrid + Vector Search / RAG).
+    product_id: Optional[str] = None,
+    product_name: Optional[str] = None,
+) -> dict[str, Any]:
+    """Searches catalog knowledge and specifications to answer product questions.
 
     Args:
-        query (str): Natural language search query or semantic search string.
-        filters (Optional[dict[str, Any]]): Metadata filters such as category, brand, or price range.
-        top_k (int): Number of top results to return. Defaults to 5.
+        query (str): Question or query regarding product specifications, battery, weight, etc.
+        product_id (Optional[str]): Target product ID (e.g. 'P001').
+        product_name (Optional[str]): Target product name if product_id is not known.
 
     Returns:
-        list[dict[str, Any]]: Retrieved product documentation, specs, and knowledge chunks.
+        dict[str, Any]: Grounded catalog answer and specification data or clarification request.
     """
-    # TODO: Implement RAG search against Azure AI Search index with vector embeddings and semantic ranking.
-    raise NotImplementedError("search_product_knowledge is a stub and will be implemented in the next phase.")
+    target_pid = product_id
+
+    # If product_id not directly provided, search by explicit product name if present
+    if not target_pid and product_name:
+        candidates = _identify_product_by_text(product_name, top_k=1)
+        if candidates and candidates[0]["similarity_score"] >= 0.80:
+            target_pid = candidates[0]["id"]
+
+    # When no product_id is given or resolved, answer_product_question asks for clarification
+    result = _answer_product_question(product_id=target_pid, question=query)
+    return result
 
 
 def search_video(
-    video_url: str,
+    video_id: str,
     query: str,
     top_k: int = 3,
-) -> list[dict[str, Any]]:
-    """Search within a video for relevant timestamps, actions, or visual appearances.
+) -> dict[str, Any]:
+    """Searches within a video's timestamped segments for spoken words or topics.
 
     Args:
-        video_url (str): URL or storage path of the video.
-        query (str): Description or question regarding what to find in the video.
-        top_k (int): Number of top video segments to return. Defaults to 3.
+        video_id (str): Video identifier (e.g. 'vid_df16da8f30f96fb6').
+        query (str): Question or description of the moment to retrieve.
+        top_k (int): Number of candidate segments to evaluate.
 
     Returns:
-        list[dict[str, Any]]: Matching timestamps, intervals, transcript excerpts, and keyframes.
+        dict[str, Any]: Grounded answer with exact start_time, end_time, and supporting segment.
     """
-    # TODO: Implement video indexing and temporal search using Azure Content Understanding video analyzer.
-    raise NotImplementedError("search_video is a stub and will be implemented in the next phase.")
+    return _grounded_video_qa(video_id=video_id, question=query, top_k=top_k)
 
 
 def find_similar_products(
     product_id: Optional[str] = None,
+    image: Optional[Union[str, bytes, Path, Image.Image]] = None,
     image_url: Optional[str] = None,
-    top_k: int = 5,
-) -> list[dict[str, Any]]:
-    """Find visually or semantically similar products based on a product ID or image.
+    category: Optional[str] = None,
+    top_k: int = 4,
+) -> dict[str, Any]:
+    """Finds visually or categorically similar products in the catalog.
 
     Args:
-        product_id (Optional[str]): Existing product identifier to find counterparts for.
-        image_url (Optional[str]): Input image URL to perform visual similarity search.
-        top_k (int): Number of similar products to retrieve. Defaults to 5.
+        product_id (Optional[str]): Source product ID to find alternatives for.
+        image: Source image to find visual matches for.
+        image_url: Source image URL.
+        category (Optional[str]): Filter by category (e.g. 'Headphones', 'Chairs').
+        top_k (int): Number of similar products to return.
 
     Returns:
-        list[dict[str, Any]]: List of similar products with similarity metrics and metadata.
+        dict[str, Any]: List of similar products with similarity scores and specs.
     """
-    # TODO: Implement vector similarity search over product embeddings in Azure AI Search.
-    raise NotImplementedError("find_similar_products is a stub and will be implemented in the next phase.")
+    target_img = image or image_url
+
+    if target_img:
+        matches = _identify_product(image=target_img, top_k=top_k + 1)
+        similar = [m for m in matches if m.get("id") != product_id][:top_k]
+        return {
+            "source_product_id": product_id,
+            "similar_products": similar,
+            "count": len(similar),
+        }
+
+    if product_id:
+        source_doc = retrieve_product_by_id(product_id)
+        if source_doc:
+            prod_category = category or source_doc.get("category")
+            prod_name = source_doc.get("name", "")
+            # Query text matching in same category
+            matches = _identify_product_by_text(f"{prod_category} {prod_name}", top_k=top_k + 2)
+            similar = [m for m in matches if m.get("id") != product_id][:top_k]
+            return {
+                "source_product_id": product_id,
+                "source_product_name": prod_name,
+                "category": prod_category,
+                "similar_products": similar,
+                "count": len(similar),
+            }
+
+    # Fallback to category search or general catalog
+    query_text = category or "Headphones"
+    matches = _identify_product_by_text(query_text, top_k=top_k)
+    return {
+        "source_product_id": product_id,
+        "category": category,
+        "similar_products": matches[:top_k],
+        "count": len(matches[:top_k]),
+    }

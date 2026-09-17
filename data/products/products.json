@@ -1,0 +1,586 @@
+[
+  {
+    "id": "P001",
+    "name": "Sony WH-1000XM5",
+    "brand": "Sony",
+    "category": "Headphones",
+    "description": "Industry-leading wireless noise-canceling over-ear headphones with two processors and 8 microphones for exceptional sound quality and call clarity.",
+    "specifications": {
+      "type": "Over-Ear",
+      "connectivity": "Bluetooth 5.2, 3.5mm AUX",
+      "battery_life": "30 hours",
+      "weight": "250g",
+      "noise_cancellation": "Active Noise Cancellation (ANC)",
+      "driver_size": "30mm",
+      "charging": "USB-C Fast Charging"
+    },
+    "features": [
+      "Auto NC Optimizer",
+      "Speak-to-Chat technology",
+      "Multipoint Bluetooth connection",
+      "LDAC high-resolution audio support",
+      "Integrated Processor V1"
+    ],
+    "image_urls": [
+      "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80",
+      "https://images.unsplash.com/photo-1505740420928-5e560c06d30e?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "id": "P002",
+    "name": "Bose QuietComfort Ultra",
+    "brand": "Bose",
+    "category": "Headphones",
+    "description": "Flagship wireless noise cancelling headphones featuring groundbreaking spatialized audio and custom tuned sound.",
+    "specifications": {
+      "type": "Over-Ear",
+      "connectivity": "Bluetooth 5.3",
+      "battery_life": "24 hours",
+      "weight": "252g",
+      "noise_cancellation": "CustomTune Active Noise Cancelling",
+      "charging": "USB-C"
+    },
+    "features": [
+      "Bose Immersive Audio",
+      "Quiet and Aware Modes",
+      "Wind Block mode",
+      "Ultra-soft ear cushions"
+    ],
+    "image_urls": [
+      "https://images.unsplash.com/photo-1583394838336-acd977736f90?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "id": "P003",
+    "name": "Apple AirPods Max",
+    "brand": "Apple",
+    "category": "Headphones",
+    "description": "High-fidelity audio with active noise cancellation, transparency mode, and personalized spatial audio with dynamic head tracking.",
+    "specifications": {
+      "type": "Over-Ear",
+      "connectivity": "Bluetooth 5.0, Apple H1 chip (each cup)",
+      "battery_life": "20 hours",
+      "weight": "384.8g",
+      "noise_cancellation": "Active Noise Cancellation",
+      "driver_size": "40mm custom Apple driver"
+    },
+    "features": [
+      "Computational audio",
+      "Knit-mesh canopy and memory foam ear cushions",
+      "Digital Crown for precise volume control",
+      "Smart Case ultra-low-power mode"
+    ],
+    "image_urls": [
+      "https://images.unsplash.com/photo-1545127398-14699f92334b?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "id": "P004",
+    "name": "Sennheiser Momentum 4 Wireless",
+    "brand": "Sennheiser",
+    "category": "Headphones",
+    "description": "Audiophile-inspired 42mm transducer system delivering superior dynamics, clarity, and an extraordinary 60-hour battery life.",
+    "specifications": {
+      "type": "Over-Ear",
+      "connectivity": "Bluetooth 5.2, aptX Adaptive",
+      "battery_life": "60 hours",
+      "weight": "293g",
+      "noise_cancellation": "Adaptive Hybrid ANC",
+      "driver_size": "42mm"
+    },
+    "features": [
+      "Sound Personalization",
+      "Built-in 5-band EQ",
+      "Smart Pause functionality",
+      "Crystal-clear call microphones"
+    ],
+    "image_urls": [
+      "https://images.unsplash.com/photo-1484704849700-f032a568e944?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "id": "P005",
+    "name": "Audio-Technica ATH-M50xBT2",
+    "brand": "Audio-Technica",
+    "category": "Headphones",
+    "description": "Legendary studio monitor sonic signature in a wireless Bluetooth design with exceptional clarity across an extended frequency range.",
+    "specifications": {
+      "type": "Over-Ear Closed-back",
+      "connectivity": "Bluetooth 5.0, LDAC, AAC, SBC",
+      "battery_life": "50 hours",
+      "weight": "307g",
+      "driver_size": "45mm large-aperture drivers",
+      "noise_cancellation": "Passive Sound Isolation"
+    },
+    "features": [
+      "Low latency mode for gaming and streaming",
+      "Dual beamforming microphones for voice calls",
+      "90-degree swiveling earcups",
+      "A-T Connect app customization"
+    ],
+    "image_urls": [
+      "https://images.unsplash.com/photo-1590658268037-6bf12165a8df?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "id": "P006",
+    "name": "Bowers & Wilkins Px7 S2e",
+    "brand": "Bowers & Wilkins",
+    "category": "Headphones",
+    "description": "Refined wireless noise-canceling headphones tuned by Abbey Road studio engineers with 24-bit DSP audio processing.",
+    "specifications": {
+      "type": "Over-Ear",
+      "connectivity": "Bluetooth 5.2, aptX HD, aptX Adaptive",
+      "battery_life": "30 hours",
+      "weight": "307g",
+      "driver_size": "40mm biocellulose drive units",
+      "noise_cancellation": "Hybrid Active Noise Cancellation"
+    },
+    "features": [
+      "24-bit digital signal processing",
+      "Custom angled acoustic drivers",
+      "Luxurious aluminum and fabric finishes",
+      "Bowers & Wilkins Music App integration"
+    ],
+    "image_urls": [
+      "https://images.unsplash.com/photo-1524678606370-a47ad25cb82a?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "id": "P007",
+    "name": "Herman Miller Aeron Chair",
+    "brand": "Herman Miller",
+    "category": "Chairs",
+    "description": "Ergonomic icon engineered for human body support with 8Z Pellicle breathable suspension membrane and PostureFit SL sacral support.",
+    "specifications": {
+      "material": "8Z Pellicle elastomeric mesh, recycled aluminum base",
+      "max_load": "159 kg (350 lbs)",
+      "adjustments": "PostureFit SL, tilt limiter, forward tilt, fully adjustable arms",
+      "weight": "18.6 kg",
+      "warranty": "12 years"
+    },
+    "features": [
+      "Pressure distribution zonal mesh",
+      "Harmonic 2 tilt mechanism",
+      "Available in sizes A, B, and C",
+      "Cradle to Cradle V3 Certified Silver"
+    ],
+    "image_urls": [
+      "https://images.unsplash.com/photo-1589384267710-7a170981ca78?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "id": "P008",
+    "name": "Steelcase Gesture",
+    "brand": "Steelcase",
+    "category": "Chairs",
+    "description": "Designed inspired by the human body movements interacting with modern touchscreen devices, featuring 360-degree rotating arms.",
+    "specifications": {
+      "material": "Connect 3D knit fabric, reinforced polymer frame",
+      "max_load": "181 kg (400 lbs)",
+      "adjustments": "Core Equalizer, 360-degree rotating arms, pneumatic height, seat depth",
+      "weight": "26 kg",
+      "warranty": "12 years"
+    },
+    "features": [
+      "3D LiveBack contouring spine technology",
+      "Adaptive seat bolster with perimeter air pockets",
+      "Synchronized seat and back tilt",
+      "Accommodates multiple postures"
+    ],
+    "image_urls": [
+      "https://images.unsplash.com/photo-1505797149-43b0069ec26b?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "id": "P009",
+    "name": "Secretlab Titan Evo",
+    "brand": "Secretlab",
+    "category": "Chairs",
+    "description": "Performance gaming and productivity chair featuring NEO Hybrid leatherette and patent-pending magnetic memory foam head pillow.",
+    "specifications": {
+      "material": "Secretlab NEO Hybrid Leatherette, cold-cure foam",
+      "max_load": "130 kg (285 lbs)",
+      "adjustments": "4-way L-ADAPT Lumbar System, 4D armrests, full-length 165-degree recline",
+      "weight": "34.5 kg",
+      "warranty": "5 years"
+    },
+    "features": [
+      "Magnetic CloudSwap armrest tops",
+      "Magnetic memory foam head pillow with cooling gel",
+      "Multi-tilt mechanism with angle lock",
+      "Sculpted pebble seat base"
+    ],
+    "image_urls": [
+      "https://images.unsplash.com/photo-1598550476439-6847785fcea6?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "id": "P010",
+    "name": "Autonomous ErgoChair Pro",
+    "brand": "Autonomous",
+    "category": "Chairs",
+    "description": "Fully customizable ergonomic office chair with responsive Korean mesh back and adjustable lumbar cushion for active lumbar support.",
+    "specifications": {
+      "material": "Breathable woven mesh, molded foam seat, nylon frame",
+      "max_load": "136 kg (300 lbs)",
+      "adjustments": "Adjustable headrest, armrests, backrest tilt, seat tilt, and lumbar support",
+      "weight": "22 kg",
+      "warranty": "2 years"
+    },
+    "features": [
+      "Flexible lumbar support with custom tension",
+      "Smooth 22-degree recline with 5 lockable positions",
+      "100% earth-friendly materials",
+      "Supportive contoured headrest"
+    ],
+    "image_urls": [
+      "https://images.unsplash.com/photo-1616046229478-9901c5536a45?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "id": "P011",
+    "name": "IKEA Markus",
+    "brand": "IKEA",
+    "category": "Chairs",
+    "description": "High-back mesh desk chair engineered for durability, airflow, and balanced lumbar support at an accessible price point.",
+    "specifications": {
+      "material": "Polyester mesh, polyurethane foam, steel star base",
+      "max_load": "110 kg (242 lbs)",
+      "adjustments": "Seat height adjustment, synchronized tilt tension and lock",
+      "weight": "20.8 kg",
+      "warranty": "10 years"
+    },
+    "features": [
+      "High backrest provides support for neck and upper spine",
+      "Breathable mesh keeps back cool",
+      "Pressure-sensitive safety brake castors",
+      "Built-in lumbar cushion"
+    ],
+    "image_urls": [
+      "https://images.unsplash.com/photo-1586023492125-27b2c045efd7?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "id": "P012",
+    "name": "Haworth Fern",
+    "brand": "Haworth",
+    "category": "Chairs",
+    "description": "Nature-inspired ergonomic executive chair with Wave Suspension back system that responds to every subtle torso movement.",
+    "specifications": {
+      "material": "Digital knit mesh, aluminum base, CFC-free molded foam",
+      "max_load": "150 kg (325 lbs)",
+      "adjustments": "4D armrests, pneumatic lift, forward tilt, 3-point tilt lock, height-adjustable lumbar",
+      "weight": "24 kg",
+      "warranty": "12 years"
+    },
+    "features": [
+      "Edgeless flex-back design",
+      "Frond and Stem flexible back spine support",
+      "Torsion spring tilt mechanism",
+      "Greenguard Gold certified"
+    ],
+    "image_urls": [
+      "https://images.unsplash.com/photo-1592078615290-033ee584e267?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "id": "P013",
+    "name": "Humanscale Freedom",
+    "brand": "Humanscale",
+    "category": "Chairs",
+    "description": "Niels Diffrient-designed self-adjusting recline chair utilizing body weight and physics to eliminate manual knobs and tension dials.",
+    "specifications": {
+      "material": "Die-cast aluminum, Corde 4-way stretch fabric",
+      "max_load": "136 kg (300 lbs)",
+      "adjustments": "Weight-sensitive self-adjusting recline, synchronous armrests, dynamic headrest",
+      "weight": "22.5 kg",
+      "warranty": "15 years"
+    },
+    "features": [
+      "Weight-activated counter-balance recline",
+      "Pivoting backrest that adapts to lumbar curve",
+      "Synchronously moving headrest during recline",
+      "Contoured cushions shaped to body contours"
+    ],
+    "image_urls": [
+      "https://images.unsplash.com/photo-1519947486511-46149fa0a254?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "id": "P014",
+    "name": "Nike Air Max 270",
+    "brand": "Nike",
+    "category": "Shoes",
+    "description": "Lifestyle sneaker boasting Nike's largest heel Air unit for super-soft cushioning and an energetic, lightweight stride.",
+    "specifications": {
+      "upper_material": "Engineered knit mesh and synthetic overlays",
+      "midsole": "Dual-density foam with Max Air 270 unit",
+      "outsole": "Solid rubber in forefoot, clear rubber in heel",
+      "weight": "310g (Size 9)",
+      "closure": "Asymmetrical lacing"
+    },
+    "features": [
+      "270-degree visible Air cushioning unit in heel",
+      "Stretchy inner sleeve bootie construction",
+      "Breathable ventilated mesh upper",
+      "Heel pull tab for easy on and off"
+    ],
+    "image_urls": [
+      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "id": "P015",
+    "name": "Adidas Ultraboost Light",
+    "brand": "Adidas",
+    "category": "Shoes",
+    "description": "Performance running shoe engineered with Light BOOST cushioning, 30% lighter than standard Boost foam for maximum energy return.",
+    "specifications": {
+      "upper_material": "PRIMEKNIT+ textile containing 50% Parley Ocean Plastic",
+      "midsole": "Light BOOST energy return foam",
+      "outsole": "Continental Better Rubber outsole",
+      "drop": "10mm",
+      "weight": "299g (Size 9)"
+    },
+    "features": [
+      "Linear Energy Push (LEP) system for responsive propulsion",
+      "Sock-like snug fit engineered mesh",
+      "Molded Fitcounter heel for natural movement",
+      "Continental rubber grip on wet and dry surfaces"
+    ],
+    "image_urls": [
+      "https://images.unsplash.com/photo-1587563871167-1ee9c731aefb?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "id": "P016",
+    "name": "New Balance 990v6",
+    "brand": "New Balance",
+    "category": "Shoes",
+    "description": "Made in USA heritage lifestyle and running shoe featuring FuelCell foam cushioning and premium pigskin suede overlays.",
+    "specifications": {
+      "upper_material": "Pigskin suede and breathable mesh",
+      "midsole": "FuelCell foam with ENCAP midsole cushioning",
+      "outsole": "Ndurance rubber outsole",
+      "drop": "12mm",
+      "weight": "374g (Size 9)"
+    },
+    "features": [
+      "FuelCell foam delivers a propulsive feel",
+      "ENCAP midsole combines lightweight foam with durable polyurethane rim",
+      "Reflective accents on 'N' logo and heel tab",
+      "Crafted in the USA"
+    ],
+    "image_urls": [
+      "https://images.unsplash.com/photo-1551107696-a4b0c5a0d9a2?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "id": "P017",
+    "name": "On Cloudmonster",
+    "brand": "On Running",
+    "category": "Shoes",
+    "description": "Maximum cushioning road running shoe engineered with giant CloudTec elements and Helion superfoam for monster rebound.",
+    "specifications": {
+      "upper_material": "Recycled polyester engineered mesh",
+      "midsole": "Helion superfoam with CloudTec pods",
+      "speedboard": "Snappy polypropylene Speedboard",
+      "drop": "6mm",
+      "weight": "275g (Size 9)"
+    },
+    "features": [
+      "Massive CloudTec cushioning for soft landings",
+      "Explosive forward roll with rocker shape geometry",
+      "Soft sockliner and upper for next-level step-in comfort",
+      "Over 80% recycled polyester construction"
+    ],
+    "image_urls": [
+      "https://images.unsplash.com/photo-1608231387042-66d1773070a5?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "id": "P018",
+    "name": "Hoka Clifton 9",
+    "brand": "Hoka",
+    "category": "Shoes",
+    "description": "Daily trainer designed for ultra-lightweight plush comfort with an upgraded CMEVA midsole foam and early stage Meta-Rocker.",
+    "specifications": {
+      "upper_material": "Engineered knit mesh with recycled contents",
+      "midsole": "Compression-molded EVA (CMEVA) foam",
+      "outsole": "Durabrasion high-abrasion rubber",
+      "drop": "5mm",
+      "weight": "248g (Size 9)"
+    },
+    "features": [
+      "Early stage Meta-Rocker for a smooth transition through gate cycle",
+      "Gusseted tongue prevents migration",
+      "Plush padded collar for Achilles comfort",
+      "APMA (American Podiatric Medical Association) accepted"
+    ],
+    "image_urls": [
+      "https://images.unsplash.com/photo-1539185441755-769473a23570?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "id": "P019",
+    "name": "Salomon XT-6",
+    "brand": "Salomon",
+    "category": "Shoes",
+    "description": "Trail running and gorpcore legend with Agile Chassis System (ACS) stability, downhill chassis lug geometry, and Quicklace system.",
+    "specifications": {
+      "upper_material": "Abrasion-resistant TPU film and mesh",
+      "chassis": "Agile Chassis System (ACS) with EVA cushioning",
+      "outsole": "Mud Contagrip with deep chevron lugs",
+      "weight": "365g (Size 9)",
+      "lacing": "Quicklace one-pull tightening"
+    },
+    "features": [
+      "EndoFit internal fit sleeve hugs the foot",
+      "Profeel Film protects against sharp terrain and debris",
+      "Sensifit cradles the foot from midsole to lacing system",
+      "Durable TPU film layer welded to resistant mesh"
+    ],
+    "image_urls": [
+      "https://images.unsplash.com/photo-1600185365926-3a2ce3cdb9eb?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "id": "P020",
+    "name": "Apple Watch Ultra 2",
+    "brand": "Apple",
+    "category": "Watches",
+    "description": "Rugged and capable smartwatch with aerospace-grade 49mm titanium case, precision dual-frequency GPS, and 3000 nits display.",
+    "specifications": {
+      "case_size": "49mm Titanium",
+      "display": "Always-On Retina OLED, 3000 nits peak brightness",
+      "battery_life": "36 hours normal use (up to 72 hours low power)",
+      "water_resistance": "100m water resistance, EN13319 dive certified (40m)",
+      "sensors": "S9 SiP with Double Tap gesture, ECG, Blood Oxygen, Temperature"
+    },
+    "features": [
+      "Customizable Action button",
+      "86-decibel Emergency Siren audible up to 180 meters",
+      "Precision Dual-Frequency GPS (L1 and L5)",
+      "Modular Ultra watch face with real-time altitude/depth metrics"
+    ],
+    "image_urls": [
+      "https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "id": "P021",
+    "name": "Garmin Fenix 7 Pro Solar",
+    "brand": "Garmin",
+    "category": "Watches",
+    "description": "Multisport GPS smartwatch with Power Glass solar charging lens, built-in LED flashlight, and advanced endurance training analytics.",
+    "specifications": {
+      "case_size": "47mm Fiber-reinforced polymer with titanium bezel",
+      "display": "1.3-inch sunlight-visible transflective memory-in-pixel (MIP)",
+      "battery_life": "Up to 22 days in smartwatch mode with solar",
+      "water_resistance": "10 ATM (100 meters)",
+      "sensors": "Multi-band GNSS with SatIQ, Elevate v5 optical HR, Pulse Ox, Altimeter"
+    },
+    "features": [
+      "Built-in multi-LED variable intensity flashlight",
+      "Hill Score and Endurance Score metrics",
+      "TopoActive mapping with NextFork trail guidance",
+      "Garmin Pay contactless payments and Spotify offline storage"
+    ],
+    "image_urls": [
+      "https://images.unsplash.com/photo-1508685096489-7aacd43bd3b1?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "id": "P022",
+    "name": "Seiko Prospex Speedtimer Solar Chronograph",
+    "brand": "Seiko",
+    "category": "Watches",
+    "description": "Vintage-inspired solar quartz chronograph watch featuring Caliber V192, sandblasted tachymeter bezel, and sapphire crystal.",
+    "specifications": {
+      "case_size": "39mm Stainless Steel",
+      "movement": "Seiko Caliber V192 Solar Chronograph",
+      "power_reserve": "6 months on full charge by any light source",
+      "crystal": "Curved sapphire crystal with anti-reflective coating",
+      "water_resistance": "10 bar (100 meters)"
+    },
+    "features": [
+      "Chronograph measures up to 60 minutes in 1/5 second increments",
+      "Subdial power reserve indicator",
+      "LumiBrite hands and indexes for night legibility",
+      "Solid stainless steel three-link bracelet with three-fold clasp"
+    ],
+    "image_urls": [
+      "https://images.unsplash.com/photo-1524805444758-089113d48a6d?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "id": "P023",
+    "name": "Samsung Galaxy Watch 6 Classic",
+    "brand": "Samsung",
+    "category": "Watches",
+    "description": "Sophisticated smartwatch with rotating physical bezel, sapphire crystal screen, and BioActive sensor for sleep and heart health.",
+    "specifications": {
+      "case_size": "47mm Stainless Steel",
+      "display": "1.5-inch Super AMOLED (480x480), Sapphire Crystal",
+      "battery_life": "Up to 40 hours",
+      "water_resistance": "5ATM + IP68, MIL-STD-810H certified",
+      "sensors": "Samsung BioActive Sensor (Optical Heart Rate + Electrical Heart + BIA)"
+    },
+    "features": [
+      "Physical rotating interactive bezel navigation",
+      "Advanced Sleep Coaching with sleep animal profiles",
+      "Body Composition analysis (BIA metric)",
+      "Wear OS 4 with One UI 5 Watch"
+    ],
+    "image_urls": [
+      "https://images.unsplash.com/photo-1579586337278-3befd40fd17a?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "id": "P024",
+    "name": "Tissot PRX Powermatic 80",
+    "brand": "Tissot",
+    "category": "Watches",
+    "description": "Retro 1978 design integrated bracelet luxury automatic watch with waffle tapisserie dial and an impressive 80-hour power reserve.",
+    "specifications": {
+      "case_size": "40mm 316L Stainless Steel",
+      "movement": "Powermatic 80.111 automatic movement with Nivachron balance spring",
+      "power_reserve": "80 hours",
+      "crystal": "Scratch-resistant sapphire crystal with anti-reflective coating",
+      "water_resistance": "10 bar (100 meters)"
+    },
+    "features": [
+      "See-through exhibition mineral glass case back",
+      "Embossed checkered waffle dial pattern",
+      "Anti-magnetic Nivachron balance hairspring",
+      "Seamlessly integrated stainless steel bracelet"
+    ],
+    "image_urls": [
+      "https://images.unsplash.com/photo-1614164185128-e4ec99c436d7?auto=format&fit=crop&w=800&q=80"
+    ]
+  },
+  {
+    "id": "P025",
+    "name": "Casio G-Shock GA-2100 'CasiOak'",
+    "brand": "Casio",
+    "category": "Watches",
+    "description": "Ultra-tough octagonal bezel analog-digital timepiece featuring Carbon Core Guard structure in a slim 11.8mm profile.",
+    "specifications": {
+      "case_size": "45.4mm Carbon and Resin",
+      "movement": "Quartz module 5611 (Accuracy: ±15 seconds per month)",
+      "battery_life": "3 years on SR726W x 2",
+      "water_resistance": "20 bar (200 meters)",
+      "weight": "51g"
+    },
+    "features": [
+      "Carbon Core Guard shock resistant case",
+      "Double LED light (Super Illuminator) with afterglow",
+      "31 world time zones, 1/100-second stopwatch, countdown timer",
+      "Hand shift feature for unobstructed LCD viewing"
+    ],
+    "image_urls": [
+      "https://images.unsplash.com/photo-1548036328-c9fa89d128fa?auto=format&fit=crop&w=800&q=80"
+    ]
+  }
+]

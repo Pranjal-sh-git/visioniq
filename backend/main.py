@@ -1,7 +1,7 @@
 """VisionIQ FastAPI Application Entrypoint.
 
-Scaffolds the REST API with CORS middleware configured for the Vite frontend
-and a health check endpoint.
+Scaffolds the REST API with CORS middleware configured for the Vite frontend,
+health check, and video intelligence endpoints.
 """
 
 import sys
@@ -19,8 +19,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 try:
     from config import settings
+    from routes.video import router as video_router
 except ImportError:
     from backend.config import settings
+    from backend.routes.video import router as video_router
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -36,6 +38,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Register routes
+app.include_router(video_router)
 
 
 @app.get("/api/health")
