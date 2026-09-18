@@ -1,0 +1,26 @@
+test_id,test_name,ground_truth_id,in_catalog,top1_id,top1_name,top1_score,top2_id,top2_score,top3_id,top3_score,top1_hit,top3_hit,is_confident_match,latency_ms,status
+T01,Sony WH-1000XM5 (Catalog Photo),P001,True,P001,Sony Sony WH-1000XM5,1.0,P004,0.9229,P002,0.882,True,True,True,23123.04,SUCCESS
+T02,Sony WH-1000XM5 (Secondary Angle),P001,True,P004,Sennheiser Sennheiser Momentum 4 Wireless,0.9397,P001,0.9343,P002,0.856,False,True,True,1738.59,SUCCESS
+T03,Bose QuietComfort Ultra,P002,True,P002,Bose Bose QuietComfort Ultra,1.0,P003,0.8912,P001,0.882,True,True,True,1865.62,SUCCESS
+T04,Apple AirPods Max,P003,True,P003,Apple Apple AirPods Max,1.0,P002,0.8912,P004,0.8611,True,True,True,1644.55,SUCCESS
+T05,Sennheiser Momentum 4,P004,True,P004,Sennheiser Sennheiser Momentum 4 Wireless,1.0,P001,0.9229,P002,0.8669,True,True,True,1540.3,SUCCESS
+T06,Audio-Technica ATH-M50xBT2,P005,True,P005,Audio-Technica Audio-Technica ATH-M50xBT2,1.0,P020,0.8109,P002,0.7828,True,True,True,1514.51,SUCCESS
+T07,Bowers & Wilkins Px7 S2e,P006,True,P006,Bowers & Wilkins Bowers & Wilkins Px7 S2e,1.0,P004,0.856,P001,0.8505,True,True,True,1564.72,SUCCESS
+T08,Herman Miller Aeron Chair,P007,True,P007,Herman Miller Herman Miller Aeron Chair,1.0,P001,0.8345,P008,0.8241,True,True,True,1942.97,SUCCESS
+T09,Steelcase Gesture,P008,True,P008,Steelcase Steelcase Gesture,1.0,P013,0.867,P001,0.8467,True,True,True,1999.91,SUCCESS
+T10,Secretlab Titan Evo,P009,True,P009,Secretlab Secretlab Titan Evo,1.0,P007,0.7646,P008,0.7508,True,True,True,2164.46,SUCCESS
+T11,Autonomous ErgoChair Pro,P010,True,P010,Autonomous Autonomous ErgoChair Pro,1.0,P011,0.8553,P013,0.8487,True,True,True,2219.38,SUCCESS
+T12,Haworth Fern Chair,P012,True,P012,Haworth Haworth Fern,0.8811,P013,0.8715,P011,0.8275,True,True,True,1695.74,SUCCESS
+T13,Humanscale Freedom Chair,P013,True,P011,IKEA IKEA Markus,1.0,P013,0.8687,P010,0.8553,False,True,True,1768.55,SUCCESS
+T14,Nike Air Zoom Pegasus 40,P011,True,P014,Nike Nike Air Max 270,1.0,P019,0.8399,P017,0.7883,False,False,True,2267.16,SUCCESS
+T15,Nike Air Max 270,P014,True,P019,Salomon Salomon XT-6,0.8173,P016,0.7633,P014,0.7441,False,True,False,1696.18,SUCCESS
+T16,Adidas Ultraboost Light,P015,True,P001,Sony Sony WH-1000XM5,0.8502,P008,0.8183,P004,0.8018,False,False,True,1917.97,SUCCESS
+T17,New Balance 990v6,P016,True,P016,New Balance New Balance 990v6,1.0,P019,0.8273,P017,0.8192,True,True,True,2161.46,SUCCESS
+T18,On Running Cloudmonster,P017,True,P017,On Running On Cloudmonster,1.0,P015,0.9041,P016,0.8192,True,True,True,2762.9,SUCCESS
+T19,Hoka Clifton 9,P018,True,P016,New Balance New Balance 990v6,0.8267,P019,0.8031,P017,0.7946,False,False,False,1662.91,SUCCESS
+T20,Salomon XT-6,P019,True,P018,Hoka Hoka Clifton 9,1.0,P016,0.7966,P015,0.762,False,False,True,1679.78,SUCCESS
+T21,Mechanical Keyboard (Out-of-Catalog),OUT_OF_CATALOG,False,P007,Herman Miller Herman Miller Aeron Chair,0.8296,P001,0.8183,P008,0.8079,False,False,False,5854.2,SUCCESS
+T22,Coffee Espresso Machine (Out-of-Catalog),OUT_OF_CATALOG,False,P008,Steelcase Steelcase Gesture,0.7505,P004,0.7449,P013,0.7419,False,False,False,6660.78,SUCCESS
+T23,DSLR Camera Lens (Out-of-Catalog),OUT_OF_CATALOG,False,P001,Sony Sony WH-1000XM5,0.8055,P007,0.7911,P008,0.7832,False,False,False,1592.2,SUCCESS
+T24,Ceramic Coffee Mug (Out-of-Catalog),OUT_OF_CATALOG,False,P008,Steelcase Steelcase Gesture,0.8233,P001,0.8216,P013,0.8122,False,False,False,1872.96,SUCCESS
+T25,Bicycle Road Frame (Out-of-Catalog),OUT_OF_CATALOG,False,P012,Haworth Haworth Fern,0.7941,P013,0.7741,P002,0.7726,False,False,False,1916.92,SUCCESS

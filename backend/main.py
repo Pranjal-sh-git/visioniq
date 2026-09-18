@@ -20,9 +20,13 @@ from fastapi.middleware.cors import CORSMiddleware
 try:
     from config import settings
     from routes.video import router as video_router
+    from routes.product import router as product_router
+    from routes.agent import router as agent_router
 except ImportError:
     from backend.config import settings
     from backend.routes.video import router as video_router
+    from backend.routes.product import router as product_router
+    from backend.routes.agent import router as agent_router
 
 app = FastAPI(
     title=settings.APP_NAME,
@@ -41,6 +45,9 @@ app.add_middleware(
 
 # Register routes
 app.include_router(video_router)
+app.include_router(product_router)
+app.include_router(agent_router)
+
 
 
 @app.get("/api/health")

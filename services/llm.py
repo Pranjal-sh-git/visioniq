@@ -96,13 +96,14 @@ def generate_grounded_answer(
                 {"role": "system", "content": sys_prompt},
                 {"role": "user", "content": user_content},
             ],
-            max_completion_tokens=800,
+            max_completion_tokens=2500,
         )
         usage = response.usage
         usage_info = f"Total={usage.total_tokens}, Prompt={usage.prompt_tokens}, Completion={usage.completion_tokens}" if usage else "N/A"
         print(f"[AZURE OPENAI RESPONSE] ID: {response.id} | Model: {response.model} | Usage: {usage_info}")
         logger.info(f"[AZURE OPENAI CALL] Deployment: {deployment} | Response ID: {response.id} | Status: SUCCESS")
-        return response.choices[0].message.content.strip()
+        content = response.choices[0].message.content
+        return (content or "").strip()
     except Exception as e:
         logger.error(f"[AZURE OPENAI ERROR] Call to deployment '{deployment}' failed: {e}")
         raise RuntimeError(f"Azure OpenAI generation failed on deployment '{deployment}': {str(e)}") from e

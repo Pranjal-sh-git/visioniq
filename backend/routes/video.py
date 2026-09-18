@@ -120,3 +120,13 @@ async def get_keyframe_image(video_id: str, filename: str):
     if not image_path.exists():
         raise HTTPException(status_code=404, detail="Keyframe image not found.")
     return FileResponse(image_path, media_type="image/jpeg")
+
+
+@router.get("/file/{filename}")
+async def get_uploaded_video_file(filename: str):
+    """Serves an uploaded video file for streaming/playback."""
+    video_file_path = UPLOAD_DIR / filename
+    if not video_file_path.exists():
+        raise HTTPException(status_code=404, detail="Video file not found.")
+    return FileResponse(video_file_path, media_type="video/mp4")
+

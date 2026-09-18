@@ -1,7 +1,7 @@
 """RAG Service for Product Catalog Knowledge Retrieval and Answering.
 
-Queries Azure AI Search for grounded product context and provides grounded,
-hallucination-free answers based strictly on catalog specifications.
+Queries Azure AI Search for grounded product context and provides intelligent,
+conversational, and grounded answers using Azure OpenAI foundation models.
 """
 
 import json
@@ -24,6 +24,8 @@ try:
     from backend.config import settings
 except ImportError:
     from config import settings
+
+from services.llm import generate_grounded_answer
 
 logger = logging.getLogger(__name__)
 INDEX_NAME = "product-catalog"
@@ -53,7 +55,10 @@ def retrieve_product_by_id(product_id: str) -> Optional[dict[str, Any]]:
 
 
 def answer_product_question(product_id: Optional[str], question: str) -> dict[str, Any]:
-    """Answers questions regarding a specific product grounded strictly in catalog data.
+    """Answers natural language questions about a product, grounded in catalog specifications.
+
+    Provides rich, conversational, and factual answers synthesized by Azure OpenAI (gpt-5-mini),
+    while preserving strict honesty when requested information is unlisted.
 
     Returns:
         dict: Contains answer, grounded_field, catalog_value, and is_available flag.
@@ -82,6 +87,7 @@ def answer_product_question(product_id: Optional[str], question: str) -> dict[st
 
     name = product.get("name", "")
     brand = product.get("brand", "")
+    category = product.get("category", "")
     specs = product.get("specifications", {})
     description = product.get("description", "")
     features = product.get("features", [])
@@ -89,81 +95,71 @@ def answer_product_question(product_id: Optional[str], question: str) -> dict[st
     # Avoid duplicate brand name prefix if name already contains it
     display_name = name if name.lower().startswith(brand.lower()) else f"{brand} {name}".strip()
 
-    q_lower = question.lower()
+    # Format structured catalog specifications and features for LLM context
+    specs_formatted = "\n".join(f"- {k.replace('_', ' ').title()}: {v}" for k, v in specs.items()) if specs else "None listed"
+    features_formatted = "\n".join(f"- {f}" for f in features) if features else "None listed"
 
-    # Synonym mapping for common natural language terms
+    context_str = (
+        f"Product: {display_name} (ID: {product_id})\n"
+        f"Brand: {brand}\n"
+        f"Category: {category}\n"
+        f"Description: {description}\n\n"
+        f"Key Features:\n{features_formatted}\n\n"
+        f"Technical Specifications:\n{specs_formatted}"
+    )
+
+    # Identify if a specific known spec field is targeted (for telemetry / metadata)
+    q_lower = question.lower()
+    matched_field = None
+    matched_value = None
+
     field_synonyms = {
         "charging": ["charging", "charge", "charged", "charger", "fast charging", "port"],
         "connectivity": ["connectivity", "connect", "connection", "bluetooth", "aux", "wireless", "wired"],
-        "battery_life": ["battery", "battery life", "battery_life", "run time", "runtime"],
-        "driver_size": ["driver", "driver size", "driver_size", "drivers", "transducer"],
-        "noise_cancellation": ["noise cancellation", "noise cancelling", "anc", "noise_cancellation"],
-        "weight": ["weight", "weigh", "heavy", "mass"],
-        "type": ["form factor", "headphone type", "chair type", "shoe type"],
+        "battery_life": ["battery", "battery life", "battery_life", "run time", "runtime", "playback"],
+        "driver_size": ["driver", "driver size", "driver_size", "drivers", "transducer", "speaker size"],
+        "noise_cancellation": ["noise cancellation", "noise cancelling", "anc", "noise_cancellation", "noise cancel"],
+        "weight": ["weight", "weigh", "heavy", "mass", "grams", "lbs"],
+        "material": ["material", "materials", "leather", "fabric", "aluminum", "mesh"],
+        "adjustments": ["adjustments", "adjust", "armrests", "lumbar", "recline", "tilt"],
+        "warranty": ["warranty", "guarantee"],
     }
 
-    # Match against specifications dictionary keys (prioritize longer/specific keys over generic ones like 'type')
-    matched_value = None
-    matched_field = None
-
-    sorted_keys = sorted(specs.keys(), key=lambda k: len(k), reverse=True)
-
-    for key in sorted_keys:
-        val = specs[key]
+    for key, val in specs.items():
         key_normalized = key.replace("_", " ").lower()
         synonyms = field_synonyms.get(key, [key_normalized])
-
         if key_normalized in q_lower or any(syn in q_lower for syn in synonyms):
-            matched_value = val
             matched_field = key
+            matched_value = val
             break
 
-    # Build retrieved context block from catalog
-    context_str = (
-        f"Product ID: {product_id}\n"
-        f"Product Name: {display_name}\n"
-        f"Category: {product.get('category', '')}\n"
-        f"Description: {description}\n"
-        f"Specifications: {json.dumps(specs, indent=2)}\n"
-        f"Features: {json.dumps(features)}"
+    system_instruction = (
+        f"You are VisionIQ's AI Product Specialist for {display_name}.\n"
+        f"Your goal is to answer the user's natural language question in a helpful, friendly, conversational, "
+        f"and accurate manner based strictly on the provided catalog data.\n\n"
+        f"Guidelines:\n"
+        f"1. Conversational & Informative: Speak naturally in complete, well-formed sentences. "
+        f"Explain specs and features with useful context rather than just stating isolated numbers.\n"
+        f"2. Factual Accuracy: For specific metrics (e.g. battery life, weight, driver size, warranty, material), "
+        f"always include the exact values from the catalog.\n"
+        f"3. Practical Insights: For broader questions (e.g. suitability for travel, comfort, fitness, sound quality), "
+        f"synthesize an informed answer from the product's verified description, features, and specifications.\n"
+        f"4. Honesty on Missing Info: If the user asks about a specific feature that is completely unlisted or not present in the catalog data (e.g. an unlisted waterproof rating or unlisted accessory), "
+        f"clearly state that this specific detail is not specified in the catalog for {display_name}."
     )
 
-    from services.llm import generate_grounded_answer
-
-    if matched_value:
-        llm_answer = generate_grounded_answer(
-            user_question=question,
-            retrieved_context=context_str,
-            system_instruction=(
-                f"You are VisionIQ's Strict Grounded Product Assistant. "
-                f"Answer the user's question accurately using ONLY the verbatim retrieved product specifications for {display_name}. "
-                f"State the exact value '{matched_value}' concisely. Do NOT add external real-world assumptions or qualifiers not found in the context."
-            ),
-        )
-
-        return {
-            "product_id": product_id,
-            "product_name": name,
-            "question": question,
-            "answer": llm_answer,
-            "requires_clarification": False,
-            "is_available": True,
-            "grounded_field": matched_field,
-            "catalog_value": matched_value,
-            "hallucination": False,
-        }
-
-    # If field is absent from catalog specifications
     llm_answer = generate_grounded_answer(
         user_question=question,
         retrieved_context=context_str,
-        system_instruction=(
-            f"You are VisionIQ's Strict Grounded Product Assistant. "
-            f"The user is asking about a specification for {display_name}. "
-            f"Since the requested information is not present in the retrieved specifications, respond strictly with:\n"
-            f"'This information is not specified in the product catalog for {display_name}.'\n"
-            f"Do NOT give buying recommendations, external advice, or assumptions."
-        ),
+        system_instruction=system_instruction,
+    )
+
+    # Determine if response is answering from available catalog data
+    is_missing_info = (
+        "not specified in the product catalog" in llm_answer.lower()
+        or "not mentioned in the catalog" in llm_answer.lower()
+        or "is not specified" in llm_answer.lower()
+        or "does not specify" in llm_answer.lower()
     )
 
     return {
@@ -172,8 +168,8 @@ def answer_product_question(product_id: Optional[str], question: str) -> dict[st
         "question": question,
         "answer": llm_answer,
         "requires_clarification": False,
-        "is_available": False,
-        "grounded_field": None,
-        "catalog_value": None,
+        "is_available": not is_missing_info,
+        "grounded_field": matched_field,
+        "catalog_value": matched_value,
         "hallucination": False,
     }

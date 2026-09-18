@@ -186,6 +186,76 @@ def identify_product_by_text(
     return matches
 
 
+def find_similar_catalog_products(
+    image: Optional[Union[str, bytes, Path, Image.Image]] = None,
+    identified_info: Optional[dict[str, Any]] = None,
+    query_text: Optional[str] = None,
+    top_k: int = 3,
+    confidence_threshold: float = DEFAULT_CONFIDENCE_THRESHOLD,
+) -> list[dict[str, Any]]:
+    """Searches the indexed catalog for similar product recommendations.
+
+    These matches are presented as 'similar options in our catalog' rather than
+    asserting identity.
+
+    Args:
+        image: Optional image input to embed.
+        identified_info: Optional open-world product recognition dict (brand, model, category).
+        query_text: Optional text query fallback.
+        top_k: Number of similar items to retrieve.
+        confidence_threshold: Similarity score threshold.
+
+    Returns:
+        list[dict[str, Any]]: Similar catalog items with scores, specs, and match flags.
+    """
+    matches: list[dict[str, Any]] = []
+
+    # Priority 1: Search using image vector if provided
+    if image is not None:
+        try:
+            matches = identify_product(image=image, top_k=top_k, confidence_threshold=confidence_threshold)
+        except Exception as e:
+            logger.warning(f"Image vector search failed in find_similar_catalog_products: {e}")
+
+    # Priority 2: Supplement / fallback with open-world text query if vector search returned few matches
+    if not matches and identified_info:
+        brand = identified_info.get("brand", "")
+        model = identified_info.get("model", "")
+        cat = identified_info.get("category", "")
+        combined_text = f"{brand} {model} {cat}".strip()
+        if combined_text and combined_text != "Unknown":
+            try:
+                matches = identify_product_by_text(query_text=combined_text, top_k=top_k, confidence_threshold=confidence_threshold)
+            except Exception as e:
+                logger.warning(f"Text vector search failed in find_similar_catalog_products: {e}")
+
+    # Priority 3: query_text fallback
+    if not matches and query_text:
+        matches = identify_product_by_text(query_text=query_text, top_k=top_k, confidence_threshold=confidence_threshold)
+
+    # Format recommendations with similarity reasoning
+    recommendations = []
+    for item in matches:
+        score = item.get("similarity_score", 0.0)
+        is_exact = False
+        if identified_info:
+            target_brand = (identified_info.get("brand") or "").lower()
+            target_model = (identified_info.get("model") or "").lower()
+            item_name = (item.get("name") or "").lower()
+            item_brand = (item.get("brand") or "").lower()
+            if target_brand and target_brand in item_brand and target_model and target_model in item_name:
+                is_exact = True
+
+        rec_item = dict(item)
+        rec_item["is_exact_catalog_match"] = is_exact
+        rec_item["recommendation_reason"] = (
+            f"Catalog item in '{item.get('category')}' with {int(score * 100)}% visual/textual similarity."
+        )
+        recommendations.append(rec_item)
+
+    return recommendations
+
+
 if __name__ == "__main__":
     sample_image = sys.argv[1] if len(sys.argv) > 1 else "https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80"
     print(f"Testing identify_product() with sample image: {sample_image}\n")

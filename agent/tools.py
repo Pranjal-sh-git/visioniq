@@ -26,8 +26,10 @@ except ImportError:
 from services.product_search.matcher import (
     identify_product as _identify_product,
     identify_product_by_text as _identify_product_by_text,
+    find_similar_catalog_products as _find_similar_catalog_products,
     get_search_client,
 )
+from services.vision.open_world_identifier import identify_product_open_world
 from services.rag.rag_service import (
     answer_product_question as _answer_product_question,
     retrieve_product_by_id,
@@ -43,7 +45,7 @@ def identify_product(
     query: Optional[str] = None,
     top_k: int = 3,
 ) -> dict[str, Any]:
-    """Identifies a product from an uploaded image or query description.
+    """Identifies ANY product from an uploaded image or query description using Open-World Vision AI.
 
     Args:
         image: Local image file path, HTTP/HTTPS URL, raw image bytes, or PIL Image.
@@ -52,29 +54,71 @@ def identify_product(
         top_k: Number of top candidate matches to retrieve.
 
     Returns:
-        dict[str, Any]: Identified product details, top matches, and match confidence.
+        dict[str, Any]: Identified product details, visual summary, and similar catalog recommendations.
     """
     target_img = image or image_url
     if target_img:
-        matches = _identify_product(image=target_img, top_k=top_k)
+        # Step 1: Open-World Vision AI identification via gpt-5-mini
+        open_world_info = identify_product_open_world(image=target_img, user_hint=query)
+
+        # Step 2: Catalog recommendations via vector search
+        similar_catalog = _find_similar_catalog_products(
+            image=target_img,
+            identified_info=open_world_info,
+            top_k=top_k,
+        )
+
+        exact_match = next((item for item in similar_catalog if item.get("is_exact_catalog_match")), None)
+        best_catalog = exact_match or (similar_catalog[0] if similar_catalog else None)
+
+        prod_name = open_world_info.get("product_name", "Unidentified Product")
+        brand = open_world_info.get("brand", "Unknown")
+        visual_desc = open_world_info.get("visual_description", "")
+
+        answer_summary = (
+            f"I identified this product as **{prod_name}** ({brand}).\n\n"
+            f"**Visual Analysis**: {visual_desc}\n"
+        )
+        if similar_catalog:
+            rec_names = ", ".join([f"{c['brand']} {c['name']}" for c in similar_catalog[:2]])
+            answer_summary += f"\n**Similar items in our catalog**: {rec_names}."
+
+        return {
+            "success": True,
+            "answer": answer_summary,
+            "identified_product": open_world_info,
+            "identified_product_name": prod_name,
+            "identified_product_id": best_catalog["id"] if best_catalog else None,
+            "brand": brand,
+            "category": open_world_info.get("category"),
+            "similar_catalog_products": similar_catalog,
+            "similar_products": similar_catalog,
+            "best_match": best_catalog,
+            "all_matches": similar_catalog,
+            "is_confident": open_world_info.get("confidence") == "high",
+        }
+
     elif query:
         matches = _identify_product_by_text(query_text=query, top_k=top_k)
+        best_match = matches[0] if matches else None
+        return {
+            "success": True,
+            "answer": f"Based on your query '{query}', the closest match is **{best_match['name']}**." if best_match else "No match found.",
+            "best_match": best_match,
+            "all_matches": matches,
+            "similar_catalog_products": matches,
+            "similar_products": matches,
+            "identified_product_name": best_match["name"] if best_match else None,
+            "identified_product_id": best_match["id"] if best_match else None,
+            "is_confident": best_match.get("is_confident_match", False) if best_match else False,
+        }
     else:
         return {
             "success": False,
             "error": "An image or text description is required to identify a product.",
             "matches": [],
+            "similar_products": [],
         }
-
-    best_match = matches[0] if matches else None
-    return {
-        "success": True,
-        "best_match": best_match,
-        "all_matches": matches,
-        "identified_product_name": best_match["name"] if best_match else None,
-        "identified_product_id": best_match["id"] if best_match else None,
-        "is_confident": best_match.get("is_confident_match", False) if best_match else False,
-    }
 
 
 def search_product_knowledge(

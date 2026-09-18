@@ -45,8 +45,8 @@ FOUNDRY_TOOL_DEFINITIONS: list[dict[str, Any]] = [
         "function": {
             "name": "identify_product",
             "description": (
-                "Identifies a commercial product from an uploaded image or visual query description "
-                "using multimodal visual vector embeddings in Azure AI Search. "
+                "Identifies ANY commercial product, brand, model, and category from an uploaded image "
+                "using open-world multimodal vision AI (gpt-5-mini), and suggests similar catalog items. "
                 "Use when the user asks 'What is this product?', 'Identify this item', or provides a product image."
             ),
             "parameters": {
@@ -213,7 +213,7 @@ class VisionIQAgent:
                 messages=messages,
                 tools=self.tool_definitions,
                 tool_choice="auto",
-                max_completion_tokens=600,
+                max_completion_tokens=2000,
             )
             logger.info(f"[AZURE OPENAI CALL] Deployment: {deployment} | Status: SUCCESS")
         except Exception as e:
@@ -304,14 +304,14 @@ class VisionIQAgent:
             )
         elif tool_name == "search_product_knowledge":
             tool_result = tool_func(
-                query=tool_args.get("query") or user_prompt,
+                query=user_prompt or tool_args.get("query", ""),
                 product_id=tool_args.get("product_id") or product_id,
                 product_name=tool_args.get("product_name"),
             )
         elif tool_name == "search_video":
             tool_result = tool_func(
                 video_id=tool_args.get("video_id") or video_id or "vid_df16da8f30f96fb6",
-                query=tool_args.get("query") or user_prompt,
+                query=user_prompt or tool_args.get("query", ""),
                 top_k=tool_args.get("top_k", 3),
             )
         elif tool_name == "find_similar_products":
