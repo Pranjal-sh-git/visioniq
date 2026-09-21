@@ -234,7 +234,8 @@ export async function queryAgent(
   prompt: string,
   productId?: string,
   videoId?: string,
-  mediaUrl?: string
+  mediaUrl?: string,
+  productInfo?: OpenWorldProductIdentification | Record<string, any>
 ): Promise<AgentQueryResponse> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/agent/query`, {
@@ -245,6 +246,7 @@ export async function queryAgent(
         product_id: productId || null,
         video_id: videoId || null,
         media_url: mediaUrl || null,
+        product_info: productInfo || null,
       }),
     });
 

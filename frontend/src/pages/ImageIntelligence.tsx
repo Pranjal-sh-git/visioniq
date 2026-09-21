@@ -7,6 +7,25 @@ import {
   SimilarCatalogProduct,
   AgentQueryResponse,
 } from '../services/api';
+import {
+  UploadCloud,
+  Sparkles,
+  CheckCircle2,
+  AlertCircle,
+  X,
+  Send,
+  Bot,
+  User,
+  BatteryCharging,
+  Package,
+  Eye,
+  Wrench,
+  ChevronRight,
+  Activity,
+  Target,
+  Layers,
+  HelpCircle,
+} from 'lucide-react';
 
 interface ChatMessage {
   id: string;
@@ -19,17 +38,154 @@ interface ChatMessage {
   isClarification?: boolean;
 }
 
+interface QuickSuggestion {
+  label: string;
+  prompt: string;
+  icon: React.ReactNode;
+}
+
+const getCategorySuggestions = (category?: string): QuickSuggestion[] => {
+  const cat = (category || '').toLowerCase();
+
+  const observedFeatures: QuickSuggestion = {
+    label: 'Observed features',
+    prompt: 'What are the key observed visual features of this item?',
+    icon: <Eye size={12} />,
+  };
+
+  const similarAlternatives: QuickSuggestion = {
+    label: 'Similar alternatives',
+    prompt: 'Show me similar products in our catalog',
+    icon: <Package size={12} />,
+  };
+
+  // Headphones / Audio
+  if (
+    cat.includes('headphone') ||
+    cat.includes('audio') ||
+    cat.includes('earphone') ||
+    cat.includes('earbud') ||
+    cat.includes('sound') ||
+    cat.includes('speaker')
+  ) {
+    return [
+      {
+        label: 'Battery life?',
+        prompt: 'What is its battery life and charging capability?',
+        icon: <BatteryCharging size={12} />,
+      },
+      {
+        label: 'Noise cancellation?',
+        prompt: 'Does this feature active noise cancellation (ANC)?',
+        icon: <Sparkles size={12} />,
+      },
+      observedFeatures,
+      similarAlternatives,
+    ];
+  }
+
+  // Footwear / Shoes
+  if (
+    cat.includes('shoe') ||
+    cat.includes('footwear') ||
+    cat.includes('sneaker') ||
+    cat.includes('runner') ||
+    cat.includes('boot') ||
+    cat.includes('athletic')
+  ) {
+    return [
+      {
+        label: 'Cushioning & comfort',
+        prompt: "What's the cushioning and midsole support like?",
+        icon: <Activity size={12} />,
+      },
+      {
+        label: 'Intended surface',
+        prompt: 'What surface or terrain is this designed for?',
+        icon: <Target size={12} />,
+      },
+      observedFeatures,
+      similarAlternatives,
+    ];
+  }
+
+  // Chairs / Furniture
+  if (
+    cat.includes('chair') ||
+    cat.includes('furniture') ||
+    cat.includes('desk') ||
+    cat.includes('ergonomic') ||
+    cat.includes('seating')
+  ) {
+    return [
+      {
+        label: 'Weight capacity',
+        prompt: "What's the weight capacity and adjustability?",
+        icon: <Layers size={12} />,
+      },
+      {
+        label: 'Ergonomic comfort',
+        prompt: 'Is this suitable for long working hours and back support?',
+        icon: <CheckCircle2 size={12} />,
+      },
+      observedFeatures,
+      similarAlternatives,
+    ];
+  }
+
+  // Watches / Timepieces
+  if (
+    cat.includes('watch') ||
+    cat.includes('smartwatch') ||
+    cat.includes('timepiece') ||
+    cat.includes('chronograph')
+  ) {
+    return [
+      {
+        label: 'Water resistance?',
+        prompt: 'What is its water resistance rating and battery performance?',
+        icon: <Sparkles size={12} />,
+      },
+      {
+        label: 'Sensors & tracking',
+        prompt: 'What health sensors, heart rate tracking, and GPS features does it have?',
+        icon: <Activity size={12} />,
+      },
+      observedFeatures,
+      similarAlternatives,
+    ];
+  }
+
+  // Generic fallback (e.g. Smartphones, Electronics, etc.)
+  return [
+    observedFeatures,
+    {
+      label: 'Key features?',
+      prompt: 'What are the key specifications and features of this product?',
+      icon: <HelpCircle size={12} />,
+    },
+    {
+      label: 'Buying options',
+      prompt: 'Can I get buying links or pricing guidance for this item?',
+      icon: <Package size={12} />,
+    },
+  ];
+};
+
 const SAMPLE_IMAGES = [
   {
-    label: 'Sony WH-1000XM5 (Catalog Match)',
+    label: 'Sony WH-1000XM5',
+    category: 'Audio',
     url: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80',
   },
   {
-    label: 'Herman Miller Aeron Chair',
+    label: 'Herman Miller Aeron',
+    category: 'Ergonomics',
     url: 'https://images.unsplash.com/photo-1580481077197-987823563052?auto=format&fit=crop&w=800&q=80',
   },
   {
-    label: 'Nike Air Zoom Shoe',
+    label: 'Nike Air Zoom Pegasus',
+    category: 'Footwear',
     url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80',
   },
 ];
@@ -117,10 +273,11 @@ export const ImageIntelligence: React.FC = () => {
         setIdentifiedProduct(result.identified_product);
         const catalogList = result.similar_catalog_products || result.all_matches || [];
         setSimilarCatalog(catalogList);
-        setSelectedCatalogItem(result.catalog_match || (catalogList.length > 0 ? catalogList[0] : null));
+        // By default, do NOT select a catalog item — keep open-world identified product as active chat context
+        setSelectedCatalogItem(null);
 
         const prod = result.identified_product;
-        const welcomeText = `Identified as **${prod.product_name}** (${prod.brand} · ${prod.category}) with ${prod.confidence} confidence.\n\n${prod.visual_description}`;
+        const welcomeText = `Identified as **${prod.product_name}** (${prod.brand} · ${prod.category}) with **${prod.confidence} confidence**.\n\n${prod.visual_description}`;
 
         setMessages([
           {
@@ -132,14 +289,13 @@ export const ImageIntelligence: React.FC = () => {
           },
         ]);
       } else if (result.best_match) {
-        // Fallback for legacy format
         setSimilarCatalog(result.all_matches || []);
         setSelectedCatalogItem(result.best_match);
         setMessages([
           {
             id: 'init-legacy',
             sender: 'assistant',
-            text: `Closest match: **${result.best_match.brand} ${result.best_match.name}**. You can ask follow-up questions!`,
+            text: `Closest match in catalog: **${result.best_match.brand} ${result.best_match.name}**. Ask any follow-up questions!`,
             timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
           },
         ]);
@@ -165,7 +321,6 @@ export const ImageIntelligence: React.FC = () => {
     const queryText = (promptToSend || inputPrompt).trim();
     if (!queryText || isAgentLoading) return;
 
-    // Check if an image or product has been loaded first
     if (!identifiedProduct && !previewUrl && !selectedCatalogItem) {
       const promptMsg: ChatMessage = {
         id: `user-${Date.now()}`,
@@ -198,14 +353,28 @@ export const ImageIntelligence: React.FC = () => {
     scrollToBottom();
 
     try {
-      const activeProductId = selectedCatalogItem?.id;
+      // If a catalog item was explicitly selected by user, target its ID and catalog data;
+      // otherwise use the open-world identifiedProduct with activeProductId = undefined.
+      const activeProductId = selectedCatalogItem ? selectedCatalogItem.id : undefined;
       const mediaContext = typeof previewUrl === 'string' && previewUrl.startsWith('http') ? previewUrl : undefined;
+      const productInfo = selectedCatalogItem
+        ? {
+            brand: selectedCatalogItem.brand,
+            model: selectedCatalogItem.name,
+            product_name: selectedCatalogItem.name,
+            category: selectedCatalogItem.category,
+            visual_description: selectedCatalogItem.description,
+            key_features_observed: selectedCatalogItem.features || [],
+            specifications: selectedCatalogItem.specifications,
+          }
+        : (identifiedProduct || undefined);
 
       const response: AgentQueryResponse = await queryAgent(
         queryText,
         activeProductId,
         undefined,
-        mediaContext
+        mediaContext,
+        productInfo
       );
 
       const toolOutput = response.tool_output || {};
@@ -265,16 +434,20 @@ export const ImageIntelligence: React.FC = () => {
       {/* Top Header */}
       <div className="tab-header">
         <div className="tab-header-titles">
-          <h1>Open-World Image Intelligence</h1>
+          <div className="tab-subtitle-tag">
+            <Sparkles size={13} />
+            <span>Open-World Visual Search & Grounding</span>
+          </div>
+          <h1>Image Intelligence</h1>
           <p>
-            Upload any product image for real-time multimodal visual identification via{' '}
-            <strong>Azure OpenAI gpt-5-mini</strong>, and explore similar catalog alternatives.
+            Upload any product photo for real-time multimodal recognition powered by{' '}
+            <strong>Azure OpenAI GPT-5</strong> and explore catalog alternatives with vector search.
           </p>
         </div>
         {isApiActive && (
           <div className="api-live-indicator">
             <span className="pulse-dot" />
-            <span>Processing with Azure AI...</span>
+            <span>{isIdentifying ? 'Analyzing visual features...' : 'Agent reasoning...'}</span>
           </div>
         )}
       </div>
@@ -283,7 +456,7 @@ export const ImageIntelligence: React.FC = () => {
       {errorMessage && (
         <div className="error-banner">
           <div className="error-msg">
-            <span>⚠️</span>
+            <AlertCircle size={18} />
             <span>{errorMessage}</span>
           </div>
           <button
@@ -291,7 +464,7 @@ export const ImageIntelligence: React.FC = () => {
             onClick={() => setErrorMessage(null)}
             title="Dismiss error"
           >
-            ×
+            <X size={16} />
           </button>
         </div>
       )}
@@ -299,25 +472,29 @@ export const ImageIntelligence: React.FC = () => {
       {/* Main Grid */}
       <div className="dashboard-grid">
         {/* Left Column: Upload & Identification Display */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div className="dashboard-column">
           {/* Upload Card */}
           <div className="card">
-            <div className="card-title">
-              <span>Product Image Upload</span>
+            <div className="card-header-row">
+              <div className="card-header-title">
+                <UploadCloud size={18} className="header-icon" />
+                <span>Product Image Upload</span>
+              </div>
               {previewUrl && (
                 <button
-                  className="btn btn-secondary"
-                  style={{ fontSize: '0.8rem', padding: '0.3rem 0.7rem' }}
+                  className="btn btn-ghost-danger btn-sm"
                   onClick={clearSelection}
+                  title="Remove image"
                 >
-                  Clear Image
+                  <X size={14} />
+                  <span>Clear</span>
                 </button>
               )}
             </div>
 
             {/* Drag and Drop Zone */}
             <div
-              className={`dropzone ${isDragging ? 'dragover' : ''}`}
+              className={`dropzone ${isDragging ? 'dragover' : ''} ${previewUrl ? 'has-preview' : ''}`}
               onDragOver={(e) => {
                 e.preventDefault();
                 setIsDragging(true);
@@ -339,26 +516,31 @@ export const ImageIntelligence: React.FC = () => {
               />
 
               {previewUrl ? (
-                <div style={{ position: 'relative' }}>
-                  <img src={previewUrl} alt="Uploaded preview" className="preview-image" />
-                  <div style={{ marginTop: '0.75rem', fontSize: '0.85rem', color: 'var(--text-muted)' }}>
-                    Click or drop another image to replace
+                <div className="preview-box">
+                  <img src={previewUrl} alt="Uploaded product preview" className="preview-image" />
+                  <div className="preview-overlay-tag">
+                    <span>Click or drop new image to replace</span>
                   </div>
                 </div>
               ) : (
-                <>
-                  <div className="dropzone-icon">📷</div>
+                <div className="dropzone-empty-state">
+                  <div className="dropzone-icon-badge">
+                    <UploadCloud size={28} />
+                  </div>
                   <div className="dropzone-title">Drop your product photo here</div>
                   <div className="dropzone-subtitle">
-                    Supports JPG, PNG, WEBP · Open-world recognition for ANY item
+                    Supports JPG, PNG, WEBP · Open-world zero-shot recognition
                   </div>
-                </>
+                  <div className="dropzone-cta-btn">
+                    <span>Browse Files</span>
+                  </div>
+                </div>
               )}
             </div>
 
             {/* Sample Image Presets */}
             <div className="sample-presets">
-              <span className="sample-title">Try quick samples:</span>
+              <span className="sample-title">Quick Demo Samples</span>
               <div className="sample-chips">
                 {SAMPLE_IMAGES.map((sample, idx) => (
                   <button
@@ -367,80 +549,91 @@ export const ImageIntelligence: React.FC = () => {
                     onClick={() => handleSampleSelect(sample.url)}
                     disabled={isIdentifying}
                   >
-                    {sample.label}
+                    <span className="sample-category-dot" />
+                    <span className="sample-label-text">{sample.label}</span>
                   </button>
                 ))}
               </div>
             </div>
           </div>
 
-          {/* Loading Spinner State */}
+          {/* Loading State */}
           {isIdentifying && (
-            <div className="card" style={{ textAlign: 'center', padding: '2.5rem' }}>
-              <div className="spinner" style={{ margin: '0 auto 1.25rem' }} />
-              <div style={{ fontWeight: 600, fontSize: '1.05rem', color: 'var(--text-primary)' }}>
-                Analyzing Visual Features with gpt-5-mini...
+            <div className="card loading-card">
+              <div className="radar-spinner">
+                <div className="radar-circle" />
+                <Sparkles size={24} className="radar-icon" />
               </div>
-              <div style={{ color: 'var(--text-muted)', fontSize: '0.85rem', marginTop: '0.4rem' }}>
-                Extracting brand, model, silhouette, and querying catalog vectors
+              <div className="loading-card-title">Analyzing Visual Features</div>
+              <div className="loading-card-subtitle">
+                Multimodal GPT-5 extracting brand, physical attributes, model silhouette, and catalog vector matches...
               </div>
             </div>
           )}
 
-          {/* PRIMARY: Open-World Recognition Card */}
+          {/* Open-World Recognition Card */}
           {!isIdentifying && identifiedProduct && (
             <div className="card open-world-card">
-              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '0.75rem' }}>
-                <span className="ai-vision-tag">✨ Open-World AI Recognition</span>
-                <span className={`confidence-pill confidence-${identifiedProduct.confidence}`}>
-                  {identifiedProduct.confidence === 'high' ? '● High Confidence' : identifiedProduct.confidence === 'medium' ? '◐ Medium Confidence' : '○ Low Confidence'}
-                </span>
+              <div className="open-world-header">
+                <div className="ai-vision-tag">
+                  <Sparkles size={13} />
+                  <span>Open-World Visual AI</span>
+                </div>
+                <div className={`confidence-pill confidence-${identifiedProduct.confidence}`}>
+                  <span className="confidence-dot" />
+                  <span>
+                    {identifiedProduct.confidence === 'high'
+                      ? 'High Confidence'
+                      : identifiedProduct.confidence === 'medium'
+                      ? 'Medium Confidence'
+                      : 'Low Confidence'}
+                  </span>
+                </div>
               </div>
 
-              <div style={{ marginBottom: '0.5rem' }}>
-                <div style={{ fontSize: '0.85rem', color: 'var(--accent-color)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                  {identifiedProduct.brand}
-                </div>
-                <h2 style={{ fontSize: '1.35rem', fontWeight: 800, color: 'var(--text-primary)', margin: '0.2rem 0 0.5rem' }}>
-                  {identifiedProduct.product_name}
-                </h2>
+              <div className="product-summary-meta">
+                <div className="product-brand-tag">{identifiedProduct.brand}</div>
+                <h2 className="product-display-name">{identifiedProduct.product_name}</h2>
                 <span className="badge badge-category">{identifiedProduct.category}</span>
               </div>
 
               {/* Visual Observations Summary */}
               {identifiedProduct.visual_description && (
                 <div className="visual-obs-box">
-                  <div className="visual-obs-title">Visual Analysis & Observations</div>
-                  <div>{identifiedProduct.visual_description}</div>
+                  <div className="visual-obs-title">
+                    <Eye size={14} />
+                    <span>Visual Analysis & Physical Profile</span>
+                  </div>
+                  <p className="visual-obs-text">{identifiedProduct.visual_description}</p>
                 </div>
               )}
 
               {/* Key Features Observed */}
               {identifiedProduct.key_features_observed && identifiedProduct.key_features_observed.length > 0 && (
-                <div>
-                  <div style={{ fontSize: '0.8rem', fontWeight: 700, color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                    Observed Physical Attributes
-                  </div>
+                <div className="features-section">
+                  <div className="features-section-title">Observed Physical Attributes</div>
                   <div className="feature-pills-wrap">
                     {identifiedProduct.key_features_observed.map((feat, idx) => (
                       <span key={idx} className="feature-pill">
-                        ✓ {feat}
+                        <CheckCircle2 size={13} className="feature-pill-icon" />
+                        <span>{feat}</span>
                       </span>
                     ))}
                   </div>
                 </div>
               )}
 
-              {/* SECONDARY: Similar Options in Our Catalog */}
-              {similarCatalog.length > 0 && (
+              {/* Similar Options in Our Catalog */}
+              {similarCatalog.length > 0 ? (
                 <div className="similar-catalog-section">
                   <div className="similar-catalog-header">
                     <div>
                       <div className="similar-catalog-title">
-                        <span>📦 Similar Options in Our Catalog</span>
+                        <Package size={16} />
+                        <span>Indexed Catalog Recommendations</span>
                       </div>
                       <div className="similar-catalog-subtitle">
-                        Closest matching items indexed in Azure AI Search
+                        Vector nearest-neighbors indexed in Azure AI Search
                       </div>
                     </div>
                   </div>
@@ -452,39 +645,45 @@ export const ImageIntelligence: React.FC = () => {
                         <div
                           key={item.id}
                           className={`similar-catalog-card ${isSelected ? 'active-catalog-item' : ''}`}
-                          onClick={() => setSelectedCatalogItem(item)}
-                          title={`Click to set ${item.name} as active chat context`}
+                          onClick={() => setSelectedCatalogItem(isSelected ? null : item)}
+                          title={
+                            isSelected
+                              ? `Currently active context. Click to return to ${identifiedProduct?.brand || 'identified product'}`
+                              : `Click to switch chat context to ${item.brand} ${item.name}`
+                          }
                         >
                           <div className="similar-card-left">
                             {item.image_urls && item.image_urls.length > 0 ? (
                               <img src={item.image_urls[0]} alt={item.name} className="similar-thumb" />
                             ) : (
-                              <div className="similar-thumb" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(51, 65, 85, 0.5)' }}>
-                                📦
+                              <div className="similar-thumb-fallback">
+                                <Package size={20} />
                               </div>
                             )}
-                            <div>
+                            <div className="similar-details">
                               <div className="similar-info-name">
                                 {item.brand} {item.name}
                               </div>
                               <div className="similar-info-meta">
-                                <span>{item.category}</span>
+                                <span className="category-meta">{item.category}</span>
                                 {item.specifications?.battery_life && (
-                                  <span>• 🔋 {item.specifications.battery_life}</span>
-                                )}
-                                {item.specifications?.weight && (
-                                  <span>• ⚖️ {item.specifications.weight}</span>
+                                   <span className="spec-meta">
+                                     <BatteryCharging size={11} />
+                                     {item.specifications.battery_life}
+                                   </span>
                                 )}
                               </div>
                             </div>
                           </div>
-                          <div style={{ textAlign: 'right' }}>
+                          <div className="similar-card-right">
                             <span className="similar-score-badge">
-                              {item.is_exact_catalog_match ? '★ Exact Match' : `${(item.similarity_score * 100).toFixed(0)}% Visual Match`}
+                              {item.is_exact_catalog_match
+                                ? 'Exact Match'
+                                : `${(item.similarity_score * 100).toFixed(0)}% Visual Match`}
                             </span>
                             {isSelected && (
-                              <div style={{ fontSize: '0.7rem', color: 'var(--accent-color)', marginTop: '0.2rem', fontWeight: 600 }}>
-                                Active Context
+                              <div className="active-context-pill">
+                                <span>Catalog Context</span>
                               </div>
                             )}
                           </div>
@@ -493,36 +692,74 @@ export const ImageIntelligence: React.FC = () => {
                     })}
                   </div>
                 </div>
+              ) : (
+                <div className="no-catalog-match-box">
+                  <div className="no-catalog-icon-wrap">
+                    <Package size={16} />
+                  </div>
+                  <div className="no-catalog-content">
+                    <div className="no-catalog-title">No Catalog Match for Category</div>
+                    <div className="no-catalog-desc">
+                      No similar items available in our catalog for this product category ({identifiedProduct.category}).
+                      You can ask full open-world questions in the chat assistant.
+                    </div>
+                  </div>
+                </div>
               )}
             </div>
           )}
         </div>
 
         {/* Right Column: Agent Chat Interface */}
-        <div>
+        <div className="dashboard-column">
           <div className="chat-container">
             <div className="chat-header">
               <div className="chat-title">
-                <span>💬 VisionIQ Assistant</span>
-                <span className="agent-badge">Foundry Agent</span>
+                <div className="chat-bot-avatar">
+                  <Bot size={18} />
+                </div>
+                <div>
+                  <div className="chat-name-row">
+                    <span className="chat-name">VisionIQ Copilot</span>
+                    <span className="agent-badge">Foundry Agent</span>
+                  </div>
+                  <div className="chat-subhead">Grounded Multimodal RAG</div>
+                </div>
               </div>
-              {identifiedProduct ? (
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                  Active: {identifiedProduct.brand} {identifiedProduct.model || identifiedProduct.product_name.substring(0, 18)}
-                </span>
-              ) : selectedCatalogItem ? (
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                  Target: {selectedCatalogItem.name.substring(0, 24)}...
-                </span>
+              {selectedCatalogItem ? (
+                <div className="active-target-badge target-catalog-badge" title={`Chat context: ${selectedCatalogItem.brand} ${selectedCatalogItem.name}`}>
+                  <span className="target-dot target-dot-catalog" />
+                  <span>Catalog: {selectedCatalogItem.brand} {selectedCatalogItem.name.substring(0, 16)}</span>
+                  <button
+                    className="badge-clear-btn"
+                    onClick={() => setSelectedCatalogItem(null)}
+                    title={`Click to reset chat context back to identified ${identifiedProduct?.brand || 'product'}`}
+                  >
+                    ✕
+                  </button>
+                </div>
+              ) : identifiedProduct ? (
+                <div className="active-target-badge" title={`Active open-world context: ${identifiedProduct.product_name}`}>
+                  <span className="target-dot" />
+                  <span>{identifiedProduct.brand} {identifiedProduct.model || identifiedProduct.product_name.substring(0, 16)}</span>
+                </div>
               ) : null}
             </div>
 
             <div className="chat-messages">
               {messages.length === 0 ? (
-                <div style={{ textAlign: 'center', color: 'var(--text-muted)', marginTop: '5rem', fontSize: '0.9rem' }}>
-                  {previewUrl
-                    ? 'Image loaded. Ask questions about observed features, specs, or catalog alternatives!'
-                    : 'Upload a product image to start chatting about open-world recognition and catalog specs.'}
+                <div className="chat-empty-state">
+                  <div className="empty-bot-icon">
+                    <Bot size={36} />
+                  </div>
+                  <div className="empty-title">
+                    {previewUrl ? 'Product Analyzed & Ready' : 'Awaiting Product Input'}
+                  </div>
+                  <p className="empty-description">
+                    {previewUrl
+                      ? 'Ask questions about observed physical features, specifications, durability, or catalog alternatives.'
+                      : 'Upload a product photo or select a quick demo sample on the left to start grounded multimodal dialogue.'}
+                  </p>
                 </div>
               ) : (
                 messages.map((msg) => (
@@ -530,7 +767,17 @@ export const ImageIntelligence: React.FC = () => {
                     key={msg.id}
                     className={`message-bubble ${msg.sender === 'user' ? 'message-user' : 'message-assistant'}`}
                   >
-                    <div style={{ whiteSpace: 'pre-line' }}>{msg.text}</div>
+                    <div className="message-header-row">
+                      <div className="message-sender-tag">
+                        {msg.sender === 'user' ? <User size={13} /> : <Bot size={13} />}
+                        <span>{msg.sender === 'user' ? 'You' : 'VisionIQ Assistant'}</span>
+                      </div>
+                      <span className="message-timestamp">{msg.timestamp}</span>
+                    </div>
+
+                    <div className="message-body" style={{ whiteSpace: 'pre-line' }}>
+                      {msg.text}
+                    </div>
 
                     {/* Similar Products Carousel / Cards if returned */}
                     {msg.similarProducts && msg.similarProducts.length > 0 && (
@@ -540,13 +787,15 @@ export const ImageIntelligence: React.FC = () => {
                             key={p.id}
                             className="similar-card"
                             onClick={() => setSelectedCatalogItem(p as SimilarCatalogProduct)}
-                            style={{ cursor: 'pointer' }}
-                            title={`Select ${p.name}`}
+                            title={`Select ${p.name} as active context`}
                           >
                             <div className="similar-card-brand">{p.brand}</div>
                             <div className="similar-card-name">{p.name}</div>
-                            <div className="similar-card-score">
-                              {(p.similarity_score * 100).toFixed(0)}% similar
+                            <div className="similar-card-footer">
+                              <span className="similar-card-score">
+                                {(p.similarity_score * 100).toFixed(0)}% match
+                              </span>
+                              <ChevronRight size={14} className="similar-card-arrow" />
                             </div>
                           </div>
                         ))}
@@ -555,7 +804,15 @@ export const ImageIntelligence: React.FC = () => {
 
                     {msg.toolUsed && (
                       <div className="message-meta">
-                        <span className="tool-tag">🔧 {msg.toolUsed}</span>
+                        <span className="tool-tag">
+                          <Wrench size={11} />
+                          <span>{msg.toolUsed}</span>
+                        </span>
+                        {msg.reasoning && (
+                          <span className="reasoning-text" title={msg.reasoning}>
+                            {msg.reasoning.substring(0, 60)}...
+                          </span>
+                        )}
                       </div>
                     )}
                   </div>
@@ -563,11 +820,13 @@ export const ImageIntelligence: React.FC = () => {
               )}
 
               {isAgentLoading && (
-                <div className="message-bubble message-assistant" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                  <div className="spinner spinner-sm-light" />
-                  <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                    Agent reasoning & synthesizing answer...
-                  </span>
+                <div className="message-bubble message-assistant message-loading">
+                  <div className="typing-indicator">
+                    <span />
+                    <span />
+                    <span />
+                  </div>
+                  <span className="typing-text">Agent reasoning & grounding with catalog vectors...</span>
                 </div>
               )}
               <div ref={chatBottomRef} />
@@ -575,38 +834,18 @@ export const ImageIntelligence: React.FC = () => {
 
             {/* Quick Action Suggestion Chips */}
             <div className="quick-prompts">
-              <button
-                className="quick-chip"
-                onClick={() => handleSendMessage("What are the key observed visual features of this item?")}
-                disabled={isAgentLoading || (!identifiedProduct && !selectedCatalogItem)}
-                title={!identifiedProduct ? "Upload an image first" : undefined}
-              >
-                🔍 Observed features?
-              </button>
-              <button
-                className="quick-chip"
-                onClick={() => handleSendMessage("What is its battery life?")}
-                disabled={isAgentLoading || (!identifiedProduct && !selectedCatalogItem)}
-                title={!identifiedProduct ? "Upload an image first" : undefined}
-              >
-                🔋 Battery life?
-              </button>
-              <button
-                className="quick-chip"
-                onClick={() => handleSendMessage("Show me similar products in our catalog")}
-                disabled={isAgentLoading || (!identifiedProduct && !selectedCatalogItem)}
-                title={!identifiedProduct ? "Upload an image first" : undefined}
-              >
-                🔄 Similar catalog items
-              </button>
-              <button
-                className="quick-chip"
-                onClick={() => handleSendMessage("Is this comfortable for long working hours or travel?")}
-                disabled={isAgentLoading || (!identifiedProduct && !selectedCatalogItem)}
-                title={!identifiedProduct ? "Upload an image first" : undefined}
-              >
-                ✈️ Travel / Comfort?
-              </button>
+              {getCategorySuggestions(identifiedProduct?.category || selectedCatalogItem?.category).map((s, idx) => (
+                <button
+                  key={idx}
+                  className="quick-chip"
+                  onClick={() => handleSendMessage(s.prompt)}
+                  disabled={isAgentLoading || (!identifiedProduct && !selectedCatalogItem)}
+                  title={!identifiedProduct && !selectedCatalogItem ? 'Upload an image first' : undefined}
+                >
+                  {s.icon}
+                  <span>{s.label}</span>
+                </button>
+              ))}
             </div>
 
             {/* Input Bar */}
@@ -622,7 +861,7 @@ export const ImageIntelligence: React.FC = () => {
                 className="chat-input"
                 placeholder={
                   identifiedProduct || selectedCatalogItem
-                    ? `Ask anything about ${identifiedProduct?.brand || selectedCatalogItem?.brand || 'this product'}...`
+                    ? `Ask anything about ${identifiedProduct?.brand || selectedCatalogItem?.brand || 'this item'}...`
                     : "Upload a product image first to start chatting..."
                 }
                 value={inputPrompt}
@@ -633,14 +872,15 @@ export const ImageIntelligence: React.FC = () => {
                 type="submit"
                 className="chat-send-btn"
                 disabled={!inputPrompt.trim() || isAgentLoading}
+                title="Send query"
               >
                 {isAgentLoading ? (
-                  <>
-                    <span className="spinner spinner-sm" />
-                    <span>Sending...</span>
-                  </>
+                  <span className="spinner spinner-sm" />
                 ) : (
-                  'Send'
+                  <>
+                    <Send size={15} />
+                    <span>Send</span>
+                  </>
                 )}
               </button>
             </form>

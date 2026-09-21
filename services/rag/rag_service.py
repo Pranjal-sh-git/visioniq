@@ -54,8 +54,12 @@ def retrieve_product_by_id(product_id: str) -> Optional[dict[str, Any]]:
         return None
 
 
-def answer_product_question(product_id: Optional[str], question: str) -> dict[str, Any]:
-    """Answers natural language questions about a product, grounded in catalog specifications.
+def answer_product_question(
+    product_id: Optional[str],
+    question: str,
+    product_info: Optional[dict[str, Any]] = None,
+) -> dict[str, Any]:
+    """Answers natural language questions about a product, grounded in catalog specifications or open-world vision data.
 
     Provides rich, conversational, and factual answers synthesized by Azure OpenAI (gpt-5-mini),
     while preserving strict honesty when requested information is unlisted.
@@ -63,7 +67,7 @@ def answer_product_question(product_id: Optional[str], question: str) -> dict[st
     Returns:
         dict: Contains answer, grounded_field, catalog_value, and is_available flag.
     """
-    if not product_id:
+    if not product_id and not product_info:
         return {
             "product_id": None,
             "question": question,
@@ -74,7 +78,68 @@ def answer_product_question(product_id: Optional[str], question: str) -> dict[st
             "catalog_value": None,
         }
 
-    product = retrieve_product_by_id(product_id)
+    # Case 1: Catalog lookup by product_id if provided
+    product = retrieve_product_by_id(product_id) if product_id else None
+
+    # Case 2: Open-world identified product info (used if product not in catalog or product_id is None)
+    if not product and product_info:
+        name = product_info.get("product_name") or product_info.get("model", "Identified Product")
+        brand = product_info.get("brand", "")
+        category = product_info.get("category", "")
+        description = product_info.get("visual_description", "")
+        features = product_info.get("key_features_observed") or product_info.get("features", [])
+        specs = product_info.get("specifications", {})
+
+        display_name = name if (brand and name.lower().startswith(brand.lower())) else f"{brand} {name}".strip()
+        features_formatted = "\n".join(f"- {f}" for f in features) if features else "None listed"
+        specs_formatted = "\n".join(f"- {k.replace('_', ' ').title()}: {v}" for k, v in specs.items()) if specs else "None listed"
+
+        context_str = (
+            f"Product: {display_name}\n"
+            f"Brand: {brand}\n"
+            f"Category: {category}\n"
+            f"Visual Observations & Description: {description}\n\n"
+            f"Observed Features & Attributes:\n{features_formatted}\n\n"
+            f"Technical Specifications:\n{specs_formatted}"
+        )
+
+        system_instruction = (
+            f"You are VisionIQ's AI Product Specialist for {display_name}.\n"
+            f"Your goal is to answer the user's natural language question in a helpful, friendly, conversational, "
+            f"and accurate manner based strictly on the provided visual identification and product attributes.\n\n"
+            f"Guidelines:\n"
+            f"1. Conversational & Informative: Speak naturally in complete, well-formed sentences. "
+            f"Explain observed features and physical characteristics with useful context.\n"
+            f"2. Factual Accuracy: For visible attributes and features, ground your response in the observed profile.\n"
+            f"3. Practical Insights: For broader questions (e.g. cushioning, usage, ergonomics, comfort), synthesize an informed answer from the product's verified description and observed features.\n"
+            f"4. Honesty on Missing Info: If the user asks about an internal metric or detail not present in the visual analysis (e.g. unlisted battery capacity or purchasing URLs), "
+            f"clearly state that this specific detail is not specified in the visual profile for {display_name}."
+        )
+
+        llm_answer = generate_grounded_answer(
+            user_question=question,
+            retrieved_context=context_str,
+            system_instruction=system_instruction,
+        )
+
+        is_missing_info = (
+            "not specified" in llm_answer.lower()
+            or "not mentioned" in llm_answer.lower()
+            or "does not specify" in llm_answer.lower()
+        )
+
+        return {
+            "product_id": None,
+            "product_name": display_name,
+            "question": question,
+            "answer": llm_answer,
+            "requires_clarification": False,
+            "is_available": not is_missing_info,
+            "grounded_field": None,
+            "catalog_value": None,
+            "hallucination": False,
+        }
+
     if not product:
         return {
             "product_id": product_id,

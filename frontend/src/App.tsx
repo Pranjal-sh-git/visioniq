@@ -3,6 +3,7 @@ import Navbar from './components/Navbar';
 import ImageIntelligence from './pages/ImageIntelligence';
 import VideoIntelligence from './pages/VideoIntelligence';
 import { getHealthStatus } from './services/api';
+import { Layers, ShieldCheck, Database, Zap } from 'lucide-react';
 
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'image' | 'video'>('image');
@@ -16,16 +17,41 @@ export const App: React.FC = () => {
 
   return (
     <div className="app-container">
-      <Navbar activeTab={activeTab} onTabChange={setActiveTab} />
+      <div className="ambient-glow" />
+      <Navbar activeTab={activeTab} onTabChange={setActiveTab} healthStatus={healthStatus} />
+      
       <main className="main-content">
-        {activeTab === 'image' && <ImageIntelligence />}
-        {activeTab === 'video' && <VideoIntelligence />}
-
-        <div className="health-status-badge">
-          <span className={`status-indicator ${healthStatus === 'ok' ? 'ok' : ''}`} />
-          Backend API Status: <strong>{healthStatus}</strong>
+        <div className={`tab-pane ${activeTab === 'image' ? 'active' : 'is-hidden'}`}>
+          <ImageIntelligence />
+        </div>
+        <div className={`tab-pane ${activeTab === 'video' ? 'active' : 'is-hidden'}`}>
+          <VideoIntelligence />
         </div>
       </main>
+
+      <footer className="app-footer">
+        <div className="footer-content">
+          <div className="footer-item">
+            <Layers size={13} className="footer-icon" />
+            <span>GPT-5 Multimodal Vision</span>
+          </div>
+          <div className="footer-divider">•</div>
+          <div className="footer-item">
+            <Database size={13} className="footer-icon" />
+            <span>Azure AI Search Vector RAG</span>
+          </div>
+          <div className="footer-divider">•</div>
+          <div className="footer-item">
+            <Zap size={13} className="footer-icon" />
+            <span>Content Understanding Temporal Pipeline</span>
+          </div>
+          <div className="footer-divider">•</div>
+          <div className="footer-item">
+            <ShieldCheck size={13} className="footer-icon" />
+            <span>Foundry Agent Service</span>
+          </div>
+        </div>
+      </footer>
     </div>
   );
 };

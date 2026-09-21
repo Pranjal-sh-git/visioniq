@@ -27,6 +27,7 @@ class AgentQueryRequest(BaseModel):
     product_id: Optional[str] = Field(None, description="Optional active product ID context (e.g. 'P001').")
     video_id: Optional[str] = Field(None, description="Optional active video ID context.")
     media_url: Optional[str] = Field(None, description="Optional image/media URL context.")
+    product_info: Optional[dict[str, Any]] = Field(None, description="Optional open-world product identification metadata.")
 
 
 @router.post("/query")
@@ -42,6 +43,7 @@ async def query_agent_endpoint(request: AgentQueryRequest):
             product_id=request.product_id,
             video_id=request.video_id,
             media_url=request.media_url,
+            product_info=request.product_info,
         )
         return result
     except Exception as e:

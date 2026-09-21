@@ -6,6 +6,24 @@ import {
   VideoAnalysisResult,
   VideoSearchResponse,
 } from '../services/api';
+import {
+  Film,
+  Play,
+  Clock,
+  Layers,
+  Image as ImageIcon,
+  Sparkles,
+  Search,
+  Bot,
+  User,
+  AlertCircle,
+  X,
+  FileText,
+  Tag,
+  Hash,
+  Target,
+  BatteryCharging,
+} from 'lucide-react';
 
 interface VideoChatMessage {
   id: string;
@@ -96,7 +114,6 @@ export const VideoIntelligence: React.FC = () => {
       const result = await analyzeVideo(file);
       setAnalysisResult(result);
 
-      // Fetch auto-generated summary and key topics
       try {
         const summaryData = await getVideoSummary(result.video_id);
         setSummary(summaryData.summary);
@@ -114,7 +131,7 @@ export const VideoIntelligence: React.FC = () => {
         {
           id: 'v-init-1',
           sender: 'assistant',
-          text: `Video analyzed successfully (${result.duration_seconds}s, ${result.chunks_count} segments indexed). You can now ask questions about statements made, topics discussed, or specific scenes!`,
+          text: `Video analyzed successfully (**${result.duration_seconds}s duration**, **${result.chunks_count} segments** indexed). You can now ask questions about statements made, topics discussed, or specific scenes!`,
           timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
         },
       ]);
@@ -139,7 +156,6 @@ export const VideoIntelligence: React.FC = () => {
     const questionText = (queryTextOverride || inputPrompt).trim();
     if (!questionText || isSearching) return;
 
-    // Check if a video has been uploaded first
     if (!analysisResult?.video_id) {
       const promptMsg: VideoChatMessage = {
         id: `v-user-${Date.now()}`,
@@ -221,10 +237,6 @@ export const VideoIntelligence: React.FC = () => {
   };
 
   const clearVideo = () => {
-    setSelectedFileUrl();
-  };
-
-  const setSelectedFileUrl = () => {
     setVideoUrl(null);
     setAnalysisResult(null);
     setSummary(null);
@@ -237,44 +249,60 @@ export const VideoIntelligence: React.FC = () => {
   };
 
   return (
-    <div>
-      {/* Small top progress bar when API call is active */}
-      {isApiActive && <div className="api-progress-bar" />}
-
+    <div className="tab-page">
+      {/* Top Header */}
       <div className="tab-header">
         <div className="tab-header-titles">
+          <div className="tab-subtitle-tag">
+            <Film size={13} />
+            <span>Temporal Speech & Video Indexing</span>
+          </div>
           <h1>Video Intelligence</h1>
-          <p>Upload a video to transcribe speech, index timeline chunks, extract key topics, and perform grounded temporal Q&A with clickable timestamp playback.</p>
+          <p>
+            Upload a video to transcribe speech with Whisper, index temporal timeline chunks into{' '}
+            <strong>Azure AI Search</strong>, and query exact timestamped moments with clickable playback.
+          </p>
         </div>
 
         {isApiActive && (
           <div className="api-live-indicator">
             <span className="pulse-dot" />
-            <span>{isAnalyzing ? 'Processing Video Pipeline...' : 'Searching Timeline...'}</span>
+            <span>{isAnalyzing ? 'Processing video pipeline...' : 'Searching timeline...'}</span>
           </div>
         )}
       </div>
 
+      {/* Inline Error Banner */}
       {errorMessage && (
         <div className="error-banner">
-          <span className="error-msg">⚠️ {errorMessage}</span>
-          <button className="error-close-btn" onClick={() => setErrorMessage(null)}>×</button>
+          <div className="error-msg">
+            <AlertCircle size={18} />
+            <span>{errorMessage}</span>
+          </div>
+          <button className="error-close-btn" onClick={() => setErrorMessage(null)} title="Dismiss error">
+            <X size={16} />
+          </button>
         </div>
       )}
 
+      {/* Main Grid */}
       <div className="dashboard-grid">
         {/* Left Column: Video Player & Summary */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
+        <div className="dashboard-column">
           <div className="card">
-            <div className="card-title">
-              <span>Video Input</span>
+            <div className="card-header-row">
+              <div className="card-header-title">
+                <Film size={18} className="header-icon" />
+                <span>Video Player & Input</span>
+              </div>
               {videoUrl && (
                 <button
-                  className="sample-chip"
+                  className="btn btn-ghost-danger btn-sm"
                   onClick={clearVideo}
-                  style={{ fontSize: '0.75rem' }}
+                  title="Upload another video"
                 >
-                  Upload New
+                  <X size={14} />
+                  <span>Upload New</span>
                 </button>
               )}
             </div>
@@ -290,13 +318,22 @@ export const VideoIntelligence: React.FC = () => {
                 onDrop={handleDrop}
                 onClick={() => fileInputRef.current?.click()}
               >
-                <div className="dropzone-icon">🎬</div>
-                <div className="dropzone-title">Drag & drop your video file here</div>
-                <div className="dropzone-subtitle">or click to browse (.mp4, .mov, .webm, .avi)</div>
+                <div className="dropzone-empty-state">
+                  <div className="dropzone-icon-badge">
+                    <Film size={28} />
+                  </div>
+                  <div className="dropzone-title">Drag & drop your video file here</div>
+                  <div className="dropzone-subtitle">
+                    Supports MP4, MOV, WEBM, AVI, MKV · Azure Whisper Transcription & Keyframes
+                  </div>
+                  <div className="dropzone-cta-btn">
+                    <span>Select Video File</span>
+                  </div>
+                </div>
                 <input
                   type="file"
                   ref={fileInputRef}
-                  className="file-input"
+                  style={{ display: 'none' }}
                   accept="video/mp4,video/webm,video/quicktime,video/x-msvideo,video/x-matroska"
                   onChange={(e) => {
                     if (e.target.files && e.target.files.length > 0) {
@@ -317,56 +354,89 @@ export const VideoIntelligence: React.FC = () => {
             )}
           </div>
 
-          {/* Loading Spinner for Video Processing */}
+          {/* Loading State for Video Processing */}
           {isAnalyzing && (
-            <div className="card loading-box">
-              <div className="spinner" />
-              <div className="loading-text">Processing Video Pipeline...</div>
-              <div className="loading-subtext">
-                Extracting audio, transcribing speech with Whisper, extracting timeline keyframes, and generating Azure AI Search embeddings.
+            <div className="card loading-card">
+              <div className="radar-spinner">
+                <div className="radar-circle" />
+                <Film size={24} className="radar-icon" />
+              </div>
+              <div className="loading-card-title">Processing Video Pipeline</div>
+              <div className="loading-card-subtitle">
+                Extracting audio, transcribing speech with Whisper, extracting timeline keyframes, and generating vector embeddings in Azure AI Search...
               </div>
             </div>
           )}
 
-          {/* Video Summary & Key Topics Card */}
+          {/* Video Overview & Summary */}
           {!isAnalyzing && analysisResult && (
             <div className="card">
-              <div className="card-title">
-                <span>Video Intelligence Overview</span>
-                <span className="tool-tag">ID: {analysisResult.video_id}</span>
+              <div className="card-header-row">
+                <div className="card-header-title">
+                  <FileText size={18} className="header-icon" />
+                  <span>Video Intelligence Overview</span>
+                </div>
+                <span className="mono-badge">ID: {analysisResult.video_id.substring(0, 8)}</span>
               </div>
 
-              <div className="badges-row" style={{ marginBottom: '1rem' }}>
-                <span className="badge badge-confident">
-                  ⏱️ {analysisResult.duration_seconds}s Duration
-                </span>
-                <span className="badge badge-category">
-                  🎞️ {analysisResult.chunks_count} Timestamped Chunks
-                </span>
-                <span className="badge badge-category">
-                  📸 {analysisResult.total_keyframes} Keyframes
-                </span>
+              {/* Stat Metric Cards */}
+              <div className="metrics-grid">
+                <div className="metric-card">
+                  <div className="metric-icon-wrap">
+                    <Clock size={16} />
+                  </div>
+                  <div>
+                    <div className="metric-value">{analysisResult.duration_seconds}s</div>
+                    <div className="metric-label">Duration</div>
+                  </div>
+                </div>
+
+                <div className="metric-card">
+                  <div className="metric-icon-wrap">
+                    <Layers size={16} />
+                  </div>
+                  <div>
+                    <div className="metric-value">{analysisResult.chunks_count}</div>
+                    <div className="metric-label">Indexed Chunks</div>
+                  </div>
+                </div>
+
+                <div className="metric-card">
+                  <div className="metric-icon-wrap">
+                    <ImageIcon size={16} />
+                  </div>
+                  <div>
+                    <div className="metric-value">{analysisResult.total_keyframes}</div>
+                    <div className="metric-label">Keyframes</div>
+                  </div>
+                </div>
               </div>
 
               {summary && (
                 <div className="video-summary-box">
-                  <div className="specs-title">Executive Summary</div>
+                  <div className="summary-box-title">
+                    <Sparkles size={14} />
+                    <span>Executive AI Summary</span>
+                  </div>
                   <p className="video-summary-text">{summary}</p>
 
                   {keyTopics.length > 0 && (
-                    <div>
-                      <div className="topics-title">Key Topics</div>
+                    <div className="topics-section">
+                      <div className="topics-title">
+                        <Tag size={12} />
+                        <span>Extracted Key Topics (Click to ask)</span>
+                      </div>
                       <div className="topics-list">
                         {keyTopics.map((topic, i) => (
-                          <span
+                          <button
                             key={i}
                             className="topic-chip"
-                            style={{ cursor: 'pointer' }}
-                            onClick={() => handleSendQuestion(`Tell me about ${topic}`)}
-                            title="Click to ask about this topic"
+                            onClick={() => handleSendQuestion(`Tell me what is discussed about "${topic}"`)}
+                            title={`Ask about ${topic}`}
                           >
-                            🏷️ {topic}
-                          </span>
+                            <Hash size={11} />
+                            <span>{topic}</span>
+                          </button>
                         ))}
                       </div>
                     </div>
@@ -378,26 +448,43 @@ export const VideoIntelligence: React.FC = () => {
         </div>
 
         {/* Right Column: Grounded Video Chat */}
-        <div>
+        <div className="dashboard-column">
           <div className="chat-container">
             <div className="chat-header">
               <div className="chat-title">
-                <span>🔍 Video Temporal Search</span>
-                <span className="agent-badge">Temporal RAG</span>
+                <div className="chat-bot-avatar">
+                  <Search size={18} />
+                </div>
+                <div>
+                  <div className="chat-name-row">
+                    <span className="chat-name">Temporal Video Search</span>
+                    <span className="agent-badge">Temporal RAG</span>
+                  </div>
+                  <div className="chat-subhead">Timestamp-Grounded Dialogue</div>
+                </div>
               </div>
               {analysisResult && (
-                <span style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>
-                  {analysisResult.filename}
-                </span>
+                <div className="active-target-badge" title={analysisResult.filename}>
+                  <Film size={12} />
+                  <span>{analysisResult.filename.substring(0, 18)}...</span>
+                </div>
               )}
             </div>
 
             <div className="chat-messages">
               {messages.length === 0 ? (
-                <div style={{ textAlign: 'center', color: 'var(--text-muted)', marginTop: '5rem', fontSize: '0.9rem' }}>
-                  {videoUrl
-                    ? 'Video loaded. Ask questions about spoken dialogue or key statements!'
-                    : 'Upload a video to search for spoken dialogue, key reviewer statements, and exact timestamped moments.'}
+                <div className="chat-empty-state">
+                  <div className="empty-bot-icon">
+                    <Film size={36} />
+                  </div>
+                  <div className="empty-title">
+                    {videoUrl ? 'Video Indexed & Ready' : 'Awaiting Video Upload'}
+                  </div>
+                  <p className="empty-description">
+                    {videoUrl
+                      ? 'Ask questions to locate spoken dialogue, reviewer opinions, scene timestamps, and conclusions.'
+                      : 'Upload a video file on the left to transcribe audio and enable temporal vector search.'}
+                  </p>
                 </div>
               ) : (
                 messages.map((msg) => (
@@ -405,18 +492,31 @@ export const VideoIntelligence: React.FC = () => {
                     key={msg.id}
                     className={`message-bubble ${msg.sender === 'user' ? 'message-user' : 'message-assistant'}`}
                   >
-                    <div>{msg.text}</div>
+                    <div className="message-header-row">
+                      <div className="message-sender-tag">
+                        {msg.sender === 'user' ? <User size={13} /> : <Bot size={13} />}
+                        <span>{msg.sender === 'user' ? 'You' : 'Temporal Search Assistant'}</span>
+                      </div>
+                      <span className="message-timestamp">{msg.timestamp}</span>
+                    </div>
+
+                    <div className="message-body" style={{ whiteSpace: 'pre-line' }}>
+                      {msg.text}
+                    </div>
 
                     {/* Clickable Seek Timestamp Button */}
                     {msg.startTime !== undefined && msg.startTime !== null && (
-                      <div>
+                      <div className="timestamp-btn-wrapper">
                         <button
                           className="timestamp-btn"
                           onClick={() => handleSeekToTime(msg.startTime!)}
-                          title={`Click to seek video to ${formatTimestamp(msg.startTime!)}`}
+                          title={`Click to jump to ${formatTimestamp(msg.startTime!)}`}
                         >
-                          ▶ Jump to {formatTimestamp(msg.startTime!)}
-                          {msg.endTime !== null && msg.endTime !== undefined ? ` - ${formatTimestamp(msg.endTime)}` : ''}
+                          <Play size={13} className="play-icon" />
+                          <span>
+                            Jump to {formatTimestamp(msg.startTime!)}
+                            {msg.endTime !== null && msg.endTime !== undefined ? ` – ${formatTimestamp(msg.endTime)}` : ''}
+                          </span>
                         </button>
                       </div>
                     )}
@@ -424,7 +524,8 @@ export const VideoIntelligence: React.FC = () => {
                     {/* Supporting Transcript Snippet */}
                     {msg.supportingSegment && (
                       <div className="supporting-segment-box">
-                        "{msg.supportingSegment}"
+                        <div className="supporting-quote-label">Grounded Transcript Segment:</div>
+                        <div className="supporting-quote-content">"{msg.supportingSegment}"</div>
                       </div>
                     )}
                   </div>
@@ -432,11 +533,13 @@ export const VideoIntelligence: React.FC = () => {
               )}
 
               {isSearching && (
-                <div className="message-bubble message-assistant" style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
-                  <div className="spinner spinner-sm-light" />
-                  <span style={{ color: 'var(--text-muted)', fontSize: '0.85rem' }}>
-                    Searching timeline segments and grounding response...
-                  </span>
+                <div className="message-bubble message-assistant message-loading">
+                  <div className="typing-indicator">
+                    <span />
+                    <span />
+                    <span />
+                  </div>
+                  <span className="typing-text">Searching timeline segments & grounding response...</span>
                 </div>
               )}
               <div ref={chatBottomRef} />
@@ -446,26 +549,30 @@ export const VideoIntelligence: React.FC = () => {
             <div className="quick-prompts">
               <button
                 className="quick-chip"
-                onClick={() => handleSendQuestion("What did the speaker say about audience capacity?")}
+                onClick={() => handleSendQuestion("What was the main conclusion or verdict in the video?")}
                 disabled={isSearching || !analysisResult}
                 title={!analysisResult ? "Upload a video first" : undefined}
               >
-                👥 Audience capacity?
+                <Target size={12} />
+                <span>Main conclusion</span>
               </button>
               <button
                 className="quick-chip"
-                onClick={() => handleSendQuestion("What was the main conclusion?")}
+                onClick={() => handleSendQuestion("What did the speaker say about battery life and performance?")}
                 disabled={isSearching || !analysisResult}
                 title={!analysisResult ? "Upload a video first" : undefined}
               >
-                🎯 Main conclusion?
+                <BatteryCharging size={12} />
+                <span>Battery & performance</span>
               </button>
               <button
                 className="quick-chip"
-                onClick={() => handleSendQuestion("What did the reviewer say about battery life?")}
+                onClick={() => handleSendQuestion("Summarize the key highlights and takeaways")}
                 disabled={isSearching || !analysisResult}
+                title={!analysisResult ? "Upload a video first" : undefined}
               >
-                🔋 Battery review?
+                <Sparkles size={12} />
+                <span>Key highlights</span>
               </button>
             </div>
 
@@ -482,7 +589,7 @@ export const VideoIntelligence: React.FC = () => {
                 className="chat-input"
                 placeholder={
                   analysisResult
-                    ? "Ask what was said, locate a scene, or query a topic..."
+                    ? "Ask what was said, query a topic, or locate a timestamp..."
                     : "Upload a video first to search timeline..."
                 }
                 value={inputPrompt}
@@ -493,14 +600,15 @@ export const VideoIntelligence: React.FC = () => {
                 type="submit"
                 className="chat-send-btn"
                 disabled={!inputPrompt.trim() || isSearching}
+                title="Search timeline"
               >
                 {isSearching ? (
-                  <>
-                    <span className="spinner spinner-sm" />
-                    <span>Searching...</span>
-                  </>
+                  <span className="spinner spinner-sm" />
                 ) : (
-                  'Search'
+                  <>
+                    <Search size={15} />
+                    <span>Search</span>
+                  </>
                 )}
               </button>
             </form>

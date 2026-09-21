@@ -75,16 +75,17 @@ FOUNDRY_TOOL_DEFINITIONS: list[dict[str, Any]] = [
         "function": {
             "name": "search_product_knowledge",
             "description": (
-                "Searches product catalog specifications and technical documentation (RAG) "
-                "to answer questions about battery life, weight, connectivity, driver size, ANC, price, and specs. "
-                "Use when the user asks 'What is its [spec]?', 'How long does the battery last?', or technical details."
+                "Answers questions about the active or identified product, including specifications, "
+                "features, materials, capabilities, pricing, and purchasing/buying links. "
+                "Use when the user asks questions about the current product like 'Can I get buying links?', "
+                "'What is its battery life?', 'What surface is this for?', or 'What materials are used?'."
             ),
             "parameters": {
                 "type": "object",
                 "properties": {
                     "query": {
                         "type": "string",
-                        "description": "The user's technical specification or capability question (e.g. 'What is its battery life?').",
+                        "description": "The user's question about the product (e.g. 'Can I get buying links?', 'What is its battery life?').",
                     },
                     "product_id": {
                         "type": "string",
@@ -122,7 +123,6 @@ FOUNDRY_TOOL_DEFINITIONS: list[dict[str, Any]] = [
                     "top_k": {
                         "type": "integer",
                         "description": "Number of candidate video segments to evaluate.",
-                        "default": 3,
                     },
                 },
                 "required": ["video_id", "query"],
@@ -134,8 +134,8 @@ FOUNDRY_TOOL_DEFINITIONS: list[dict[str, Any]] = [
         "function": {
             "name": "find_similar_products",
             "description": (
-                "Finds visually or categorically similar product alternatives, recommendations, or comparable items. "
-                "Use when the user asks 'Show me similar products', 'What are other alternatives?', or requests related items."
+                "Finds alternative products or catalog recommendations when the user explicitly asks for alternatives or recommendations. "
+                "Use ONLY when the user asks 'Show me similar products', 'What are other alternatives?', 'Recommend other options'."
             ),
             "parameters": {
                 "type": "object",
@@ -245,6 +245,7 @@ class VisionIQAgent:
         image: Optional[Union[str, bytes, Path, Image.Image]] = None,
         video_id: Optional[str] = None,
         product_id: Optional[str] = None,
+        product_info: Optional[dict[str, Any]] = None,
     ) -> dict[str, Any]:
         """Executes the Microsoft Foundry Agent with real model-driven tool selection.
 
@@ -257,6 +258,7 @@ class VisionIQAgent:
             image (Optional[Any]): Image input.
             video_id (Optional[str]): Target video identifier.
             product_id (Optional[str]): Target product identifier.
+            product_info (Optional[dict[str, Any]]): Open-world product identification metadata if product_id is not in catalog.
 
         Returns:
             dict[str, Any]: Execution result containing selected tool, reasoning, and tool output.
@@ -264,10 +266,16 @@ class VisionIQAgent:
         context_prompt = user_prompt
         if product_id:
             context_prompt = f"[Context: Product ID is {product_id}] {user_prompt}"
+        elif product_info:
+            brand = product_info.get("brand", "")
+            name = product_info.get("product_name") or product_info.get("model", "")
+            category = product_info.get("category", "")
+            desc = product_info.get("visual_description", "")
+            context_prompt = f"[Context: Identified Product is {brand} {name} (Category: {category}). Visual Description: {desc}] {user_prompt}"
         if video_id:
-            context_prompt = f"[Context: Video ID is {video_id}] {user_prompt}"
+            context_prompt = f"[Context: Video ID is {video_id}] {context_prompt}"
         if media_url:
-            context_prompt = f"[Context: Image URL is {media_url}] {user_prompt}"
+            context_prompt = f"[Context: Image URL is {media_url}] {context_prompt}"
 
         messages = [
             {"role": "system", "content": self.system_prompt},
@@ -306,7 +314,8 @@ class VisionIQAgent:
             tool_result = tool_func(
                 query=user_prompt or tool_args.get("query", ""),
                 product_id=tool_args.get("product_id") or product_id,
-                product_name=tool_args.get("product_name"),
+                product_name=tool_args.get("product_name") or (product_info.get("product_name") if product_info else None),
+                product_info=product_info,
             )
         elif tool_name == "search_video":
             tool_result = tool_func(
@@ -319,7 +328,7 @@ class VisionIQAgent:
                 product_id=tool_args.get("product_id") or product_id,
                 image=image,
                 image_url=tool_args.get("image_url") or media_url,
-                category=tool_args.get("category"),
+                category=tool_args.get("category") or (product_info.get("category") if product_info else None),
                 top_k=tool_args.get("top_k", 4),
             )
 

@@ -74,6 +74,9 @@ coverage.xml
 .cache/
 data/cache/
 data/output/
+data/uploads/images/Screenshot*
+data/uploads/videos/Speech*
 temp/
 tmp/
 *.log
+

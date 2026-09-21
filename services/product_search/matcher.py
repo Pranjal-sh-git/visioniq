@@ -186,6 +186,59 @@ def identify_product_by_text(
     return matches
 
 
+# Valid product categories present in the indexed catalog
+CATALOG_CATEGORIES = {"Headphones", "Chairs", "Shoes", "Watches"}
+
+CATEGORY_SYNONYMS: dict[str, list[str]] = {
+    "Headphones": [
+        "headphone", "headphones", "earphone", "earphones", "headset", "headsets",
+        "earbud", "earbuds", "audio", "over-ear", "in-ear", "on-ear", "airpods"
+    ],
+    "Chairs": [
+        "chair", "chairs", "furniture", "seating", "office chair", "desk chair",
+        "ergonomic chair", "armchair", "seat", "stool"
+    ],
+    "Shoes": [
+        "shoe", "shoes", "footwear", "sneaker", "sneakers", "running shoe",
+        "running shoes", "trainer", "trainers", "boot", "boots", "cleat", "cleats",
+        "sandal", "sandals", "footware"
+    ],
+    "Watches": [
+        "watch", "watches", "smartwatch", "smartwatches", "timepiece", "timepieces",
+        "chronograph", "wrist watch", "wrist-watch", "wristwatch"
+    ],
+}
+
+
+def map_to_catalog_category(identified_info: Optional[dict[str, Any]]) -> Optional[str]:
+    """Maps open-world identified metadata to an existing catalog category if relevant.
+
+    Returns:
+        Optional[str]: One of 'Headphones', 'Chairs', 'Shoes', 'Watches' if matched, otherwise None.
+    """
+    if not identified_info:
+        return None
+
+    cat_raw = (identified_info.get("category") or "").strip().lower()
+    name_raw = (identified_info.get("product_name") or identified_info.get("model") or "").strip().lower()
+
+    # Exact or synonym category match
+    for cat_name, synonyms in CATEGORY_SYNONYMS.items():
+        if cat_raw == cat_name.lower():
+            return cat_name
+        for syn in synonyms:
+            if syn in cat_raw:
+                return cat_name
+
+    # Check product name or model if category was generic (e.g. 'Electronics' or 'Apparel')
+    for cat_name, synonyms in CATEGORY_SYNONYMS.items():
+        for syn in synonyms:
+            if syn in name_raw:
+                return cat_name
+
+    return None
+
+
 def find_similar_catalog_products(
     image: Optional[Union[str, bytes, Path, Image.Image]] = None,
     identified_info: Optional[dict[str, Any]] = None,
@@ -195,8 +248,9 @@ def find_similar_catalog_products(
 ) -> list[dict[str, Any]]:
     """Searches the indexed catalog for similar product recommendations.
 
-    These matches are presented as 'similar options in our catalog' rather than
-    asserting identity.
+    Enforces category relevance: if the identified product belongs to a category
+    NOT present in our catalog (e.g. smartphones, laptops, apparel), no recommendations
+    are returned to avoid misleading cross-category high similarity scores.
 
     Args:
         image: Optional image input to embed.
@@ -208,30 +262,58 @@ def find_similar_catalog_products(
     Returns:
         list[dict[str, Any]]: Similar catalog items with scores, specs, and match flags.
     """
+    # Category relevance check for open-world identification
+    target_category: Optional[str] = None
+    if identified_info:
+        target_category = map_to_catalog_category(identified_info)
+        if target_category is None:
+            raw_cat = identified_info.get("category", "Unknown")
+            logger.info(
+                f"[CATALOG RELEVANCE] Identified category '{raw_cat}' is not in catalog categories ({CATALOG_CATEGORIES}). "
+                "Suppressing catalog recommendations."
+            )
+            return []
+
     matches: list[dict[str, Any]] = []
 
-    # Priority 1: Search using image vector if provided
+    # Priority 1: Search using image vector if provided (filtered by relevant catalog category if known)
     if image is not None:
         try:
-            matches = identify_product(image=image, top_k=top_k, confidence_threshold=confidence_threshold)
+            matches = identify_product(
+                image=image,
+                top_k=top_k,
+                confidence_threshold=confidence_threshold,
+                category_filter=target_category,
+            )
         except Exception as e:
             logger.warning(f"Image vector search failed in find_similar_catalog_products: {e}")
 
     # Priority 2: Supplement / fallback with open-world text query if vector search returned few matches
-    if not matches and identified_info:
+    if not matches and identified_info and target_category:
         brand = identified_info.get("brand", "")
         model = identified_info.get("model", "")
-        cat = identified_info.get("category", "")
-        combined_text = f"{brand} {model} {cat}".strip()
+        combined_text = f"{brand} {model} {target_category}".strip()
         if combined_text and combined_text != "Unknown":
             try:
-                matches = identify_product_by_text(query_text=combined_text, top_k=top_k, confidence_threshold=confidence_threshold)
+                matches = identify_product_by_text(
+                    query_text=combined_text,
+                    top_k=top_k,
+                    confidence_threshold=confidence_threshold,
+                )
+                # Ensure strictly filtered by target_category
+                matches = [m for m in matches if m.get("category") == target_category]
             except Exception as e:
                 logger.warning(f"Text vector search failed in find_similar_catalog_products: {e}")
 
     # Priority 3: query_text fallback
     if not matches and query_text:
-        matches = identify_product_by_text(query_text=query_text, top_k=top_k, confidence_threshold=confidence_threshold)
+        matches = identify_product_by_text(
+            query_text=query_text,
+            top_k=top_k,
+            confidence_threshold=confidence_threshold,
+        )
+        if target_category:
+            matches = [m for m in matches if m.get("category") == target_category]
 
     # Format recommendations with similarity reasoning
     recommendations = []
@@ -254,6 +336,7 @@ def find_similar_catalog_products(
         recommendations.append(rec_item)
 
     return recommendations
+
 
 
 if __name__ == "__main__":

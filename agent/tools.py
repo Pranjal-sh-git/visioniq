@@ -27,6 +27,7 @@ from services.product_search.matcher import (
     identify_product as _identify_product,
     identify_product_by_text as _identify_product_by_text,
     find_similar_catalog_products as _find_similar_catalog_products,
+    map_to_catalog_category,
     get_search_client,
 )
 from services.vision.open_world_identifier import identify_product_open_world
@@ -125,6 +126,7 @@ def search_product_knowledge(
     query: str,
     product_id: Optional[str] = None,
     product_name: Optional[str] = None,
+    product_info: Optional[dict[str, Any]] = None,
 ) -> dict[str, Any]:
     """Searches catalog knowledge and specifications to answer product questions.
 
@@ -132,6 +134,7 @@ def search_product_knowledge(
         query (str): Question or query regarding product specifications, battery, weight, etc.
         product_id (Optional[str]): Target product ID (e.g. 'P001').
         product_name (Optional[str]): Target product name if product_id is not known.
+        product_info (Optional[dict[str, Any]]): Open-world product identification metadata if product_id is not in catalog.
 
     Returns:
         dict[str, Any]: Grounded catalog answer and specification data or clarification request.
@@ -144,8 +147,8 @@ def search_product_knowledge(
         if candidates and candidates[0]["similarity_score"] >= 0.80:
             target_pid = candidates[0]["id"]
 
-    # When no product_id is given or resolved, answer_product_question asks for clarification
-    result = _answer_product_question(product_id=target_pid, question=query)
+    # When product_id is not in catalog, answer_product_question uses product_info if available
+    result = _answer_product_question(product_id=target_pid, question=query, product_info=product_info)
     return result
 
 
@@ -186,13 +189,25 @@ def find_similar_products(
     Returns:
         dict[str, Any]: List of similar products with similarity scores and specs.
     """
+    target_category = map_to_catalog_category({"category": category}) if category else None
+
+    if category and not target_category:
+        return {
+            "source_product_id": product_id,
+            "category": category,
+            "similar_products": [],
+            "count": 0,
+            "message": f"No similar items available in our catalog for product category '{category}'.",
+        }
+
     target_img = image or image_url
 
     if target_img:
-        matches = _identify_product(image=target_img, top_k=top_k + 1)
+        matches = _identify_product(image=target_img, top_k=top_k + 1, category_filter=target_category)
         similar = [m for m in matches if m.get("id") != product_id][:top_k]
         return {
             "source_product_id": product_id,
+            "category": target_category or category,
             "similar_products": similar,
             "count": len(similar),
         }
@@ -200,11 +215,11 @@ def find_similar_products(
     if product_id:
         source_doc = retrieve_product_by_id(product_id)
         if source_doc:
-            prod_category = category or source_doc.get("category")
+            prod_category = target_category or source_doc.get("category")
             prod_name = source_doc.get("name", "")
             # Query text matching in same category
             matches = _identify_product_by_text(f"{prod_category} {prod_name}", top_k=top_k + 2)
-            similar = [m for m in matches if m.get("id") != product_id][:top_k]
+            similar = [m for m in matches if m.get("id") != product_id and (not prod_category or m.get("category") == prod_category)][:top_k]
             return {
                 "source_product_id": product_id,
                 "source_product_name": prod_name,
@@ -214,11 +229,13 @@ def find_similar_products(
             }
 
     # Fallback to category search or general catalog
-    query_text = category or "Headphones"
+    query_text = target_category or "Headphones"
     matches = _identify_product_by_text(query_text, top_k=top_k)
+    filtered_matches = [m for m in matches if not target_category or m.get("category") == target_category]
     return {
         "source_product_id": product_id,
-        "category": category,
-        "similar_products": matches[:top_k],
-        "count": len(matches[:top_k]),
+        "category": target_category or category,
+        "similar_products": filtered_matches[:top_k],
+        "count": len(filtered_matches[:top_k]),
     }
+
