@@ -70,13 +70,14 @@ coverage.xml
 *.py,cover
 .hypothesis/
 
-# Local cache & data output folders
+# Local cache, uploads & data output folders
 .cache/
 data/cache/
 data/output/
-data/uploads/images/Screenshot*
-data/uploads/videos/Speech*
+data/uploads/
+uploads/
 temp/
 tmp/
 *.log
+
 
