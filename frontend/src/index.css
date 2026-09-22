@@ -470,6 +470,33 @@ html, body {
 }
 
 /* ==========================================================================
+   Main Content Layout & Tab Pane Switching
+   ========================================================================== */
+
+.main-content {
+  flex: 1;
+  width: 100%;
+}
+
+.tab-pane {
+  width: 100%;
+}
+
+.tab-pane.is-hidden {
+  display: none !important;
+}
+
+.tab-pane.active {
+  display: block;
+}
+
+.tab-page {
+  max-width: 1340px;
+  margin: 0 auto;
+  padding: 2rem 2.25rem 4rem 2.25rem;
+}
+
+/* ==========================================================================
    Page Hero Showcase Banner (Image & Video Intelligence)
    ========================================================================== */
 
