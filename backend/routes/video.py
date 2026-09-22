@@ -29,7 +29,7 @@ class VideoSearchRequest(BaseModel):
     video_id: str = Field(..., description="ID of the processed video to query against.")
     query: str = Field(..., description="Natural language question or query regarding video content.")
     top_k: int = Field(3, description="Number of candidate segments to inspect.")
-    confidence_threshold: float = Field(0.65, description="Minimum confidence score for grounded answer.")
+    confidence_threshold: float = Field(0.50, description="Minimum confidence score for grounded answer.")
 
 
 @router.post("/analyze")
@@ -101,10 +101,13 @@ async def search_video_endpoint(request: VideoSearchRequest):
 
 
 @router.get("/{video_id}/summary")
-async def get_video_summary_endpoint(video_id: str):
-    """Returns a short summary and 3-5 key topics for a processed video."""
+async def get_video_summary_endpoint(
+    video_id: str,
+    force_regenerate: bool = Query(False),
+):
+    """Returns an AI-generated structured summary, topics, and key takeaways for a processed video based on its transcript."""
     try:
-        summary_data = generate_video_summary(video_id)
+        summary_data = generate_video_summary(video_id, force_regenerate=force_regenerate)
         return summary_data
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))

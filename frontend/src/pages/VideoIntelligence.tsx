@@ -22,7 +22,14 @@ import {
   Tag,
   Hash,
   Target,
-  BatteryCharging,
+  MessageSquare,
+  RefreshCw,
+  CheckCircle2,
+  Copy,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Volume2,
 } from 'lucide-react';
 
 interface VideoChatMessage {
@@ -30,12 +37,17 @@ interface VideoChatMessage {
   sender: 'user' | 'assistant';
   text: string;
   timestamp: string;
+  contextStart?: number | null;
+  matchedTimestamp?: number | null;
+  contextEnd?: number | null;
   startTime?: number | null;
   endTime?: number | null;
+  evidence?: Array<{ timestamp: number; text: string }>;
   supportingSegment?: string;
   confidenceScore?: number;
   foundMatch?: boolean;
 }
+
 
 const VALID_VIDEO_EXTENSIONS = ['.mp4', '.mov', '.webm', '.avi', '.mkv'];
 
@@ -51,10 +63,14 @@ export const VideoIntelligence: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState<boolean>(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
-  // Video Analysis State
+  // Video Analysis & Summary State
   const [analysisResult, setAnalysisResult] = useState<VideoAnalysisResult | null>(null);
   const [summary, setSummary] = useState<string | null>(null);
   const [keyTopics, setKeyTopics] = useState<string[]>([]);
+  const [keyTakeaways, setKeyTakeaways] = useState<string[]>([]);
+  const [isRegeneratingSummary, setIsRegeneratingSummary] = useState<boolean>(false);
+  const [showTranscript, setShowTranscript] = useState<boolean>(false);
+  const [isCopiedTranscript, setIsCopiedTranscript] = useState<boolean>(false);
 
   // Video Chat State
   const [messages, setMessages] = useState<VideoChatMessage[]>([]);
@@ -63,14 +79,19 @@ export const VideoIntelligence: React.FC = () => {
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const videoPlayerRef = useRef<HTMLVideoElement>(null);
-  const chatBottomRef = useRef<HTMLDivElement>(null);
+  const chatMessagesRef = useRef<HTMLDivElement>(null);
 
   const isApiActive = isAnalyzing || isSearching;
 
   const scrollToBottom = () => {
     setTimeout(() => {
-      chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
+      if (chatMessagesRef.current) {
+        chatMessagesRef.current.scrollTo({
+          top: chatMessagesRef.current.scrollHeight,
+          behavior: 'smooth',
+        });
+      }
+    }, 50);
   };
 
   const validateVideoFile = (file: File): boolean => {
@@ -101,6 +122,8 @@ export const VideoIntelligence: React.FC = () => {
     setAnalysisResult(null);
     setSummary(null);
     setKeyTopics([]);
+    setKeyTakeaways([]);
+    setShowTranscript(false);
     setMessages([]);
 
     await runVideoAnalysis(file);
@@ -118,6 +141,7 @@ export const VideoIntelligence: React.FC = () => {
         const summaryData = await getVideoSummary(result.video_id);
         setSummary(summaryData.summary);
         setKeyTopics(summaryData.key_topics || []);
+        setKeyTakeaways(summaryData.key_takeaways || []);
       } catch (sumErr) {
         console.warn('Could not load summary:', sumErr);
         setSummary(
@@ -143,6 +167,29 @@ export const VideoIntelligence: React.FC = () => {
     } finally {
       setIsAnalyzing(false);
     }
+  };
+
+  const handleRegenerateSummary = async () => {
+    if (!analysisResult?.video_id || isRegeneratingSummary) return;
+    setIsRegeneratingSummary(true);
+    try {
+      const summaryData = await getVideoSummary(analysisResult.video_id, true);
+      setSummary(summaryData.summary);
+      setKeyTopics(summaryData.key_topics || []);
+      setKeyTakeaways(summaryData.key_takeaways || []);
+    } catch (err: any) {
+      console.error('Failed to regenerate summary:', err);
+      setErrorMessage(err.message || 'Failed to regenerate AI summary.');
+    } finally {
+      setIsRegeneratingSummary(false);
+    }
+  };
+
+  const handleCopyTranscript = () => {
+    if (!analysisResult?.full_transcript) return;
+    navigator.clipboard.writeText(analysisResult.full_transcript);
+    setIsCopiedTranscript(true);
+    setTimeout(() => setIsCopiedTranscript(false), 2000);
   };
 
   const handleSeekToTime = (timeInSeconds: number) => {
@@ -192,25 +239,27 @@ export const VideoIntelligence: React.FC = () => {
         analysisResult.video_id,
         questionText,
         3,
-        0.65
+        0.50
       );
 
-      let replyText = searchResult.answer;
-      if (!searchResult.found_match) {
-        replyText = "I couldn't find that in the video. The topic does not appear in the transcribed audio or indexed timeline.";
-      }
+      const replyText = searchResult.answer || "I couldn't find that in the video. The topic does not appear in the transcribed audio or indexed timeline.";
 
       const assistantMsg: VideoChatMessage = {
         id: `v-asst-${Date.now()}`,
         sender: 'assistant',
         text: replyText,
         timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        startTime: searchResult.start_time,
-        endTime: searchResult.end_time,
+        contextStart: searchResult.context_start ?? searchResult.start_time,
+        matchedTimestamp: searchResult.matched_timestamp ?? searchResult.start_time,
+        contextEnd: searchResult.context_end ?? searchResult.end_time,
+        startTime: searchResult.context_start ?? searchResult.start_time,
+        endTime: searchResult.context_end ?? searchResult.end_time,
+        evidence: searchResult.evidence,
         supportingSegment: searchResult.supporting_segment,
         confidenceScore: searchResult.confidence_score,
         foundMatch: searchResult.found_match,
       };
+
 
       setMessages((prev) => [...prev, assistantMsg]);
     } catch (err: any) {
@@ -241,6 +290,9 @@ export const VideoIntelligence: React.FC = () => {
     setAnalysisResult(null);
     setSummary(null);
     setKeyTopics([]);
+    setKeyTakeaways([]);
+    setShowTranscript(false);
+    setIsCopiedTranscript(false);
     setMessages([]);
     setErrorMessage(null);
     if (fileInputRef.current) {
@@ -414,17 +466,49 @@ export const VideoIntelligence: React.FC = () => {
 
               {summary && (
                 <div className="video-summary-box">
-                  <div className="summary-box-title">
-                    <Sparkles size={14} />
-                    <span>Executive AI Summary</span>
+                  <div className="summary-box-title-row">
+                    <div className="summary-box-title">
+                      <Sparkles size={15} className="sparkle-gold" />
+                      <span>Executive AI Summary</span>
+                      <span className="summary-grounding-pill">Whisper Grounded</span>
+                    </div>
+                    <button
+                      className="btn-regenerate-summary"
+                      onClick={handleRegenerateSummary}
+                      disabled={isRegeneratingSummary}
+                      title="Regenerate AI summary from full transcript"
+                    >
+                      <RefreshCw size={12} className={isRegeneratingSummary ? 'spin' : ''} />
+                      <span>{isRegeneratingSummary ? 'Generating...' : 'Regenerate'}</span>
+                    </button>
                   </div>
+
                   <p className="video-summary-text">{summary}</p>
 
+                  {/* Key Takeaways */}
+                  {keyTakeaways && keyTakeaways.length > 0 && (
+                    <div className="summary-takeaways-section">
+                      <div className="takeaways-title">
+                        <CheckCircle2 size={13} />
+                        <span>Key Discussion Takeaways</span>
+                      </div>
+                      <ul className="takeaways-list">
+                        {keyTakeaways.map((takeaway, idx) => (
+                          <li key={idx} className="takeaway-item">
+                            <span className="takeaway-bullet">•</span>
+                            <span className="takeaway-text">{takeaway}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
+
+                  {/* Key Topics */}
                   {keyTopics.length > 0 && (
                     <div className="topics-section">
                       <div className="topics-title">
                         <Tag size={12} />
-                        <span>Extracted Key Topics (Click to ask)</span>
+                        <span>Extracted Key Topics (Click to query timeline)</span>
                       </div>
                       <div className="topics-list">
                         {keyTopics.map((topic, i) => (
@@ -439,6 +523,58 @@ export const VideoIntelligence: React.FC = () => {
                           </button>
                         ))}
                       </div>
+                    </div>
+                  )}
+
+                  {/* Full Spoken Transcript Explorer Accordion */}
+                  {analysisResult.full_transcript && (
+                    <div className="transcript-accordion">
+                      <div
+                        className="transcript-accordion-header"
+                        onClick={() => setShowTranscript(!showTranscript)}
+                      >
+                        <div className="transcript-header-left">
+                          <Volume2 size={14} />
+                          <span>Full Audio Transcription ({analysisResult.chunks_count} segments)</span>
+                        </div>
+                        <div className="transcript-header-right">
+                          <button
+                            type="button"
+                            className="btn-copy-transcript"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleCopyTranscript();
+                            }}
+                            title="Copy full transcription"
+                          >
+                            {isCopiedTranscript ? <Check size={12} /> : <Copy size={12} />}
+                            <span>{isCopiedTranscript ? 'Copied' : 'Copy'}</span>
+                          </button>
+                          {showTranscript ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+                        </div>
+                      </div>
+
+                      {showTranscript && (
+                        <div className="transcript-body">
+                          {analysisResult.chunks && analysisResult.chunks.length > 0 ? (
+                            <div className="transcript-chunks-list">
+                              {analysisResult.chunks.map((chunk, cIdx) => (
+                                <div
+                                  key={cIdx}
+                                  className="transcript-chunk-item"
+                                  onClick={() => handleSeekToTime(chunk.start_time)}
+                                  title={`Click to jump to ${formatTimestamp(chunk.start_time)}`}
+                                >
+                                  <span className="chunk-timestamp">[{formatTimestamp(chunk.start_time)}]</span>
+                                  <span className="chunk-text">{chunk.transcript}</span>
+                                </div>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="transcript-raw-text">{analysisResult.full_transcript}</p>
+                          )}
+                        </div>
+                      )}
                     </div>
                   )}
                 </div>
@@ -471,7 +607,7 @@ export const VideoIntelligence: React.FC = () => {
               )}
             </div>
 
-            <div className="chat-messages">
+            <div className="chat-messages" ref={chatMessagesRef}>
               {messages.length === 0 ? (
                 <div className="chat-empty-state">
                   <div className="empty-bot-icon">
@@ -504,33 +640,70 @@ export const VideoIntelligence: React.FC = () => {
                       {msg.text}
                     </div>
 
-                    {/* Clickable Seek Timestamp Button */}
-                    {msg.startTime !== undefined && msg.startTime !== null && (
+                    {/* Clickable Seek Timestamp Button (Seeks to context_start) */}
+                    {(msg.contextStart !== undefined && msg.contextStart !== null) || (msg.startTime !== undefined && msg.startTime !== null) ? (
                       <div className="timestamp-btn-wrapper">
-                        <button
-                          className="timestamp-btn"
-                          onClick={() => handleSeekToTime(msg.startTime!)}
-                          title={`Click to jump to ${formatTimestamp(msg.startTime!)}`}
-                        >
-                          <Play size={13} className="play-icon" />
-                          <span>
-                            Jump to {formatTimestamp(msg.startTime!)}
-                            {msg.endTime !== null && msg.endTime !== undefined ? ` – ${formatTimestamp(msg.endTime)}` : ''}
-                          </span>
-                        </button>
-                      </div>
-                    )}
+                        {(() => {
+                          const seekTarget = msg.contextStart ?? msg.startTime!;
+                          const endTarget = msg.contextEnd ?? msg.endTime;
+                          const hasKeywordDiff = msg.matchedTimestamp !== undefined && msg.matchedTimestamp !== null && Math.abs(msg.matchedTimestamp - seekTarget) > 1.0;
 
-                    {/* Supporting Transcript Snippet */}
-                    {msg.supportingSegment && (
+                          return (
+                            <>
+                              <button
+                                className="timestamp-btn"
+                                onClick={() => handleSeekToTime(seekTarget)}
+                                title={`Click to start playback from context start at ${formatTimestamp(seekTarget)}`}
+                              >
+                                <Play size={13} className="play-icon" />
+                                <span>
+                                  Play Context: {formatTimestamp(seekTarget)}
+                                  {endTarget !== null && endTarget !== undefined ? ` – ${formatTimestamp(endTarget)}` : ''}
+                                </span>
+                              </button>
+                              {hasKeywordDiff && (
+                                <span
+                                  className="matched-ts-pill"
+                                  onClick={() => handleSeekToTime(msg.matchedTimestamp!)}
+                                  title={`Core answer/keyword occurs at ${formatTimestamp(msg.matchedTimestamp!)}. Click to jump directly.`}
+                                >
+                                  Core point: {formatTimestamp(msg.matchedTimestamp!)}
+                                </span>
+                              )}
+                            </>
+                          );
+                        })()}
+                      </div>
+                    ) : null}
+
+                    {/* Supporting Lecture Evidence */}
+                    {msg.evidence && msg.evidence.length > 0 ? (
+                      <div className="supporting-segment-box">
+                        <div className="supporting-quote-label">Grounded Lecture Evidence:</div>
+                        <div className="evidence-list">
+                          {msg.evidence.map((ev, i) => (
+                            <div
+                              key={i}
+                              className="evidence-item"
+                              onClick={() => handleSeekToTime(ev.timestamp)}
+                              title={`Click to jump to ${formatTimestamp(ev.timestamp)}`}
+                            >
+                              <span className="evidence-time">[{formatTimestamp(ev.timestamp)}]</span>
+                              <span className="evidence-text">"{ev.text}"</span>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    ) : msg.supportingSegment ? (
                       <div className="supporting-segment-box">
                         <div className="supporting-quote-label">Grounded Transcript Segment:</div>
                         <div className="supporting-quote-content">"{msg.supportingSegment}"</div>
                       </div>
-                    )}
+                    ) : null}
                   </div>
                 ))
               )}
+
 
               {isSearching && (
                 <div className="message-bubble message-assistant message-loading">
@@ -542,7 +715,6 @@ export const VideoIntelligence: React.FC = () => {
                   <span className="typing-text">Searching timeline segments & grounding response...</span>
                 </div>
               )}
-              <div ref={chatBottomRef} />
             </div>
 
             {/* Quick Action Suggestion Chips */}
@@ -558,12 +730,12 @@ export const VideoIntelligence: React.FC = () => {
               </button>
               <button
                 className="quick-chip"
-                onClick={() => handleSendQuestion("What did the speaker say about battery life and performance?")}
+                onClick={() => handleSendQuestion("What is the speaker's main purpose or goal in this video?")}
                 disabled={isSearching || !analysisResult}
                 title={!analysisResult ? "Upload a video first" : undefined}
               >
-                <BatteryCharging size={12} />
-                <span>Battery & performance</span>
+                <MessageSquare size={12} />
+                <span>Speaker's purpose</span>
               </button>
               <button
                 className="quick-chip"

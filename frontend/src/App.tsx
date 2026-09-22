@@ -10,10 +10,27 @@ export const App: React.FC = () => {
   const [healthStatus, setHealthStatus] = useState<string>('checking...');
 
   useEffect(() => {
-    getHealthStatus()
-      .then((data) => setHealthStatus(data.status))
-      .catch(() => setHealthStatus('offline'));
+    let isMounted = true;
+
+    const checkHealth = () => {
+      getHealthStatus()
+        .then((data) => {
+          if (isMounted) setHealthStatus(data.status);
+        })
+        .catch(() => {
+          if (isMounted) setHealthStatus('offline');
+        });
+    };
+
+    checkHealth();
+    const interval = setInterval(checkHealth, 4000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
   }, []);
+
 
   return (
     <div className="app-container">

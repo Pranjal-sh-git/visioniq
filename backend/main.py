@@ -38,10 +38,12 @@ app = FastAPI(
 app.add_middleware(
     CORSMiddleware,
     allow_origins=settings.CORS_ORIGINS,
+    allow_origin_regex=r"https?://(localhost|127\.0\.0\.1|10\.\d+\.\d+\.\d+|192\.168\.\d+\.\d+)(:\d+)?",
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
 
 # Register routes
 app.include_router(video_router)
@@ -63,4 +65,16 @@ async def health_check() -> dict[str, str]:
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run("main:app", host="0.0.0.0", port=8000, reload=True)
+    # Robust app target for running directly via `python backend/main.py` or from inside `backend/`
+    in_backend_dir = (Path.cwd() / "main.py").exists()
+    app_target = "main:app" if in_backend_dir else "backend.main:app"
+    reload_dirs = [str(BACKEND_DIR), str(PROJECT_ROOT / "services"), str(PROJECT_ROOT / "agent")]
+
+    uvicorn.run(
+        app_target,
+        host="0.0.0.0",
+        port=8000,
+        reload=True,
+        reload_dirs=reload_dirs,
+    )
+

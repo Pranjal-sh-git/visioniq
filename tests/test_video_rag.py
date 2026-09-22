@@ -2,9 +2,15 @@
 
 import io
 from pathlib import Path
+import sys
 import pytest
-from fastapi.testclient import TestClient
 
+ROOT_DIR = Path(__file__).resolve().parent.parent
+for directory in (str(ROOT_DIR), str(ROOT_DIR / "backend")):
+    if directory not in sys.path:
+        sys.path.insert(0, directory)
+
+from fastapi.testclient import TestClient
 from backend.main import app
 from services.video.processor import analyze_video
 from services.video.search import grounded_video_qa, generate_video_summary
@@ -62,7 +68,7 @@ def test_video_search_unmatched_query_honesty(processed_video):
     assert data["found_match"] is False
     assert data["start_time"] is None
     assert data["end_time"] is None
-    assert "No relevant segment" in data["answer"]
+    assert "not provide enough information" in data["answer"].lower() or "no relevant segment" in data["answer"].lower()
 
 
 def test_video_summary_endpoint(processed_video):

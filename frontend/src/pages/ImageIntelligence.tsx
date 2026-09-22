@@ -209,14 +209,19 @@ export const ImageIntelligence: React.FC = () => {
   const [isAgentLoading, setIsAgentLoading] = useState<boolean>(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const chatBottomRef = useRef<HTMLDivElement>(null);
+  const chatMessagesRef = useRef<HTMLDivElement>(null);
 
   const isApiActive = isIdentifying || isAgentLoading;
 
   const scrollToBottom = () => {
     setTimeout(() => {
-      chatBottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-    }, 100);
+      if (chatMessagesRef.current) {
+        chatMessagesRef.current.scrollTo({
+          top: chatMessagesRef.current.scrollHeight,
+          behavior: 'smooth',
+        });
+      }
+    }, 50);
   };
 
   const validateImageFile = (file: File): boolean => {
@@ -746,7 +751,7 @@ export const ImageIntelligence: React.FC = () => {
               ) : null}
             </div>
 
-            <div className="chat-messages">
+            <div className="chat-messages" ref={chatMessagesRef}>
               {messages.length === 0 ? (
                 <div className="chat-empty-state">
                   <div className="empty-bot-icon">
@@ -829,7 +834,6 @@ export const ImageIntelligence: React.FC = () => {
                   <span className="typing-text">Agent reasoning & grounding with catalog vectors...</span>
                 </div>
               )}
-              <div ref={chatBottomRef} />
             </div>
 
             {/* Quick Action Suggestion Chips */}

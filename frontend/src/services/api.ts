@@ -83,8 +83,12 @@ export interface AgentToolOutput {
 
   video_id?: string;
   found_match?: boolean;
+  context_start?: number | null;
+  matched_timestamp?: number | null;
+  context_end?: number | null;
   start_time?: number | null;
   end_time?: number | null;
+  evidence?: Array<{ timestamp: number; text: string }>;
   supporting_segment?: string;
   confidence_score?: number;
 
@@ -106,6 +110,11 @@ export interface KeyframeInfo {
   time_sec: number;
   filename: string;
   relative_path: string;
+}
+
+export interface VideoEvidence {
+  timestamp: number;
+  text: string;
 }
 
 export interface VideoChunk {
@@ -135,8 +144,13 @@ export interface VideoAnalysisResult {
 
 export interface VideoSummaryResponse {
   video_id: string;
+  filename?: string;
+  duration_seconds?: number;
   summary: string;
   key_topics: string[];
+  key_takeaways?: string[];
+  total_segments?: number;
+  full_transcript?: string;
 }
 
 export interface VideoSearchResponse {
@@ -144,12 +158,17 @@ export interface VideoSearchResponse {
   question: string;
   answer: string;
   found_match: boolean;
+  context_start: number | null;
+  matched_timestamp: number | null;
+  context_end: number | null;
   start_time: number | null;
   end_time: number | null;
+  evidence?: VideoEvidence[];
   supporting_segment?: string;
   confidence_score?: number;
   candidate_segments?: any[];
 }
+
 
 /**
  * Normalizes network or HTTP errors into friendly user messages.
@@ -296,7 +315,7 @@ export async function searchVideo(
   videoId: string,
   query: string,
   topK: number = 3,
-  confidenceThreshold: number = 0.65
+  confidenceThreshold: number = 0.50
 ): Promise<VideoSearchResponse> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/video/search`, {
@@ -322,11 +341,15 @@ export async function searchVideo(
 }
 
 /**
- * Fetches auto-generated summary and key topics for a processed video.
+ * Fetches auto-generated summary, key topics, and takeaways for a processed video based on transcription.
  */
-export async function getVideoSummary(videoId: string): Promise<VideoSummaryResponse> {
+export async function getVideoSummary(
+  videoId: string,
+  forceRegenerate: boolean = false
+): Promise<VideoSummaryResponse> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/video/${videoId}/summary`, {
+    const url = `${API_BASE_URL}/api/video/${videoId}/summary?force_regenerate=${forceRegenerate}`;
+    const response = await fetch(url, {
       method: 'GET',
       headers: { 'Content-Type': 'application/json' },
     });

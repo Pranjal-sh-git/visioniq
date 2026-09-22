@@ -359,10 +359,12 @@ def analyze_video(
         "total_keyframes": len(keyframes),
         "keyframes": keyframes,
         "full_transcript": full_transcript,
+        "segments": segments,
         "chunks_count": len(chunks),
         "chunks": chunks,
         "cached": False,
     }
+
 
     # 6. Save to Disk Cache
     try:
