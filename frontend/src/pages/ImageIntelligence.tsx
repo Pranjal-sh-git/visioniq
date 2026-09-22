@@ -560,11 +560,11 @@ export const ImageIntelligence: React.FC = () => {
               </div>
               {previewUrl && (
                 <button
-                  className="btn btn-ghost-danger btn-sm"
+                  className="btn-clear-action"
                   onClick={clearSelection}
                   title="Remove image"
                 >
-                  <X size={14} />
+                  <X size={13} />
                   <span>Clear</span>
                 </button>
               )}
@@ -812,7 +812,7 @@ export const ImageIntelligence: React.FC = () => {
               {selectedCatalogItem ? (
                 <div className="active-target-badge target-catalog-badge" title={`Chat context: ${selectedCatalogItem.brand} ${selectedCatalogItem.name}`}>
                   <span className="target-dot target-dot-catalog" />
-                  <span>Catalog: {selectedCatalogItem.brand} {selectedCatalogItem.name.substring(0, 16)}</span>
+                  <span className="badge-truncated-text">Catalog: {selectedCatalogItem.brand} {selectedCatalogItem.name}</span>
                   <button
                     className="badge-clear-btn"
                     onClick={() => setSelectedCatalogItem(null)}
@@ -824,7 +824,7 @@ export const ImageIntelligence: React.FC = () => {
               ) : identifiedProduct ? (
                 <div className="active-target-badge" title={`Active open-world context: ${identifiedProduct.product_name}`}>
                   <span className="target-dot" />
-                  <span>{identifiedProduct.brand} {identifiedProduct.model || identifiedProduct.product_name.substring(0, 16)}</span>
+                  <span className="badge-truncated-text">{identifiedProduct.brand} {identifiedProduct.model || identifiedProduct.product_name}</span>
                 </div>
               ) : null}
             </div>
@@ -887,14 +887,16 @@ export const ImageIntelligence: React.FC = () => {
 
                     {msg.toolUsed && (
                       <div className="message-meta">
-                        <span className="tool-tag">
-                          <Wrench size={11} />
-                          <span>{msg.toolUsed}</span>
-                        </span>
-                        {msg.reasoning && (
-                          <span className="reasoning-text" title={msg.reasoning}>
-                            {msg.reasoning.substring(0, 60)}...
+                        <div className="message-meta-header">
+                          <span className="tool-tag">
+                            <Wrench size={11} />
+                            <span>{msg.toolUsed}</span>
                           </span>
+                        </div>
+                        {msg.reasoning && (
+                          <div className="reasoning-text" title={msg.reasoning}>
+                            {msg.reasoning}
+                          </div>
                         )}
                       </div>
                     )}

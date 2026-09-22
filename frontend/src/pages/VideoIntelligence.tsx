@@ -349,11 +349,11 @@ export const VideoIntelligence: React.FC = () => {
               </div>
               {videoUrl && (
                 <button
-                  className="btn btn-ghost-danger btn-sm"
+                  className="btn-clear-action"
                   onClick={clearVideo}
                   title="Upload another video"
                 >
-                  <X size={14} />
+                  <X size={13} />
                   <span>Upload New</span>
                 </button>
               )}
