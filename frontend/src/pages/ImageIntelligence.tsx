@@ -156,6 +156,79 @@ const getCategorySuggestions = (category?: string): QuickSuggestion[] => {
     ];
   }
 
+  // Books & Publications
+  if (
+    cat.includes('book') ||
+    cat.includes('publication') ||
+    cat.includes('literature') ||
+    cat.includes('novel') ||
+    cat.includes('reading')
+  ) {
+    return [
+      {
+        label: 'Summary & key lessons',
+        prompt: 'Can you summarize the main message, key lessons, and takeaways from this book?',
+        icon: <Sparkles size={12} />,
+      },
+      {
+        label: 'Author & background',
+        prompt: 'Who is the author and what is the background or premise of this work?',
+        icon: <HelpCircle size={12} />,
+      },
+      observedFeatures,
+      {
+        label: 'Edition & format',
+        prompt: 'What edition and format does this physical copy appear to be?',
+        icon: <Layers size={12} />,
+      },
+    ];
+  }
+
+  // Groceries & Food / Beverage
+  if (
+    cat.includes('food') ||
+    cat.includes('grocer') ||
+    cat.includes('beverage') ||
+    cat.includes('snack') ||
+    cat.includes('drink')
+  ) {
+    return [
+      {
+        label: 'Flavor & variant',
+        prompt: 'What flavor, variant, or product line is this?',
+        icon: <Sparkles size={12} />,
+      },
+      {
+        label: 'Ingredients & usage',
+        prompt: 'What are typical ingredients, nutritional highlights, or serving suggestions for this?',
+        icon: <CheckCircle2 size={12} />,
+      },
+      observedFeatures,
+    ];
+  }
+
+  // Personal Care & Beauty
+  if (
+    cat.includes('beauty') ||
+    cat.includes('personal care') ||
+    cat.includes('skincare') ||
+    cat.includes('cosmetic')
+  ) {
+    return [
+      {
+        label: 'Skin type & benefits',
+        prompt: 'What skin or hair types is this formulated for and what are its key benefits?',
+        icon: <Sparkles size={12} />,
+      },
+      {
+        label: 'How to use',
+        prompt: 'How is this product applied and what are active ingredients?',
+        icon: <CheckCircle2 size={12} />,
+      },
+      observedFeatures,
+    ];
+  }
+
   // Generic fallback (e.g. Smartphones, Electronics, etc.)
   return [
     observedFeatures,

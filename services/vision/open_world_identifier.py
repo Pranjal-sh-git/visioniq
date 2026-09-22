@@ -125,20 +125,29 @@ def identify_product_open_world(
     deployment = settings.AZURE_OPENAI_DEPLOYMENT_NAME
 
     system_instruction = (
-        "You are VisionIQ's Open-World Multimodal Product Intelligence Specialist.\n"
-        "Identify the commercial product in the image. Be concise, honest, and accurate.\n\n"
-        "CRITICAL MODEL IDENTIFICATION RULE:\n"
-        "If you are not highly confident about the EXACT model number, say so clearly "
-        "(e.g. 'Sony brand, WH-series headphones, exact model uncertain') rather than stating a specific "
-        "model number that may be a guess. Brand and category identification should be confident; exact model number "
-        "identification should be hedged unless very clearly visible (e.g. from text/logo in the image).\n\n"
+        "You are VisionIQ's Universal Multimodal Product & Media Intelligence Specialist.\n"
+        "Your task is to identify ANY commercial product, book, publication, packaged grocery item, cosmetic, "
+        "piece of apparel, footwear, gadget, furniture, tool, artwork, or consumer good from the provided image.\n\n"
+        "UNIVERSAL RECOGNITION & OCR RULES:\n"
+        "1. VISUAL OCR & TEXT PRIORITY: Always read prominent printed text on the item (book titles, author names, packaging labels, brand logos, flavor/edition text). Use this text directly in product_name and brand.\n"
+        "2. ENTITY MAPPING:\n"
+        "   - Books / Publications: 'brand' = Author or Publisher (e.g. 'Robert T. Kiyosaki'), 'model' = Edition/Sub-title, 'product_name' = Book Title (e.g. 'Rich Dad Poor Dad'), 'category' = 'Books & Publications'.\n"
+        "   - Groceries / Packaged Goods: 'brand' = Brand/Manufacturer, 'product_name' = Item Name & Flavor/Variant, 'category' = 'Groceries & Food'.\n"
+        "   - Cosmetics / Personal Care: 'brand' = Brand, 'product_name' = Product Line / Formula, 'category' = 'Personal Care & Beauty'.\n"
+        "   - Electronics & Gadgets: 'brand' = Manufacturer, 'model' = Model number/series (hedged if uncertain), 'category' = 'Electronics & Gadgets' or 'Headphones'/'Watches'.\n"
+        "   - Footwear & Apparel: 'brand' = Brand/Label, 'model' = Silhouette/Style, 'category' = 'Shoes' or 'Apparel'.\n"
+        "   - Furniture & Home: 'brand' = Brand or Maker, 'product_name' = Descriptive Item Name, 'category' = 'Chairs' or 'Home & Furniture'.\n"
+        "   - General / Other: State the clear descriptive name (e.g., 'Stainless Steel Water Bottle').\n"
+        "3. CONFIDENCE & HEDGING:\n"
+        "   - Set confidence = 'high' when title/brand is clearly legible from text or recognizable.\n"
+        "   - Set confidence = 'medium' when the product category and general brand are known but exact variant is uncertain.\n"
+        "   - Set confidence = 'low' only if the image is extremely blurry or unidentifiable.\n\n"
         "You MUST respond ONLY with a valid JSON object matching the requested schema."
     )
 
     prompt_text = (
-        "Identify this product: brand, model, and category.\n"
-        "If the exact model number is not explicitly visible or certain, state the model as uncertain/hedged (e.g. 'WH-series, exact model uncertain').\n"
-        "Keep the visual description concise (1-2 sentences) and list max 4 key observed features.\n"
+        "Identify this item completely (reading all visible text, title, author/brand, and packaging details).\n"
+        "Keep the visual description concise (1-2 sentences) and list up to 4 key observed physical features.\n"
     )
     if user_hint:
         prompt_text += f"User hint: '{user_hint}'\n"
@@ -146,13 +155,13 @@ def identify_product_open_world(
     prompt_text += (
         "\nJSON schema:\n"
         "{\n"
-        '  "brand": "Brand name or Unknown",\n'
-        '  "model": "Model name / series or Unknown",\n'
-        '  "product_name": "Short descriptive product name",\n'
-        '  "category": "Headphones | Chairs | Shoes | Watches | Electronics | Apparel | Other",\n'
-        '  "visual_description": "Concise 1-2 sentence visual summary",\n'
+        '  "brand": "Brand, Author, or Maker name (or Unknown)",\n'
+        '  "model": "Model, Edition, Style, or Variant (or empty string)",\n'
+        '  "product_name": "Full descriptive title or product name",\n'
+        '  "category": "Books & Publications | Electronics & Gadgets | Headphones | Chairs | Shoes | Watches | Groceries & Food | Personal Care & Beauty | Apparel | Home & Furniture | Other",\n'
+        '  "visual_description": "Concise 1-2 sentence visual summary highlighting key colors, materials, text, or format",\n'
         '  "confidence": "high | medium | low",\n'
-        '  "key_features_observed": ["List of up to 4 key physical features"]\n'
+        '  "key_features_observed": ["List of up to 4 key observed physical features"]\n'
         "}"
     )
 
@@ -170,7 +179,7 @@ def identify_product_open_world(
                     ],
                 },
             ],
-            max_completion_tokens=800,  # Covers ~500 reasoning tokens + 100-150 concise JSON tokens
+            max_completion_tokens=800,  # Covers reasoning tokens + concise JSON tokens
             response_format={"type": "json_object"},
         )
 
