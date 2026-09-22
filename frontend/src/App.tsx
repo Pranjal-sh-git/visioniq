@@ -9,6 +9,20 @@ import { Layers, ShieldCheck, Database, Zap } from 'lucide-react';
 export const App: React.FC = () => {
   const [activeTab, setActiveTab] = useState<'landing' | 'image' | 'video'>('landing');
   const [healthStatus, setHealthStatus] = useState<string>('checking...');
+  const [theme, setTheme] = useState<'light' | 'dark'>(() => {
+    const saved = localStorage.getItem('visioniq-theme');
+    if (saved === 'dark' || saved === 'light') return saved;
+    return 'light';
+  });
+
+  useEffect(() => {
+    document.documentElement.setAttribute('data-theme', theme);
+    localStorage.setItem('visioniq-theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  };
 
   useEffect(() => {
     let isMounted = true;
@@ -35,7 +49,13 @@ export const App: React.FC = () => {
   return (
     <div className="app-container">
       <div className="ambient-glow" />
-      <Navbar activeTab={activeTab} onTabChange={setActiveTab} healthStatus={healthStatus} />
+      <Navbar
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        healthStatus={healthStatus}
+        theme={theme}
+        onToggleTheme={toggleTheme}
+      />
       
       <main className="main-content">
         <div className={`tab-pane ${activeTab === 'landing' ? 'active' : 'is-hidden'}`}>

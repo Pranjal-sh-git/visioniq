@@ -1,13 +1,21 @@
 import React from 'react';
-import { Sparkles, LayoutDashboard, Image as ImageIcon, Video as VideoIcon, Cpu } from 'lucide-react';
+import { Sparkles, LayoutDashboard, Image as ImageIcon, Video as VideoIcon, Cpu, Sun, Moon } from 'lucide-react';
 
 interface NavbarProps {
   activeTab: 'landing' | 'image' | 'video';
   onTabChange: (tab: 'landing' | 'image' | 'video') => void;
   healthStatus?: string;
+  theme?: 'light' | 'dark';
+  onToggleTheme?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ activeTab, onTabChange, healthStatus = 'ok' }) => {
+export const Navbar: React.FC<NavbarProps> = ({
+  activeTab,
+  onTabChange,
+  healthStatus = 'ok',
+  theme = 'light',
+  onToggleTheme,
+}) => {
   const isHealthy = healthStatus === 'ok';
 
   return (
@@ -28,7 +36,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, onTabChange, healthSt
             <div className="brand-title">
               Vision<span className="brand-accent">IQ</span>
             </div>
-            <div className="brand-subtitle">Multimodal Intelligence</div>
+            <div className="brand-subtitle">MULTIMODAL INTELLIGENCE</div>
           </div>
         </div>
 
@@ -72,11 +80,26 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, onTabChange, healthSt
       </nav>
 
       <div className="navbar-right">
+        {onToggleTheme && (
+          <button
+            className="theme-toggle-btn"
+            onClick={onToggleTheme}
+            title={`Switch to ${theme === 'dark' ? 'Light' : 'Dark'} mode`}
+            aria-label="Toggle Color Theme"
+          >
+            {theme === 'dark' ? <Moon size={16} /> : <Sun size={16} />}
+          </button>
+        )}
+
         <div className="status-pill" title={`Backend Status: ${healthStatus}`}>
           <span className={`status-indicator ${isHealthy ? 'ok' : 'offline'}`} />
           <span className="status-label">
             {isHealthy ? 'API Connected' : `Backend: ${healthStatus}`}
           </span>
+        </div>
+
+        <div className="user-avatar-badge" title="Pranjal Sharma (PS)">
+          <span>PS</span>
         </div>
       </div>
     </header>
