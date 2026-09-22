@@ -38,15 +38,21 @@
 - **Zero-Shot Recognition**: Identifies ANY real-world commercial product (brand, model silhouette, physical attributes, color, category) from arbitrary user photos using Azure OpenAI multimodal vision (`gpt-5-mini`).
 - **No Closed-Set Hallucinations**: Accurately labels uncataloged items (e.g., Sony pink headphones) without falsely forcing them into arbitrary catalog product IDs.
 - **Smart Category Relevance Filtering**: Suppresses irrelevant catalog recommendations for out-of-catalog categories (e.g., smartphones) while cleanly surfacing nearest catalog matches for in-catalog items (e.g., footwear, audio, chairs, watches).
+- **Interactive Visual Summary**: Displays real-time confidence scores, extracted attribute pill tags, and collapsible deep visual analysis breakdown.
 
 ### 2. 💬 Autonomous Foundry Agent & Grounded RAG
 - **Model-Driven Tool Selection**: Uses Azure OpenAI function calling to dynamically orchestrate queries across `search_product_knowledge`, `find_similar_products`, `identify_product`, and `search_video`.
 - **Honest Grounding**: Answers against indexed Azure AI Search specifications for catalog products; gracefully handles unlisted specs or open-world attributes with zero hallucinated purchase links or specifications.
-- **Context-Preserving Conversation**: Seamlessly switches between open-world identified context and explicit catalog item inspection.
+- **Context-Preserving Conversation**: Seamlessly switches between open-world identified context and explicit catalog item inspection with dynamic category suggestion chips.
 
 ### 3. 🎥 Temporal Video Intelligence & Moment Retrieval
 - **Segment-Level Indexing**: Extracts timestamped transcript segments, visual descriptions, and audio dialogue.
 - **Natural Language Video Search**: Answers queries (e.g., *"When do they demonstrate the ANC and battery features?"*) and returns exact start/end timestamps with a clickable jump-to-time video player.
+
+### 4. 🎨 Modern SaaS Dashboard & Experience
+- **Dual Dark / Light Mode**: Dynamic CSS variable design system with one-click theme switcher.
+- **State-Preserving Tabs**: Seamlessly switch between Image Intelligence, Video Intelligence, and Evaluation without losing active photo uploads or conversation history.
+- **Instant Demo Presets**: One-click quick-sample loaders (Air Zoom Alpha, Sony WH-1000XM5, Ergonomic Office Chair, Classic Chrono).
 
 ---
 

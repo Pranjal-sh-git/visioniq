@@ -25,8 +25,6 @@ import {
   Target,
   Layers,
   HelpCircle,
-  Zap,
-  Image as ImageIcon,
 } from 'lucide-react';
 
 interface ChatMessage {
@@ -249,28 +247,19 @@ const getCategorySuggestions = (category?: string): QuickSuggestion[] => {
 
 const SAMPLE_IMAGES = [
   {
-    label: 'Nike Air Zoom Pegasus',
-    category: 'Footwear',
-    brand: 'Nike',
-    url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=400&q=80',
-  },
-  {
     label: 'Sony WH-1000XM5',
     category: 'Audio',
-    brand: 'Sony',
-    url: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=400&q=80',
+    url: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80',
   },
   {
     label: 'Herman Miller Aeron',
     category: 'Ergonomics',
-    brand: 'Herman Miller',
-    url: 'https://images.unsplash.com/photo-1580481077197-987823563052?auto=format&fit=crop&w=400&q=80',
+    url: 'https://images.unsplash.com/photo-1580481077197-987823563052?auto=format&fit=crop&w=800&q=80',
   },
   {
-    label: 'Apple Watch Series',
-    category: 'Smartwatch',
-    brand: 'Apple',
-    url: 'https://images.unsplash.com/photo-1523275335684-37898b6baf30?auto=format&fit=crop&w=400&q=80',
+    label: 'Nike Air Zoom Pegasus',
+    category: 'Footwear',
+    url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80',
   },
 ];
 
@@ -295,6 +284,8 @@ export const ImageIntelligence: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const chatMessagesRef = useRef<HTMLDivElement>(null);
 
+  const isApiActive = isIdentifying || isAgentLoading;
+
   const scrollToBottom = () => {
     setTimeout(() => {
       if (chatMessagesRef.current) {
@@ -307,69 +298,105 @@ export const ImageIntelligence: React.FC = () => {
   };
 
   const validateImageFile = (file: File): boolean => {
-    const ext = '.' + file.name.split('.').pop()?.toLowerCase();
-    if (!VALID_IMAGE_EXTENSIONS.includes(ext)) {
+    const hasImageMime = file.type.startsWith('image/');
+    const fileNameLower = file.name.toLowerCase();
+    const hasValidExtension = VALID_IMAGE_EXTENSIONS.some((ext) => fileNameLower.endsWith(ext));
+
+    if (!hasImageMime && !hasValidExtension) {
       setErrorMessage(
-        `Invalid file type (${ext}). Please select an image (${VALID_IMAGE_EXTENSIONS.join(', ')}).`
+        `Invalid file type: "${file.name}". Please upload a valid image file (${VALID_IMAGE_EXTENSIONS.join(', ')}).`
       );
-      return false;
-    }
-    const maxSizeBytes = 20 * 1024 * 1024;
-    if (file.size > maxSizeBytes) {
-      setErrorMessage('Image size exceeds 20MB limit. Please choose a smaller photo.');
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
       return false;
     }
     return true;
   };
 
-  const processImageIdentification = async (fileOrUrl: File | string) => {
-    setIsIdentifying(true);
+  const handleFileSelection = async (file: File) => {
+    if (!validateImageFile(file)) {
+      return;
+    }
+
     setErrorMessage(null);
+    const objectUrl = URL.createObjectURL(file);
+    setPreviewUrl(objectUrl);
     setIdentifiedProduct(null);
     setSimilarCatalog([]);
     setSelectedCatalogItem(null);
+    setMessages([]);
+
+    await runIdentification(file);
+  };
+
+  const handleSampleSelect = async (sampleUrl: string) => {
+    setErrorMessage(null);
+    setPreviewUrl(sampleUrl);
+    setIdentifiedProduct(null);
+    setSimilarCatalog([]);
+    setSelectedCatalogItem(null);
+    setMessages([]);
+
+    await runIdentification(sampleUrl);
+  };
+
+  const runIdentification = async (fileOrUrl: File | string) => {
+    setIsIdentifying(true);
+    setErrorMessage(null);
 
     try {
-      const response = await identifyProduct(fileOrUrl);
-      if (response && response.identified_product) {
-        setIdentifiedProduct(response.identified_product);
-        setSimilarCatalog(response.similar_catalog_products || []);
-        
-        const autoIntroMsg: ChatMessage = {
-          id: `asst-intro-${Date.now()}`,
-          sender: 'assistant',
-          text: `I've analyzed your product image. I identified this as **${response.identified_product.brand} ${response.identified_product.product_name}** (${response.identified_product.category}).\n\nAsk me anything about its features, material specifications, or explore catalog alternatives below.`,
-          timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        };
-        setMessages([autoIntroMsg]);
+      const result = await identifyProduct(fileOrUrl, 3);
+      if (result.success && result.identified_product) {
+        setIdentifiedProduct(result.identified_product);
+        const catalogList = result.similar_catalog_products || result.all_matches || [];
+        setSimilarCatalog(catalogList);
+        // By default, do NOT select a catalog item — keep open-world identified product as active chat context
+        setSelectedCatalogItem(null);
+
+        const prod = result.identified_product;
+        const welcomeText = `Identified as **${prod.product_name}** (${prod.brand} · ${prod.category}) with **${prod.confidence} confidence**.\n\n${prod.visual_description}`;
+
+        setMessages([
+          {
+            id: 'init-1',
+            sender: 'assistant',
+            text: welcomeText,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+            similarProducts: catalogList,
+          },
+        ]);
+      } else if (result.best_match) {
+        setSimilarCatalog(result.all_matches || []);
+        setSelectedCatalogItem(result.best_match);
+        setMessages([
+          {
+            id: 'init-legacy',
+            sender: 'assistant',
+            text: `Closest match in catalog: **${result.best_match.brand} ${result.best_match.name}**. Ask any follow-up questions!`,
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          },
+        ]);
       } else {
-        setErrorMessage('Could not analyze the visual details of this product. Please try another image.');
+        setMessages([
+          {
+            id: 'init-empty',
+            sender: 'assistant',
+            text: 'No product could be visually identified. Feel free to try another photo.',
+            timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+          },
+        ]);
       }
     } catch (err: any) {
       console.error('Identification error:', err);
-      setErrorMessage(
-        err.message || 'Error communicating with the vision recognition service. Please check your backend connection.'
-      );
+      setErrorMessage(err.message || "Couldn't connect to the backend server. Please verify the backend is running.");
     } finally {
       setIsIdentifying(false);
-      scrollToBottom();
     }
   };
 
-  const handleFileSelection = (file: File) => {
-    if (!validateImageFile(file)) return;
-    const localUrl = URL.createObjectURL(file);
-    setPreviewUrl(localUrl);
-    processImageIdentification(file);
-  };
-
-  const handleSampleSelect = (sampleUrl: string) => {
-    setPreviewUrl(sampleUrl);
-    processImageIdentification(sampleUrl);
-  };
-
-  const handleSendMessage = async (textToSend?: string) => {
-    const queryText = (textToSend || inputPrompt).trim();
+  const handleSendMessage = async (promptToSend?: string) => {
+    const queryText = (promptToSend || inputPrompt).trim();
     if (!queryText || isAgentLoading) return;
 
     if (!identifiedProduct && !previewUrl && !selectedCatalogItem) {
@@ -482,81 +509,25 @@ export const ImageIntelligence: React.FC = () => {
 
   return (
     <div className="tab-page">
-      {/* Top Hero Showcase Banner matching reference */}
-      <div className="page-hero-banner">
-        <div className="hero-banner-left">
+      {/* Top Header */}
+      <div className="tab-header">
+        <div className="tab-header-titles">
           <div className="tab-subtitle-tag">
             <Sparkles size={13} />
-            <span>OPEN-WORLD VISUAL SEARCH & GROUNDING</span>
+            <span>Open-World Visual Search & Grounding</span>
           </div>
-          <h1 className="hero-banner-title">Image Intelligence</h1>
-          <p className="hero-banner-desc">
+          <h1>Image Intelligence</h1>
+          <p>
             Upload any product photo for real-time multimodal recognition powered by{' '}
             <strong>Azure OpenAI GPT-5</strong> and explore catalog alternatives with vector search.
           </p>
-
-          <div className="hero-feature-pills">
-            <div className="hero-feature-pill">
-              <div className="hero-pill-icon-wrap">
-                <Zap size={15} />
-              </div>
-              <div className="hero-pill-text">
-                <div className="hero-pill-heading">Instant Recognition</div>
-                <div className="hero-pill-caption">Identify products in seconds</div>
-              </div>
-            </div>
-            <div className="hero-feature-pill">
-              <div className="hero-pill-icon-wrap">
-                <Package size={15} />
-              </div>
-              <div className="hero-pill-text">
-                <div className="hero-pill-heading">Find Similar Items</div>
-                <div className="hero-pill-caption">Explore catalog alternatives</div>
-              </div>
-            </div>
-            <div className="hero-feature-pill">
-              <div className="hero-pill-icon-wrap">
-                <Target size={15} />
-              </div>
-              <div className="hero-pill-text">
-                <div className="hero-pill-heading">Open-World Search</div>
-                <div className="hero-pill-caption">Works beyond fixed catalogs</div>
-              </div>
-            </div>
-          </div>
         </div>
-
-        <div className="hero-banner-right">
-          <div className="hero-graphic-cluster">
-            <div className="floating-card floating-card-headphones">
-              <img
-                src="https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=240&q=80"
-                alt="Headphones"
-              />
-            </div>
-            <div className="floating-card floating-card-shoe">
-              <img
-                src="https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=300&q=80"
-                alt="Nike Sneaker"
-              />
-            </div>
-            <div className="floating-card floating-card-bag">
-              <img
-                src="https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=240&q=80"
-                alt="Backpack"
-              />
-            </div>
-            <div className="ai-powered-pill">
-              <span>AI Powered</span>
-            </div>
-            <div className="hero-curved-annotation">
-              <span className="annotation-line">Detect Products</span>
-              <span className="annotation-line">Find Similar Items</span>
-              <span className="annotation-line">Explore Alternatives</span>
-              <div className="annotation-arrow">⤹</div>
-            </div>
+        {isApiActive && (
+          <div className="api-live-indicator">
+            <span className="pulse-dot" />
+            <span>{isIdentifying ? 'Analyzing visual features...' : 'Agent reasoning...'}</span>
           </div>
-        </div>
+        )}
       </div>
 
       {/* Inline Error Banner */}
@@ -581,34 +552,22 @@ export const ImageIntelligence: React.FC = () => {
         {/* Left Column: Upload & Identification Display */}
         <div className="dashboard-column">
           {/* Upload Card */}
-          <div className="card upload-card">
+          <div className="card">
             <div className="card-header-row">
-              <div className="card-header-title-group">
-                <div className="card-header-icon-box">
-                  <UploadCloud size={18} />
-                </div>
-                <div>
-                  <h3 className="card-main-heading">Product Image Upload</h3>
-                  <p className="card-sub-heading">Drop an image, or browse from your device</p>
-                </div>
+              <div className="card-header-title">
+                <UploadCloud size={18} className="header-icon" />
+                <span>Product Image Upload</span>
               </div>
-              <div className="card-header-actions">
-                {previewUrl ? (
-                  <button
-                    className="btn-clear-action"
-                    onClick={clearSelection}
-                    title="Remove image"
-                  >
-                    <X size={13} />
-                    <span>Clear</span>
-                  </button>
-                ) : (
-                  <div className="supported-formats-badge">
-                    <HelpCircle size={13} />
-                    <span>Supported Formats</span>
-                  </div>
-                )}
-              </div>
+              {previewUrl && (
+                <button
+                  className="btn-clear-action"
+                  onClick={clearSelection}
+                  title="Remove image"
+                >
+                  <X size={13} />
+                  <span>Clear</span>
+                </button>
+              )}
             </div>
 
             {/* Drag and Drop Zone */}
@@ -643,48 +602,35 @@ export const ImageIntelligence: React.FC = () => {
                 </div>
               ) : (
                 <div className="dropzone-empty-state">
-                  <div className="dropzone-icon-ring">
+                  <div className="dropzone-icon-badge">
                     <UploadCloud size={28} />
                   </div>
-                  <div className="dropzone-title">Drag & drop your product photo here</div>
-                  <div className="dropzone-subtitle-muted">or click to browse</div>
-                  <div className="dropzone-meta-tag">
-                    Supports JPG, PNG, WEBP • Open-world zero-shot recognition
+                  <div className="dropzone-title">Drop your product photo here</div>
+                  <div className="dropzone-subtitle">
+                    Supports JPG, PNG, WEBP · Open-world zero-shot recognition
                   </div>
-                  <button type="button" className="btn-browse-primary">
-                    <UploadCloud size={14} />
+                  <div className="dropzone-cta-btn">
                     <span>Browse Files</span>
-                  </button>
+                  </div>
                 </div>
               )}
             </div>
 
-            {/* Sample Image Presets with Visual Cards */}
-            <div className="sample-presets-container">
-              <div className="sample-presets-header">
-                <div className="sample-header-left">
-                  <Sparkles size={13} className="sample-icon-mint" />
-                  <span>Try with a sample</span>
-                </div>
-                <span className="sample-header-right">View more demos →</span>
-              </div>
-              <div className="sample-cards-row">
-                {SAMPLE_IMAGES.map((sample, idx) => {
-                  const isCurrent = previewUrl === sample.url;
-                  return (
-                    <div
-                      key={idx}
-                      className={`sample-product-card ${isCurrent ? 'is-selected' : ''}`}
-                      onClick={() => handleSampleSelect(sample.url)}
-                      title={`Analyze ${sample.label}`}
-                    >
-                      <img src={sample.url} alt={sample.label} className="sample-product-thumb" />
-                      <div className="sample-product-text">
-                        <span className="sample-product-name">{sample.label}</span>
-                      </div>
-                    </div>
-                  );
-                })}
+            {/* Sample Image Presets */}
+            <div className="sample-presets">
+              <span className="sample-title">Quick Demo Samples</span>
+              <div className="sample-chips">
+                {SAMPLE_IMAGES.map((sample, idx) => (
+                  <button
+                    key={idx}
+                    className="sample-chip"
+                    onClick={() => handleSampleSelect(sample.url)}
+                    disabled={isIdentifying}
+                  >
+                    <span className="sample-category-dot" />
+                    <span className="sample-label-text">{sample.label}</span>
+                  </button>
+                ))}
               </div>
             </div>
           </div>
@@ -858,9 +804,9 @@ export const ImageIntelligence: React.FC = () => {
                 <div>
                   <div className="chat-name-row">
                     <span className="chat-name">VisionIQ Copilot</span>
-                    <span className="agent-badge">FOUNDRY AGENT</span>
+                    <span className="agent-badge">Foundry Agent</span>
                   </div>
-                  <div className="chat-subhead">Your multimodal product analysis assistant</div>
+                  <div className="chat-subhead">Grounded Multimodal RAG</div>
                 </div>
               </div>
               {selectedCatalogItem ? (
@@ -886,52 +832,17 @@ export const ImageIntelligence: React.FC = () => {
             <div className="chat-messages" ref={chatMessagesRef}>
               {messages.length === 0 ? (
                 <div className="empty-state-modern">
-                  <div className="empty-state-icon-box">
-                    <Bot size={28} />
+                  <div className="empty-state-icon-ring">
+                    <Bot size={30} />
                   </div>
-                  <h3 className="empty-state-title">Ready to analyze your product</h3>
+                  <div className="empty-state-title">
+                    {previewUrl ? 'Product Analyzed & Ready' : 'Awaiting Product Input'}
+                  </div>
                   <p className="empty-state-text">
-                    Upload a product photo or try a sample image to start a grounded multimodal conversation. I can identify items, find similar products, extract attributes, and more.
+                    {previewUrl
+                      ? 'Ask questions about observed physical features, specifications, durability, or catalog alternatives.'
+                      : 'Upload a product photo or select a quick demo sample on the left to start grounded multimodal dialogue.'}
                   </p>
-
-                  <div className="empty-state-prompt-grid">
-                    <button
-                      type="button"
-                      className="empty-prompt-card"
-                      onClick={() => handleSendMessage('What is this product and what are its key features?')}
-                      disabled={isAgentLoading}
-                    >
-                      <HelpCircle size={14} className="prompt-card-icon" />
-                      <span>What is this product?</span>
-                    </button>
-                    <button
-                      type="button"
-                      className="empty-prompt-card"
-                      onClick={() => handleSendMessage('Describe key features and physical attributes observed.')}
-                      disabled={isAgentLoading}
-                    >
-                      <Sparkles size={14} className="prompt-card-icon" />
-                      <span>Describe key features</span>
-                    </button>
-                    <button
-                      type="button"
-                      className="empty-prompt-card"
-                      onClick={() => handleSendMessage('Find similar products and catalog alternatives.')}
-                      disabled={isAgentLoading}
-                    >
-                      <Package size={14} className="prompt-card-icon" />
-                      <span>Find similar products</span>
-                    </button>
-                    <button
-                      type="button"
-                      className="empty-prompt-card"
-                      onClick={() => handleSendMessage('Compare with alternative choices in the market.')}
-                      disabled={isAgentLoading}
-                    >
-                      <Layers size={14} className="prompt-card-icon" />
-                      <span>Compare with alternatives</span>
-                    </button>
-                  </div>
                 </div>
               ) : (
                 messages.map((msg) => (
@@ -1005,70 +916,58 @@ export const ImageIntelligence: React.FC = () => {
               )}
             </div>
 
-            {/* Quick Action Suggestion Chips when product is active */}
-            {messages.length > 0 && (
-              <div className="quick-prompts">
-                {getCategorySuggestions(identifiedProduct?.category || selectedCatalogItem?.category).map((s, idx) => (
-                  <button
-                    key={idx}
-                    className="quick-chip"
-                    onClick={() => handleSendMessage(s.prompt)}
-                    disabled={isAgentLoading || (!identifiedProduct && !selectedCatalogItem)}
-                    title={!identifiedProduct && !selectedCatalogItem ? 'Upload an image first' : undefined}
-                  >
-                    {s.icon}
-                    <span>{s.label}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-
-            {/* Bottom Input Section */}
-            <div className="chat-input-wrapper">
-              <form
-                className="chat-input-bar"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  handleSendMessage();
-                }}
-              >
+            {/* Quick Action Suggestion Chips */}
+            <div className="quick-prompts">
+              {getCategorySuggestions(identifiedProduct?.category || selectedCatalogItem?.category).map((s, idx) => (
                 <button
-                  type="button"
-                  className="chat-attach-btn"
-                  onClick={() => fileInputRef.current?.click()}
-                  title="Upload product image"
+                  key={idx}
+                  className="quick-chip"
+                  onClick={() => handleSendMessage(s.prompt)}
+                  disabled={isAgentLoading || (!identifiedProduct && !selectedCatalogItem)}
+                  title={!identifiedProduct && !selectedCatalogItem ? 'Upload an image first' : undefined}
                 >
-                  <ImageIcon size={18} />
+                  {s.icon}
+                  <span>{s.label}</span>
                 </button>
-                <input
-                  type="text"
-                  className="chat-input"
-                  placeholder={
-                    identifiedProduct || selectedCatalogItem
-                      ? `Ask anything about ${identifiedProduct?.brand || selectedCatalogItem?.brand || 'this item'}...`
-                      : "Upload an image to start chatting..."
-                  }
-                  value={inputPrompt}
-                  onChange={(e) => setInputPrompt(e.target.value)}
-                  disabled={isAgentLoading}
-                />
-                <button
-                  type="submit"
-                  className="chat-send-round-btn"
-                  disabled={!inputPrompt.trim() || isAgentLoading}
-                  title="Send query"
-                >
-                  {isAgentLoading ? (
-                    <span className="spinner spinner-sm" />
-                  ) : (
-                    <Send size={15} />
-                  )}
-                </button>
-              </form>
-              <div className="chat-input-microcopy">
-                Supports product images • Get detailed insights, specs, and recommendations
-              </div>
+              ))}
             </div>
+
+            {/* Input Bar */}
+            <form
+              className="chat-input-bar"
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSendMessage();
+              }}
+            >
+              <input
+                type="text"
+                className="chat-input"
+                placeholder={
+                  identifiedProduct || selectedCatalogItem
+                    ? `Ask anything about ${identifiedProduct?.brand || selectedCatalogItem?.brand || 'this item'}...`
+                    : "Upload a product image first to start chatting..."
+                }
+                value={inputPrompt}
+                onChange={(e) => setInputPrompt(e.target.value)}
+                disabled={isAgentLoading}
+              />
+              <button
+                type="submit"
+                className="chat-send-btn"
+                disabled={!inputPrompt.trim() || isAgentLoading}
+                title="Send query"
+              >
+                {isAgentLoading ? (
+                  <span className="spinner spinner-sm" />
+                ) : (
+                  <>
+                    <Send size={15} />
+                    <span>Send</span>
+                  </>
+                )}
+              </button>
+            </form>
           </div>
         </div>
       </div>
