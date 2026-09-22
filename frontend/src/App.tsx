@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import Navbar from './components/Navbar';
+import LandingPage from './pages/LandingPage';
 import ImageIntelligence from './pages/ImageIntelligence';
 import VideoIntelligence from './pages/VideoIntelligence';
 import { getHealthStatus } from './services/api';
 import { Layers, ShieldCheck, Database, Zap } from 'lucide-react';
 
 export const App: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'image' | 'video'>('image');
+  const [activeTab, setActiveTab] = useState<'landing' | 'image' | 'video'>('landing');
   const [healthStatus, setHealthStatus] = useState<string>('checking...');
 
   useEffect(() => {
@@ -31,13 +32,15 @@ export const App: React.FC = () => {
     };
   }, []);
 
-
   return (
     <div className="app-container">
       <div className="ambient-glow" />
       <Navbar activeTab={activeTab} onTabChange={setActiveTab} healthStatus={healthStatus} />
       
       <main className="main-content">
+        <div className={`tab-pane ${activeTab === 'landing' ? 'active' : 'is-hidden'}`}>
+          <LandingPage onNavigate={(tab) => setActiveTab(tab)} />
+        </div>
         <div className={`tab-pane ${activeTab === 'image' ? 'active' : 'is-hidden'}`}>
           <ImageIntelligence />
         </div>

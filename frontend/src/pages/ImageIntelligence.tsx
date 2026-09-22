@@ -635,7 +635,7 @@ export const ImageIntelligence: React.FC = () => {
             </div>
           </div>
 
-          {/* Loading State */}
+          {/* Loading State with Shimmer Skeleton */}
           {isIdentifying && (
             <div className="card loading-card">
               <div className="radar-spinner">
@@ -645,6 +645,11 @@ export const ImageIntelligence: React.FC = () => {
               <div className="loading-card-title">Analyzing Visual Features</div>
               <div className="loading-card-subtitle">
                 Multimodal GPT-5 extracting brand, physical attributes, model silhouette, and catalog vector matches...
+              </div>
+              <div style={{ width: '100%', marginTop: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                <div className="skeleton-shimmer skeleton-line medium" />
+                <div className="skeleton-shimmer skeleton-line long" />
+                <div className="skeleton-shimmer skeleton-line short" />
               </div>
             </div>
           )}
@@ -826,14 +831,14 @@ export const ImageIntelligence: React.FC = () => {
 
             <div className="chat-messages" ref={chatMessagesRef}>
               {messages.length === 0 ? (
-                <div className="chat-empty-state">
-                  <div className="empty-bot-icon">
-                    <Bot size={36} />
+                <div className="empty-state-modern">
+                  <div className="empty-state-icon-ring">
+                    <Bot size={30} />
                   </div>
-                  <div className="empty-title">
+                  <div className="empty-state-title">
                     {previewUrl ? 'Product Analyzed & Ready' : 'Awaiting Product Input'}
                   </div>
-                  <p className="empty-description">
+                  <p className="empty-state-text">
                     {previewUrl
                       ? 'Ask questions about observed physical features, specifications, durability, or catalog alternatives.'
                       : 'Upload a product photo or select a quick demo sample on the left to start grounded multimodal dialogue.'}

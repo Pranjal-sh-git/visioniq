@@ -1,9 +1,9 @@
 import React from 'react';
-import { Sparkles, Image as ImageIcon, Video as VideoIcon, Cpu } from 'lucide-react';
+import { Sparkles, LayoutDashboard, Image as ImageIcon, Video as VideoIcon, Cpu } from 'lucide-react';
 
 interface NavbarProps {
-  activeTab: 'image' | 'video';
-  onTabChange: (tab: 'image' | 'video') => void;
+  activeTab: 'landing' | 'image' | 'video';
+  onTabChange: (tab: 'landing' | 'image' | 'video') => void;
   healthStatus?: string;
 }
 
@@ -13,7 +13,14 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, onTabChange, healthSt
   return (
     <header className="navbar">
       <div className="navbar-left">
-        <div className="navbar-brand">
+        <div
+          className="navbar-brand clickable"
+          onClick={() => onTabChange('landing')}
+          title="Return to VisionIQ Overview"
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && onTabChange('landing')}
+        >
           <div className="brand-icon-wrapper">
             <Sparkles className="brand-icon" size={18} />
           </div>
@@ -33,13 +40,23 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, onTabChange, healthSt
 
       <nav className="navbar-tabs" role="tablist" aria-label="Main Navigation">
         <button
+          id="tab-overview"
+          role="tab"
+          aria-selected={activeTab === 'landing'}
+          className={`tab-btn ${activeTab === 'landing' ? 'active' : ''}`}
+          onClick={() => onTabChange('landing')}
+        >
+          <LayoutDashboard size={15} />
+          <span>Overview</span>
+        </button>
+        <button
           id="tab-image-intelligence"
           role="tab"
           aria-selected={activeTab === 'image'}
           className={`tab-btn ${activeTab === 'image' ? 'active' : ''}`}
           onClick={() => onTabChange('image')}
         >
-          <ImageIcon size={16} />
+          <ImageIcon size={15} />
           <span>Image Intelligence</span>
         </button>
         <button
@@ -49,7 +66,7 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, onTabChange, healthSt
           className={`tab-btn ${activeTab === 'video' ? 'active' : ''}`}
           onClick={() => onTabChange('video')}
         >
-          <VideoIcon size={16} />
+          <VideoIcon size={15} />
           <span>Video Intelligence</span>
         </button>
       </nav>

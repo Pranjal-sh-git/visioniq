@@ -406,7 +406,7 @@ export const VideoIntelligence: React.FC = () => {
             )}
           </div>
 
-          {/* Loading State for Video Processing */}
+          {/* Loading State for Video Processing with Shimmer Skeleton */}
           {isAnalyzing && (
             <div className="card loading-card">
               <div className="radar-spinner">
@@ -416,6 +416,11 @@ export const VideoIntelligence: React.FC = () => {
               <div className="loading-card-title">Processing Video Pipeline</div>
               <div className="loading-card-subtitle">
                 Extracting audio, transcribing speech with Whisper, extracting timeline keyframes, and generating vector embeddings in Azure AI Search...
+              </div>
+              <div style={{ width: '100%', marginTop: '1.25rem', display: 'flex', flexDirection: 'column', gap: '0.65rem' }}>
+                <div className="skeleton-shimmer skeleton-line medium" />
+                <div className="skeleton-shimmer skeleton-line long" />
+                <div className="skeleton-shimmer skeleton-line short" />
               </div>
             </div>
           )}
@@ -609,14 +614,14 @@ export const VideoIntelligence: React.FC = () => {
 
             <div className="chat-messages" ref={chatMessagesRef}>
               {messages.length === 0 ? (
-                <div className="chat-empty-state">
-                  <div className="empty-bot-icon">
-                    <Film size={36} />
+                <div className="empty-state-modern">
+                  <div className="empty-state-icon-ring">
+                    <Film size={30} />
                   </div>
-                  <div className="empty-title">
+                  <div className="empty-state-title">
                     {videoUrl ? 'Video Indexed & Ready' : 'Awaiting Video Upload'}
                   </div>
-                  <p className="empty-description">
+                  <p className="empty-state-text">
                     {videoUrl
                       ? 'Ask questions to locate spoken dialogue, reviewer opinions, scene timestamps, and conclusions.'
                       : 'Upload a video file on the left to transcribe audio and enable temporal vector search.'}
