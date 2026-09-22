@@ -7,10 +7,8 @@ import {
   Database,
   Cpu,
   ShieldCheck,
-  Search,
-  Zap,
   Layers,
-  FileText,
+  CheckCircle,
 } from 'lucide-react';
 
 interface LandingPageProps {
@@ -20,16 +18,12 @@ interface LandingPageProps {
 export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
   return (
     <div className="landing-container">
-      {/* Background Lighting Meshes */}
-      <div className="landing-mesh-1" />
-      <div className="landing-mesh-2" />
-
       {/* Hero Section */}
       <section className="landing-hero">
         <div className="hero-badge">
           <span className="badge-pulse" />
-          <Sparkles size={13} className="badge-icon" />
-          <span>Multimodal Agent Platform</span>
+          <Sparkles size={14} className="badge-icon" />
+          <span>Multimodal Intelligence Platform</span>
         </div>
 
         <h1 className="hero-title">
@@ -37,33 +31,31 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         </h1>
 
         <p className="hero-tagline">
-          Multimodal AI that sees, understands, and answers.
+          Multimodal AI that <span className="highlight-mint">sees</span>, <span className="highlight-mint">understands</span>, and <span className="highlight-mint">answers</span>.
         </p>
 
         <p className="hero-description">
-          Seamlessly identify real-world products from arbitrary photos, query grounded specifications via vector RAG, 
-          and search temporal moments in demonstration videos with exact timestamp retrieval.
+          Seamlessly identify real-world products, books, and objects from photos with zero-shot vision, 
+          query grounded catalog specs with vector RAG, and retrieve exact temporal moments in video.
         </p>
 
         <div className="hero-cta-group">
           <button
-            id="hero-cta-image"
-            className="btn-primary-hero"
+            id="hero-cta-primary"
+            className="btn-dark-cta"
             onClick={() => onNavigate('image')}
           >
-            <Eye size={18} />
-            <span>Launch Image Intelligence</span>
-            <ArrowRight size={16} className="btn-arrow" />
+            <span>Try it now</span>
+            <ArrowRight size={16} />
           </button>
 
           <button
             id="hero-cta-video"
-            className="btn-secondary-hero"
+            className="btn-light-secondary"
             onClick={() => onNavigate('video')}
           >
-            <Video size={18} />
-            <span>Launch Video Intelligence</span>
-            <ArrowRight size={16} className="btn-arrow" />
+            <Video size={16} className="btn-icon-mint" />
+            <span>Video Intelligence</span>
           </button>
         </div>
       </section>
@@ -73,18 +65,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         {/* Card 1: Image Intelligence */}
         <div
           id="feature-card-image"
-          className="feature-card feature-card-image"
+          className="feature-card"
           onClick={() => onNavigate('image')}
           role="button"
           tabIndex={0}
           onKeyDown={(e) => e.key === 'Enter' && onNavigate('image')}
         >
-          <div className="feature-card-glow" />
           <div className="feature-card-header">
-            <div className="feature-icon-wrapper icon-cyan">
-              <Eye size={26} />
+            <div className="feature-icon-wrapper">
+              <Eye size={24} />
             </div>
-            <div className="feature-pill">Open-World Vision</div>
+            <span className="feature-badge">Open-World Vision</span>
           </div>
 
           <h3 className="feature-card-title">Image Intelligence</h3>
@@ -94,23 +85,23 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
 
           <ul className="feature-highlights">
             <li>
-              <Search size={14} className="highlight-icon" />
+              <CheckCircle size={15} className="highlight-icon" />
               <span>Zero-shot visual entity recognition with OCR</span>
             </li>
             <li>
-              <Database size={14} className="highlight-icon" />
+              <CheckCircle size={15} className="highlight-icon" />
               <span>Cosine vector similarity catalog recommendations</span>
             </li>
             <li>
-              <FileText size={14} className="highlight-icon" />
+              <CheckCircle size={15} className="highlight-icon" />
               <span>Grounded RAG specification & multi-turn QA</span>
             </li>
           </ul>
 
           <div className="feature-card-footer">
-            <span className="footer-action-text">Explore Image Intelligence</span>
+            <span className="footer-action-text">Launch Image Intelligence</span>
             <div className="action-circle">
-              <ArrowRight size={16} />
+              <ArrowRight size={15} />
             </div>
           </div>
         </div>
@@ -118,18 +109,17 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         {/* Card 2: Video Intelligence */}
         <div
           id="feature-card-video"
-          className="feature-card feature-card-video"
+          className="feature-card"
           onClick={() => onNavigate('video')}
           role="button"
           tabIndex={0}
           onKeyDown={(e) => e.key === 'Enter' && onNavigate('video')}
         >
-          <div className="feature-card-glow" />
           <div className="feature-card-header">
-            <div className="feature-icon-wrapper icon-purple">
-              <Video size={26} />
+            <div className="feature-icon-wrapper">
+              <Video size={24} />
             </div>
-            <div className="feature-pill">Temporal Moments</div>
+            <span className="feature-badge">Temporal Moments</span>
           </div>
 
           <h3 className="feature-card-title">Video Intelligence</h3>
@@ -139,51 +129,58 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
 
           <ul className="feature-highlights">
             <li>
-              <Zap size={14} className="highlight-icon" />
+              <CheckCircle size={15} className="highlight-icon" />
               <span>Whisper ASR audio speech transcription</span>
             </li>
             <li>
-              <Layers size={14} className="highlight-icon" />
+              <CheckCircle size={15} className="highlight-icon" />
               <span>Segment-level temporal relevance indexing</span>
             </li>
             <li>
-              <ArrowRight size={14} className="highlight-icon" />
+              <CheckCircle size={15} className="highlight-icon" />
               <span>Interactive jump-to-timestamp video playback</span>
             </li>
           </ul>
 
           <div className="feature-card-footer">
-            <span className="footer-action-text">Explore Video Intelligence</span>
+            <span className="footer-action-text">Launch Video Intelligence</span>
             <div className="action-circle">
-              <ArrowRight size={16} />
+              <ArrowRight size={15} />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Powered by Azure AI Foundry Credibility Strip */}
-      <section className="landing-credibility-strip">
-        <div className="credibility-header">
-          <Cpu size={14} className="credibility-icon" />
-          <span>Powered by Microsoft Azure AI & OpenAI Foundation Models</span>
+      {/* Powered by Azure AI Foundry - Gradient Pro Strip */}
+      <section className="landing-gradient-strip">
+        <div className="gradient-strip-left">
+          <div className="strip-icon-box">
+            <Cpu size={20} />
+          </div>
+          <div>
+            <div className="strip-title">Powered by Azure AI Foundry & OpenAI</div>
+            <div className="strip-subtitle">
+              Enterprise-grade foundation models (gpt-5-mini), vector search, and Responsible AI guardrails.
+            </div>
+          </div>
         </div>
 
-        <div className="credibility-badges">
-          <div className="cred-badge">
+        <div className="gradient-strip-badges">
+          <div className="glass-badge">
             <Sparkles size={13} />
-            <span>Azure OpenAI (gpt-5-mini)</span>
+            <span>Azure OpenAI</span>
           </div>
-          <div className="cred-badge">
+          <div className="glass-badge">
             <Database size={13} />
-            <span>Azure AI Search (Vector RAG)</span>
+            <span>AI Search RAG</span>
           </div>
-          <div className="cred-badge">
+          <div className="glass-badge">
             <Layers size={13} />
-            <span>CLIP ViT-B/32 Embeddings</span>
+            <span>CLIP Embeddings</span>
           </div>
-          <div className="cred-badge">
+          <div className="glass-badge">
             <ShieldCheck size={13} />
-            <span>Microsoft Responsible AI</span>
+            <span>Responsible AI</span>
           </div>
         </div>
       </section>
