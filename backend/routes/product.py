@@ -100,6 +100,20 @@ async def identify_product_endpoint(
         best_catalog_item = exact_catalog_match or (similar_catalog[0] if similar_catalog else None)
         is_confident = best_catalog_item.get("is_confident_match", False) if best_catalog_item else False
 
+        # Ground open-world identification with authoritative catalog metadata if a high-confidence match exists and category matches
+        if identified_product and best_catalog_item and (is_confident or best_catalog_item.get("similarity_score", 0.0) >= 0.85):
+            ident_cat = (identified_product.get("category") or "").lower()
+            catalog_cat = (best_catalog_item.get("category") or "").lower()
+            if ident_cat in (catalog_cat, "general", "unknown", ""):
+                if identified_product.get("brand") in ("Unknown", "Unidentified", "", None) or identified_product.get("product_name") in ("Unknown", "Unidentified Product", "", None) or not identified_product.get("brand"):
+                    identified_product["brand"] = best_catalog_item["brand"]
+                    identified_product["model"] = best_catalog_item["name"]
+                    identified_product["product_name"] = best_catalog_item["name"]
+                    identified_product["category"] = best_catalog_item.get("category") or identified_product.get("category", "General")
+                    identified_product["confidence"] = "high"
+                    identified_product["is_catalog_match"] = True
+                    identified_product["catalog_id"] = best_catalog_item["id"]
+
         return {
             "success": True,
             "identified_product": identified_product,

@@ -1,13 +1,32 @@
 import React from 'react';
-import { Sparkles, LayoutDashboard, Image as ImageIcon, Video as VideoIcon, Cpu } from 'lucide-react';
+import {
+  Sparkles,
+  LayoutDashboard,
+  Image as ImageIcon,
+  Video as VideoIcon,
+  Cpu,
+  LogOut,
+  LogIn,
+  User as UserIcon,
+} from 'lucide-react';
 
 interface NavbarProps {
   activeTab: 'landing' | 'image' | 'video';
   onTabChange: (tab: 'landing' | 'image' | 'video') => void;
   healthStatus?: string;
+  currentUser?: { name: string; email: string; isGuest?: boolean } | null;
+  onLogout?: () => void;
+  onOpenAuth?: () => void;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ activeTab, onTabChange, healthStatus = 'ok' }) => {
+export const Navbar: React.FC<NavbarProps> = ({
+  activeTab,
+  onTabChange,
+  healthStatus = 'ok',
+  currentUser,
+  onLogout,
+  onOpenAuth,
+}) => {
   const isHealthy = healthStatus === 'ok';
 
   return (
@@ -72,6 +91,42 @@ export const Navbar: React.FC<NavbarProps> = ({ activeTab, onTabChange, healthSt
       </nav>
 
       <div className="navbar-right">
+        {currentUser ? (
+          <>
+            <div className="user-profile-pill" title={`Signed in as ${currentUser.email}`}>
+              <div className="user-avatar-circle">
+                <UserIcon size={12} />
+              </div>
+              <span className="user-profile-name">{currentUser.name}</span>
+              {currentUser.isGuest && <span className="guest-badge">Guest</span>}
+            </div>
+
+            {onLogout && (
+              <button
+                id="btn-logout"
+                className="navbar-logout-btn"
+                onClick={onLogout}
+                title="Sign out of current session"
+              >
+                <LogOut size={13} />
+                <span>Sign Out</span>
+              </button>
+            )}
+          </>
+        ) : (
+          onOpenAuth && (
+            <button
+              id="btn-navbar-signin"
+              className="btn-navbar-signin"
+              onClick={onOpenAuth}
+              title="Sign in to VisionIQ"
+            >
+              <LogIn size={13} />
+              <span>Sign In</span>
+            </button>
+          )
+        )}
+
         <div className="status-pill" title={`Backend Status: ${healthStatus}`}>
           <span className={`status-indicator ${isHealthy ? 'ok' : 'offline'}`} />
           <span className="status-label">

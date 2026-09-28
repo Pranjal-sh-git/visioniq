@@ -192,20 +192,21 @@ CATALOG_CATEGORIES = {"Headphones", "Chairs", "Shoes", "Watches"}
 CATEGORY_SYNONYMS: dict[str, list[str]] = {
     "Headphones": [
         "headphone", "headphones", "earphone", "earphones", "headset", "headsets",
-        "earbud", "earbuds", "audio", "over-ear", "in-ear", "on-ear", "airpods"
+        "earbud", "earbuds", "audio", "over-ear", "in-ear", "on-ear", "airpods",
+        "wh-1000", "quietcomfort", "momentum", "sony", "bose", "sennheiser"
     ],
     "Chairs": [
         "chair", "chairs", "furniture", "seating", "office chair", "desk chair",
-        "ergonomic chair", "armchair", "seat", "stool"
+        "ergonomic chair", "armchair", "seat", "stool", "aeron", "herman miller", "embody"
     ],
     "Shoes": [
         "shoe", "shoes", "footwear", "sneaker", "sneakers", "running shoe",
         "running shoes", "trainer", "trainers", "boot", "boots", "cleat", "cleats",
-        "sandal", "sandals", "footware"
+        "sandal", "sandals", "footware", "pegasus", "nike", "air zoom", "adidas"
     ],
     "Watches": [
         "watch", "watches", "smartwatch", "smartwatches", "timepiece", "timepieces",
-        "chronograph", "wrist watch", "wrist-watch", "wristwatch"
+        "chronograph", "wrist watch", "wrist-watch", "wristwatch", "rolex", "submariner", "garmin", "apple watch"
     ],
 }
 
@@ -221,6 +222,8 @@ def map_to_catalog_category(identified_info: Optional[dict[str, Any]]) -> Option
 
     cat_raw = (identified_info.get("category") or "").strip().lower()
     name_raw = (identified_info.get("product_name") or identified_info.get("model") or "").strip().lower()
+    brand_raw = (identified_info.get("brand") or "").strip().lower()
+    combined_raw = f"{brand_raw} {name_raw} {cat_raw}"
 
     # Exact or synonym category match
     for cat_name, synonyms in CATEGORY_SYNONYMS.items():
@@ -230,10 +233,10 @@ def map_to_catalog_category(identified_info: Optional[dict[str, Any]]) -> Option
             if syn in cat_raw:
                 return cat_name
 
-    # Check product name or model if category was generic (e.g. 'Electronics' or 'Apparel')
+    # Check combined brand, product name, and model
     for cat_name, synonyms in CATEGORY_SYNONYMS.items():
         for syn in synonyms:
-            if syn in name_raw:
+            if syn in combined_raw:
                 return cat_name
 
     return None
@@ -249,8 +252,8 @@ def find_similar_catalog_products(
     """Searches the indexed catalog for similar product recommendations.
 
     Enforces category relevance: if the identified product belongs to a category
-    NOT present in our catalog (e.g. smartphones, laptops, apparel), no recommendations
-    are returned to avoid misleading cross-category high similarity scores.
+    NOT present in our catalog (e.g. books, groceries, cosmetics, apparel), out-of-catalog
+    items are rejected to avoid misleading cross-category recommendations.
 
     Args:
         image: Optional image input to embed.
@@ -262,21 +265,19 @@ def find_similar_catalog_products(
     Returns:
         list[dict[str, Any]]: Similar catalog items with scores, specs, and match flags.
     """
-    # Category relevance check for open-world identification
-    target_category: Optional[str] = None
-    if identified_info:
-        target_category = map_to_catalog_category(identified_info)
-        if target_category is None:
-            raw_cat = identified_info.get("category", "Unknown")
-            logger.info(
-                f"[CATALOG RELEVANCE] Identified category '{raw_cat}' is not in catalog categories ({CATALOG_CATEGORIES}). "
-                "Suppressing catalog recommendations."
-            )
-            return []
-
+    target_category = map_to_catalog_category(identified_info) if identified_info else None
     matches: list[dict[str, Any]] = []
 
-    # Priority 1: Search using image vector if provided (filtered by relevant catalog category if known)
+    # Strict out-of-catalog rejection: if identified product category is not in our catalog, return no recommendations
+    if identified_info and target_category is None:
+        raw_cat = identified_info.get("category", "Unknown")
+        logger.info(
+            f"[CATALOG RELEVANCE] Identified category '{raw_cat}' is not in indexed catalog ({CATALOG_CATEGORIES}). "
+            "Suppressing catalog recommendations."
+        )
+        return []
+
+    # Priority 1: Search using image vector if provided (filtered by relevant catalog category)
     if image is not None:
         try:
             matches = identify_product(

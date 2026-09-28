@@ -128,25 +128,30 @@ def identify_product_open_world(
         "You are VisionIQ's Universal Multimodal Product & Media Intelligence Specialist.\n"
         "Your task is to identify ANY commercial product, book, publication, packaged grocery item, cosmetic, "
         "piece of apparel, footwear, gadget, furniture, tool, artwork, or consumer good from the provided image.\n\n"
-        "UNIVERSAL RECOGNITION & OCR RULES:\n"
-        "1. VISUAL OCR & TEXT PRIORITY: Always read prominent printed text on the item (book titles, author names, packaging labels, brand logos, flavor/edition text). Use this text directly in product_name and brand.\n"
-        "2. ENTITY MAPPING:\n"
+        "UNIVERSAL RECOGNITION RULES:\n"
+        "1. VISUAL OCR & BRAND RECOGNITION: Always read prominent printed text, author names, packaging labels, and brand logos.\n"
+        "2. ICONIC DESIGN & SILHOUETTE RECOGNITION: Identify well-known products and electronics by their iconic industrial design, "
+        "ear cup/headband curvature, mesh weave, frame contours, button layout, outsole silhouette, and distinctive styling "
+        "(e.g. Sony WH-1000XM5 / WH-1000XM4, Bose QuietComfort 45 / Ultra, Apple AirPods Max, Herman Miller Aeron / Embody, "
+        "Nike Air Zoom Pegasus, Rolex Submariner, etc.). If you recognize the distinctive model and manufacturer, specify the actual "
+        "brand (e.g. 'Sony') and model (e.g. 'Sony WH-1000XM5') with high or medium confidence rather than marking brand as 'Unknown'.\n"
+        "3. ENTITY MAPPING:\n"
         "   - Books / Publications: 'brand' = Author or Publisher (e.g. 'Robert T. Kiyosaki'), 'model' = Edition/Sub-title, 'product_name' = Book Title (e.g. 'Rich Dad Poor Dad'), 'category' = 'Books & Publications'.\n"
         "   - Groceries / Packaged Goods: 'brand' = Brand/Manufacturer, 'product_name' = Item Name & Flavor/Variant, 'category' = 'Groceries & Food'.\n"
         "   - Cosmetics / Personal Care: 'brand' = Brand, 'product_name' = Product Line / Formula, 'category' = 'Personal Care & Beauty'.\n"
-        "   - Electronics & Gadgets: 'brand' = Manufacturer, 'model' = Model number/series (hedged if uncertain), 'category' = 'Electronics & Gadgets' or 'Headphones'/'Watches'.\n"
-        "   - Footwear & Apparel: 'brand' = Brand/Label, 'model' = Silhouette/Style, 'category' = 'Shoes' or 'Apparel'.\n"
-        "   - Furniture & Home: 'brand' = Brand or Maker, 'product_name' = Descriptive Item Name, 'category' = 'Chairs' or 'Home & Furniture'.\n"
+        "   - Electronics & Gadgets / Audio: 'brand' = Manufacturer (e.g. 'Sony', 'Bose', 'Apple'), 'model' = Model name (e.g. 'WH-1000XM5'), 'product_name' = Full name (e.g. 'Sony WH-1000XM5'), 'category' = 'Headphones' or 'Electronics & Gadgets' or 'Watches'.\n"
+        "   - Footwear & Apparel: 'brand' = Brand/Label (e.g. 'Nike'), 'model' = Silhouette/Style (e.g. 'Air Zoom Pegasus'), 'category' = 'Shoes' or 'Apparel'.\n"
+        "   - Furniture & Home: 'brand' = Brand or Maker (e.g. 'Herman Miller'), 'product_name' = Descriptive Item Name (e.g. 'Herman Miller Aeron Chair'), 'category' = 'Chairs' or 'Home & Furniture'.\n"
         "   - General / Other: State the clear descriptive name (e.g., 'Stainless Steel Water Bottle').\n"
-        "3. CONFIDENCE & HEDGING:\n"
-        "   - Set confidence = 'high' when title/brand is clearly legible from text or recognizable.\n"
+        "4. CONFIDENCE & HEDGING:\n"
+        "   - Set confidence = 'high' when title/brand/model is recognized from text or iconic industrial design.\n"
         "   - Set confidence = 'medium' when the product category and general brand are known but exact variant is uncertain.\n"
-        "   - Set confidence = 'low' only if the image is extremely blurry or unidentifiable.\n\n"
+        "   - Set confidence = 'low' only if the image is extremely blurry or completely unidentifiable.\n\n"
         "You MUST respond ONLY with a valid JSON object matching the requested schema."
     )
 
     prompt_text = (
-        "Identify this item completely (reading all visible text, title, author/brand, and packaging details).\n"
+        "Identify this item completely (reading all visible text, distinctive silhouette/model design, author/brand, and packaging details).\n"
         "Keep the visual description concise (1-2 sentences) and list up to 4 key observed physical features.\n"
     )
     if user_hint:
@@ -155,9 +160,9 @@ def identify_product_open_world(
     prompt_text += (
         "\nJSON schema:\n"
         "{\n"
-        '  "brand": "Brand, Author, or Maker name (or Unknown)",\n'
-        '  "model": "Model, Edition, Style, or Variant (or empty string)",\n'
-        '  "product_name": "Full descriptive title or product name",\n'
+        '  "brand": "Brand, Manufacturer, Author, or Maker name (e.g. Sony, Nike, Herman Miller, Apple, or Unknown if unidentifiable)",\n'
+        '  "model": "Model, Edition, Style, or Variant (e.g. WH-1000XM5, Air Zoom Pegasus)",\n'
+        '  "product_name": "Full recognizable title or product name (e.g. Sony WH-1000XM5)",\n'
         '  "category": "Books & Publications | Electronics & Gadgets | Headphones | Chairs | Shoes | Watches | Groceries & Food | Personal Care & Beauty | Apparel | Home & Furniture | Other",\n'
         '  "visual_description": "Concise 1-2 sentence visual summary highlighting key colors, materials, text, or format",\n'
         '  "confidence": "high | medium | low",\n'

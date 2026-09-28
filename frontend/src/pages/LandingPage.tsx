@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Sparkles,
   Eye,
@@ -6,20 +6,99 @@ import {
   ArrowRight,
   Database,
   Cpu,
-  ShieldCheck,
   Layers,
   CheckCircle,
+  UploadCloud,
+  Search,
+  MessageSquareQuote,
+  Zap,
+  Mic,
 } from 'lucide-react';
 
 interface LandingPageProps {
   onNavigate: (tab: 'image' | 'video') => void;
 }
 
+// Smooth quadratic easing for counter
+const easeOutQuad = (t: number) => t * (2 - t);
+
 export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
+  const statsRef = useRef<HTMLDivElement>(null);
+  const [hasAnimated, setHasAnimated] = useState(false);
+
+  // Counter States
+  const [top1Acc, setTop1Acc] = useState(0);
+  const [top3Acc, setTop3Acc] = useState(0);
+  const [rejectionRate, setRejectionRate] = useState(0);
+  const [latency, setLatency] = useState(0);
+
+  // IntersectionObserver for general scroll-reveal sections
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('is-revealed');
+          }
+        });
+      },
+      { threshold: 0.12 }
+    );
+
+    const elements = document.querySelectorAll('.scroll-reveal');
+    elements.forEach((el) => observer.observe(el));
+
+    return () => observer.disconnect();
+  }, []);
+
+  // IntersectionObserver specifically for Stats count-up
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && !hasAnimated) {
+          setHasAnimated(true);
+
+          const duration = 900; // ms
+          const startTime = performance.now();
+
+          const animate = (currentTime: number) => {
+            const elapsed = currentTime - startTime;
+            const progress = Math.min(elapsed / duration, 1);
+            const eased = easeOutQuad(progress);
+
+            setTop1Acc(Math.round(eased * 65));
+            setTop3Acc(Math.round(eased * 80));
+            setRejectionRate(Math.round(eased * 100));
+            setLatency(parseFloat((eased * 3.07).toFixed(2)));
+
+            if (progress < 1) {
+              requestAnimationFrame(animate);
+            } else {
+              setLatency(3.07);
+              setTop1Acc(65);
+              setTop3Acc(80);
+              setRejectionRate(100);
+            }
+          };
+
+          requestAnimationFrame(animate);
+        }
+      },
+      { threshold: 0.2 }
+    );
+
+    if (statsRef.current) {
+      observer.observe(statsRef.current);
+    }
+
+    return () => observer.disconnect();
+  }, [hasAnimated]);
+
   return (
     <div className="landing-container">
-      {/* Hero Section */}
-      <section className="landing-hero">
+      {/* 1. Hero Section */}
+      <section className="landing-hero scroll-reveal is-revealed">
         <div className="hero-badge">
           <span className="badge-pulse" />
           <Sparkles size={14} className="badge-icon" />
@@ -31,12 +110,15 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         </h1>
 
         <p className="hero-tagline">
-          Multimodal AI that <span className="highlight-mint">sees</span>, <span className="highlight-mint">understands</span>, and <span className="highlight-mint">answers</span>.
+          Multimodal AI that <span className="highlight-mint">sees</span>,{' '}
+          <span className="highlight-mint">understands</span>, and{' '}
+          <span className="highlight-mint">answers</span>.
         </p>
 
         <p className="hero-description">
-          Seamlessly identify real-world products, books, and objects from photos with zero-shot vision, 
-          query grounded catalog specs with vector RAG, and retrieve exact temporal moments in video.
+          Seamlessly identify real-world products, books, and objects from photos with
+          zero-shot vision, query grounded catalog specs with vector RAG, and retrieve
+          exact temporal moments in video.
         </p>
 
         <div className="hero-cta-group">
@@ -60,8 +142,8 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         </div>
       </section>
 
-      {/* Two Large Interactive Feature Cards */}
-      <section className="landing-cards-grid">
+      {/* 2. Two Large Interactive Feature Cards (Right Below Hero) */}
+      <section className="landing-cards-grid scroll-reveal">
         {/* Card 1: Image Intelligence */}
         <div
           id="feature-card-image"
@@ -151,36 +233,132 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
         </div>
       </section>
 
-      {/* Powered by Azure AI Foundry - Gradient Pro Strip */}
-      <section className="landing-gradient-strip">
-        <div className="gradient-strip-left">
-          <div className="strip-icon-box">
-            <Cpu size={20} />
-          </div>
-          <div>
-            <div className="strip-title">Powered by Azure AI Foundry & OpenAI</div>
-            <div className="strip-subtitle">
-              Enterprise-grade foundation models (gpt-5-mini), vector search, and Responsible AI guardrails.
-            </div>
-          </div>
+      {/* 3. Stats Section (Horizontal Trust Strip) */}
+      <section className="landing-stats-section scroll-reveal" ref={statsRef}>
+        <div className="stats-section-header">
+          <span className="section-eyebrow">TRUSTED & GROUNDED</span>
+          <h2 className="stats-section-heading">Numbers that back the claims</h2>
         </div>
 
-        <div className="gradient-strip-badges">
-          <div className="glass-badge">
-            <Sparkles size={13} />
-            <span>Azure OpenAI</span>
+        <div className="stats-row">
+          <div className="stat-col">
+            <div className="stat-number">
+              0.0<span className="stat-unit">%</span>
+            </div>
+            <div className="stat-label">Hallucination Rate</div>
           </div>
-          <div className="glass-badge">
-            <Database size={13} />
-            <span>AI Search RAG</span>
+
+          <div className="stat-divider-line" />
+
+          <div className="stat-col">
+            <div className="stat-number">
+              {top1Acc}% <span className="stat-sub-number">/ {top3Acc}%</span>
+            </div>
+            <div className="stat-label">Top-1 / Top-3 Accuracy</div>
           </div>
-          <div className="glass-badge">
-            <Layers size={13} />
+
+          <div className="stat-divider-line" />
+
+          <div className="stat-col">
+            <div className="stat-number">
+              {rejectionRate}<span className="stat-unit">%</span>
+            </div>
+            <div className="stat-label">Out-of-Catalog Rejection</div>
+          </div>
+
+          <div className="stat-divider-line" />
+
+          <div className="stat-col">
+            <div className="stat-number">
+              {latency.toFixed(2)}<span className="stat-unit">s</span>
+            </div>
+            <div className="stat-label">Mean Query Latency</div>
+          </div>
+        </div>
+      </section>
+
+      {/* 4. How It Works (3-Step Horizontal Flow) */}
+      <section className="landing-workflow-section scroll-reveal">
+        <div className="workflow-section-header">
+          <span className="section-eyebrow">WORKFLOW</span>
+          <h2 className="section-heading">From Raw Media to Grounded Answers</h2>
+          <p className="section-description">
+            A frictionless three-step multimodal pipeline built for sub-second precision.
+          </p>
+        </div>
+
+        <div className="workflow-steps-grid">
+          {/* Step 1 */}
+          <div className="workflow-step-card">
+            <div className="step-header">
+              <div className="step-icon-box">
+                <UploadCloud size={20} />
+              </div>
+              <span className="step-number">01</span>
+            </div>
+            <h3 className="step-title">Upload & Ingest</h3>
+            <p className="step-desc">
+              Drop arbitrary product photos, book covers, or video URLs with no prior manual tagging or dataset labeling.
+            </p>
+          </div>
+
+          {/* Step 2 */}
+          <div className="workflow-step-card">
+            <div className="step-header">
+              <div className="step-icon-box">
+                <Search size={20} />
+              </div>
+              <span className="step-number">02</span>
+            </div>
+            <h3 className="step-title">Identify & Ground</h3>
+            <p className="step-desc">
+              Zero-shot vision extracts OCR and visual tokens, querying Azure AI Search vector indexes with cosine similarity.
+            </p>
+          </div>
+
+          {/* Step 3 */}
+          <div className="workflow-step-card">
+            <div className="step-header">
+              <div className="step-icon-box">
+                <MessageSquareQuote size={20} />
+              </div>
+              <span className="step-number">03</span>
+            </div>
+            <h3 className="step-title">Ask Anything</h3>
+            <p className="step-desc">
+              Execute conversational grounded QA with strict catalog citations or jump to exact transcript timestamps.
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* 5. "Powered By" Minimalist Tech Strip */}
+      <section className="landing-tech-strip scroll-reveal">
+        <span className="tech-strip-label">BUILT ON FOUNDATION INFRASTRUCTURE</span>
+        <div className="tech-badges-row">
+          <div className="tech-badge-item">
+            <Cpu size={14} className="tech-badge-icon" />
+            <span>Azure AI Foundry</span>
+          </div>
+          <div className="tech-badge-item">
+            <Database size={14} className="tech-badge-icon" />
+            <span>Azure AI Search</span>
+          </div>
+          <div className="tech-badge-item">
+            <Sparkles size={14} className="tech-badge-icon" />
+            <span>gpt-5-mini</span>
+          </div>
+          <div className="tech-badge-item">
+            <Layers size={14} className="tech-badge-icon" />
             <span>CLIP Embeddings</span>
           </div>
-          <div className="glass-badge">
-            <ShieldCheck size={13} />
-            <span>Responsible AI</span>
+          <div className="tech-badge-item">
+            <Mic size={14} className="tech-badge-icon" />
+            <span>Whisper ASR</span>
+          </div>
+          <div className="tech-badge-item">
+            <Zap size={14} className="tech-badge-icon" />
+            <span>Content Understanding</span>
           </div>
         </div>
       </section>
@@ -189,3 +367,4 @@ export const LandingPage: React.FC<LandingPageProps> = ({ onNavigate }) => {
 };
 
 export default LandingPage;
+

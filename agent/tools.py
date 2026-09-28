@@ -72,6 +72,20 @@ def identify_product(
         exact_match = next((item for item in similar_catalog if item.get("is_exact_catalog_match")), None)
         best_catalog = exact_match or (similar_catalog[0] if similar_catalog else None)
 
+        # Ground open-world info with authoritative catalog item if a confident catalog match exists and category is consistent
+        if best_catalog and (best_catalog.get("is_confident_match") or best_catalog.get("similarity_score", 0.0) >= 0.85):
+            ident_cat = (open_world_info.get("category") or "").lower()
+            catalog_cat = (best_catalog.get("category") or "").lower()
+            if ident_cat in (catalog_cat, "general", "unknown", ""):
+                if open_world_info.get("brand") in ("Unknown", "Unidentified", "", None) or open_world_info.get("product_name") in ("Unknown", "Unidentified Product", "", None) or not open_world_info.get("brand"):
+                    open_world_info["brand"] = best_catalog["brand"]
+                    open_world_info["model"] = best_catalog["name"]
+                    open_world_info["product_name"] = best_catalog["name"]
+                    open_world_info["category"] = best_catalog.get("category") or open_world_info.get("category", "General")
+                    open_world_info["confidence"] = "high"
+                    open_world_info["is_catalog_match"] = True
+                    open_world_info["catalog_id"] = best_catalog["id"]
+
         prod_name = open_world_info.get("product_name", "Unidentified Product")
         brand = open_world_info.get("brand", "Unknown")
         visual_desc = open_world_info.get("visual_description", "")

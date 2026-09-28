@@ -247,17 +247,17 @@ const getCategorySuggestions = (category?: string): QuickSuggestion[] => {
 
 const SAMPLE_IMAGES = [
   {
-    label: 'Sony WH-1000XM5',
+    label: 'Headphones',
     category: 'Audio',
     url: 'https://images.unsplash.com/photo-1546435770-a3e426bf472b?auto=format&fit=crop&w=800&q=80',
   },
   {
-    label: 'Herman Miller Aeron',
+    label: 'Chair',
     category: 'Ergonomics',
-    url: 'https://images.unsplash.com/photo-1580481077197-987823563052?auto=format&fit=crop&w=800&q=80',
+    url: 'https://images.unsplash.com/photo-1505843490538-5133c6c7d0e1?auto=format&fit=crop&w=800&q=80',
   },
   {
-    label: 'Nike Air Zoom Pegasus',
+    label: 'Shoes',
     category: 'Footwear',
     url: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=800&q=80',
   },
@@ -355,7 +355,25 @@ export const ImageIntelligence: React.FC = () => {
         setSelectedCatalogItem(null);
 
         const prod = result.identified_product;
-        const welcomeText = `Identified as **${prod.product_name}** (${prod.brand} · ${prod.category}) with **${prod.confidence} confidence**.\n\n${prod.visual_description}`;
+        // Fallback grounding if open-world model returned Unknown but catalog has confident visual match
+        if ((!prod.brand || prod.brand.toLowerCase() === 'unknown' || !prod.product_name || prod.product_name.toLowerCase() === 'unknown') && catalogList.length > 0 && catalogList[0].similarity_score >= 0.85) {
+          prod.brand = catalogList[0].brand;
+          prod.product_name = catalogList[0].name;
+          prod.category = catalogList[0].category;
+          prod.confidence = 'high';
+          prod.catalog_id = catalogList[0].id;
+          prod.is_catalog_match = true;
+        }
+
+        let welcomeText = `I identified this product as **${prod.product_name}** (${prod.brand}).\n\n**Visual Analysis**: ${prod.visual_description || 'Clear visual match identified.'}`;
+        if (catalogList.length > 0) {
+          const recNames = catalogList.slice(0, 2).map((c) => {
+            const b = c.brand || '';
+            const n = c.name || '';
+            return n.toLowerCase().startsWith(b.toLowerCase()) ? n : `${b} ${n}`;
+          }).join(', ');
+          welcomeText += `\n\n**Similar items in our catalog**: ${recNames}.`;
+        }
 
         setMessages([
           {
@@ -431,9 +449,8 @@ export const ImageIntelligence: React.FC = () => {
     scrollToBottom();
 
     try {
-      // If a catalog item was explicitly selected by user, target its ID and catalog data;
-      // otherwise use the open-world identifiedProduct with activeProductId = undefined.
-      const activeProductId = selectedCatalogItem ? selectedCatalogItem.id : undefined;
+      // If a catalog item was explicitly selected by user or grounded from identifiedProduct, target its ID
+      const activeProductId = selectedCatalogItem ? selectedCatalogItem.id : (identifiedProduct?.catalog_id || undefined);
       const mediaContext = typeof previewUrl === 'string' && previewUrl.startsWith('http') ? previewUrl : undefined;
       const productInfo = selectedCatalogItem
         ? {

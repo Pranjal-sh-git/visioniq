@@ -46,6 +46,8 @@ export interface OpenWorldProductIdentification {
   confidence: 'high' | 'medium' | 'low';
   key_features_observed: string[];
   is_open_world?: boolean;
+  is_catalog_match?: boolean;
+  catalog_id?: string;
 }
 
 export interface SimilarCatalogProduct extends ProductMatch {

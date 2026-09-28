@@ -3,11 +3,27 @@ import Navbar from './components/Navbar';
 import LandingPage from './pages/LandingPage';
 import ImageIntelligence from './pages/ImageIntelligence';
 import VideoIntelligence from './pages/VideoIntelligence';
+import AuthPage from './pages/AuthPage';
 import { getHealthStatus } from './services/api';
 import { Layers, ShieldCheck, Database, Zap } from 'lucide-react';
 
 export const App: React.FC = () => {
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
+    return localStorage.getItem('visioniq_demo_session') === 'true';
+  });
+
+  const [currentUser, setCurrentUser] = useState<{ name: string; email: string; isGuest?: boolean } | null>(() => {
+    try {
+      const stored = localStorage.getItem('visioniq_user');
+      return stored ? JSON.parse(stored) : null;
+    } catch {
+      return null;
+    }
+  });
+
   const [activeTab, setActiveTab] = useState<'landing' | 'image' | 'video'>('landing');
+  const [showAuthPage, setShowAuthPage] = useState<boolean>(false);
+  const [pendingTargetTab, setPendingTargetTab] = useState<'image' | 'video' | null>(null);
   const [healthStatus, setHealthStatus] = useState<string>('checking...');
 
   useEffect(() => {
@@ -32,14 +48,81 @@ export const App: React.FC = () => {
     };
   }, []);
 
+  const handleNavigate = (tab: 'landing' | 'image' | 'video') => {
+    if (tab === 'landing') {
+      setShowAuthPage(false);
+      setActiveTab('landing');
+      return;
+    }
+
+    // If accessing image or video intelligence without auth, show login page
+    if (!isAuthenticated) {
+      setPendingTargetTab(tab);
+      setShowAuthPage(true);
+    } else {
+      setShowAuthPage(false);
+      setActiveTab(tab);
+    }
+  };
+
+  const handleOpenAuth = (defaultTarget: 'image' | 'video' = 'image') => {
+    setPendingTargetTab(defaultTarget);
+    setShowAuthPage(true);
+  };
+
+  const handleLoginSuccess = (user: { name: string; email: string; isGuest?: boolean }) => {
+    setCurrentUser(user);
+    setIsAuthenticated(true);
+    setShowAuthPage(false);
+    const target = pendingTargetTab || 'image';
+    setActiveTab(target);
+    setPendingTargetTab(null);
+  };
+
+  const handleBackToOverview = () => {
+    setShowAuthPage(false);
+    setActiveTab('landing');
+    setPendingTargetTab(null);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('visioniq_demo_session');
+    localStorage.removeItem('visioniq_user');
+    setCurrentUser(null);
+    setIsAuthenticated(false);
+    setShowAuthPage(false);
+    setActiveTab('landing');
+    setPendingTargetTab(null);
+  };
+
+  if (showAuthPage) {
+    return (
+      <div className="app-container">
+        <div className="ambient-glow" />
+        <AuthPage
+          onLoginSuccess={handleLoginSuccess}
+          onBack={handleBackToOverview}
+          intendedTab={pendingTargetTab || 'image'}
+        />
+      </div>
+    );
+  }
+
   return (
     <div className="app-container">
       <div className="ambient-glow" />
-      <Navbar activeTab={activeTab} onTabChange={setActiveTab} healthStatus={healthStatus} />
+      <Navbar
+        activeTab={activeTab}
+        onTabChange={handleNavigate}
+        healthStatus={healthStatus}
+        currentUser={currentUser}
+        onLogout={handleLogout}
+        onOpenAuth={() => handleOpenAuth('image')}
+      />
       
       <main className="main-content">
         <div className={`tab-pane ${activeTab === 'landing' ? 'active' : 'is-hidden'}`}>
-          <LandingPage onNavigate={(tab) => setActiveTab(tab)} />
+          <LandingPage onNavigate={(tab) => handleNavigate(tab)} />
         </div>
         <div className={`tab-pane ${activeTab === 'image' ? 'active' : 'is-hidden'}`}>
           <ImageIntelligence />
