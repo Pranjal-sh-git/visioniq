@@ -1,26 +1,101 @@
-test_id,test_name,ground_truth_id,in_catalog,top1_id,top1_name,top1_score,top2_id,top2_score,top3_id,top3_score,top1_hit,top3_hit,is_confident_match,latency_ms,status
-T01,Sony WH-1000XM5 (Catalog Photo),P001,True,P001,Sony Sony WH-1000XM5,1.0,P004,0.9229,P002,0.882,True,True,True,23123.04,SUCCESS
-T02,Sony WH-1000XM5 (Secondary Angle),P001,True,P004,Sennheiser Sennheiser Momentum 4 Wireless,0.9397,P001,0.9343,P002,0.856,False,True,True,1738.59,SUCCESS
-T03,Bose QuietComfort Ultra,P002,True,P002,Bose Bose QuietComfort Ultra,1.0,P003,0.8912,P001,0.882,True,True,True,1865.62,SUCCESS
-T04,Apple AirPods Max,P003,True,P003,Apple Apple AirPods Max,1.0,P002,0.8912,P004,0.8611,True,True,True,1644.55,SUCCESS
-T05,Sennheiser Momentum 4,P004,True,P004,Sennheiser Sennheiser Momentum 4 Wireless,1.0,P001,0.9229,P002,0.8669,True,True,True,1540.3,SUCCESS
-T06,Audio-Technica ATH-M50xBT2,P005,True,P005,Audio-Technica Audio-Technica ATH-M50xBT2,1.0,P020,0.8109,P002,0.7828,True,True,True,1514.51,SUCCESS
-T07,Bowers & Wilkins Px7 S2e,P006,True,P006,Bowers & Wilkins Bowers & Wilkins Px7 S2e,1.0,P004,0.856,P001,0.8505,True,True,True,1564.72,SUCCESS
-T08,Herman Miller Aeron Chair,P007,True,P007,Herman Miller Herman Miller Aeron Chair,1.0,P001,0.8345,P008,0.8241,True,True,True,1942.97,SUCCESS
-T09,Steelcase Gesture,P008,True,P008,Steelcase Steelcase Gesture,1.0,P013,0.867,P001,0.8467,True,True,True,1999.91,SUCCESS
-T10,Secretlab Titan Evo,P009,True,P009,Secretlab Secretlab Titan Evo,1.0,P007,0.7646,P008,0.7508,True,True,True,2164.46,SUCCESS
-T11,Autonomous ErgoChair Pro,P010,True,P010,Autonomous Autonomous ErgoChair Pro,1.0,P011,0.8553,P013,0.8487,True,True,True,2219.38,SUCCESS
-T12,Haworth Fern Chair,P012,True,P012,Haworth Haworth Fern,0.8811,P013,0.8715,P011,0.8275,True,True,True,1695.74,SUCCESS
-T13,Humanscale Freedom Chair,P013,True,P011,IKEA IKEA Markus,1.0,P013,0.8687,P010,0.8553,False,True,True,1768.55,SUCCESS
-T14,Nike Air Zoom Pegasus 40,P011,True,P014,Nike Nike Air Max 270,1.0,P019,0.8399,P017,0.7883,False,False,True,2267.16,SUCCESS
-T15,Nike Air Max 270,P014,True,P019,Salomon Salomon XT-6,0.8173,P016,0.7633,P014,0.7441,False,True,False,1696.18,SUCCESS
-T16,Adidas Ultraboost Light,P015,True,P001,Sony Sony WH-1000XM5,0.8502,P008,0.8183,P004,0.8018,False,False,True,1917.97,SUCCESS
-T17,New Balance 990v6,P016,True,P016,New Balance New Balance 990v6,1.0,P019,0.8273,P017,0.8192,True,True,True,2161.46,SUCCESS
-T18,On Running Cloudmonster,P017,True,P017,On Running On Cloudmonster,1.0,P015,0.9041,P016,0.8192,True,True,True,2762.9,SUCCESS
-T19,Hoka Clifton 9,P018,True,P016,New Balance New Balance 990v6,0.8267,P019,0.8031,P017,0.7946,False,False,False,1662.91,SUCCESS
-T20,Salomon XT-6,P019,True,P018,Hoka Hoka Clifton 9,1.0,P016,0.7966,P015,0.762,False,False,True,1679.78,SUCCESS
-T21,Mechanical Keyboard (Out-of-Catalog),OUT_OF_CATALOG,False,P007,Herman Miller Herman Miller Aeron Chair,0.8296,P001,0.8183,P008,0.8079,False,False,False,5854.2,SUCCESS
-T22,Coffee Espresso Machine (Out-of-Catalog),OUT_OF_CATALOG,False,P008,Steelcase Steelcase Gesture,0.7505,P004,0.7449,P013,0.7419,False,False,False,6660.78,SUCCESS
-T23,DSLR Camera Lens (Out-of-Catalog),OUT_OF_CATALOG,False,P001,Sony Sony WH-1000XM5,0.8055,P007,0.7911,P008,0.7832,False,False,False,1592.2,SUCCESS
-T24,Ceramic Coffee Mug (Out-of-Catalog),OUT_OF_CATALOG,False,P008,Steelcase Steelcase Gesture,0.8233,P001,0.8216,P013,0.8122,False,False,False,1872.96,SUCCESS
-T25,Bicycle Road Frame (Out-of-Catalog),OUT_OF_CATALOG,False,P012,Haworth Haworth Fern,0.7941,P013,0.7741,P002,0.7726,False,False,False,1916.92,SUCCESS
+test_id,test_name,expected_category,expected_product,condition,is_in_catalog,actual_top1_id,actual_top1_name,similarity_score,applied_threshold,actual_top2_id,actual_top2_score,actual_top3_id,actual_top3_score,top1_hit,top3_hit,is_confident_match,threshold_correct,latency_ms,status
+T001,Sony WH-1000XM5 (Catalog Studio Shot),Headphones,P001,Studio Clean,True,P001,Sony Sony WH-1000XM5,1.0,0.9,P004,0.9229,P002,0.882,True,True,True,True,135071.28,SUCCESS
+T002,Sony WH-1000XM5 (Angled Wooden Desk with Shadow),Headphones,P001,Desk Angled,True,P004,Sennheiser Sennheiser Momentum 4 Wireless,0.9397,0.9,P001,0.9343,P002,0.856,False,True,True,True,1610.66,SUCCESS
+T003,Sony WH-1000XM5 (Worn on Commuter Neck),Headphones,P001,Worn on Person,True,P002,Bose Bose QuietComfort Ultra,0.9132,0.9,P003,0.8767,P004,0.8703,False,False,True,True,1534.42,SUCCESS
+T004,Bose QuietComfort Ultra (Clean Profile View),Headphones,P002,Clean Profile,True,P002,Bose Bose QuietComfort Ultra,1.0,0.9,P003,0.8912,P001,0.882,True,True,True,True,1711.23,SUCCESS
+T005,Bose QuietComfort Ultra (Moody Low Light on Velvet),Headphones,P002,Low Light Ambient,True,P002,Bose Bose QuietComfort Ultra,0.9224,0.9,P004,0.9095,P001,0.8945,True,True,True,True,1955.94,SUCCESS
+T006,Bose QuietComfort Ultra (Folded Flat in Travel Case),Headphones,P002,Folded in Case,True,P003,Apple Apple AirPods Max,0.9981,0.9,P002,0.8913,P004,0.8594,False,True,True,True,1945.3,SUCCESS
+T007,Apple AirPods Max (Silver Metal Canopy Frontal),Headphones,P003,Frontal Studio,True,P004,Sennheiser Sennheiser Momentum 4 Wireless,0.8876,0.9,P002,0.8743,P006,0.8741,False,False,False,False,1694.52,SUCCESS
+T008,Apple AirPods Max (Space Gray on Cluttered Table),Headphones,P003,Cluttered Tabletop,True,P004,Sennheiser Sennheiser Momentum 4 Wireless,0.9138,0.9,P001,0.9027,P002,0.8778,False,False,True,True,1940.22,SUCCESS
+T009,Apple AirPods Max (Top-Down Overhead Flatlay),Headphones,P003,Overhead Flatlay,True,P005,Audio-Technica Audio-Technica ATH-M50xBT2,0.9934,0.9,P020,0.8142,P002,0.7856,False,False,True,True,1566.14,SUCCESS
+T010,Sennheiser Momentum 4 Wireless (Minimalist Black),Headphones,P004,Minimalist Studio,True,P004,Sennheiser Sennheiser Momentum 4 Wireless,1.0,0.9,P001,0.9229,P002,0.8669,True,True,True,True,1552.38,SUCCESS
+T011,Sennheiser Momentum 4 Wireless (Worn Outdoors in Sunlight),Headphones,P004,Outdoor Sunlight,True,P004,Sennheiser Sennheiser Momentum 4 Wireless,0.8308,0.9,P001,0.8305,P006,0.8055,True,True,False,False,1554.47,SUCCESS
+T012,Audio-Technica ATH-M50xBT2 (Studio Setup with Cable),Headphones,P005,Studio Desk,True,P001,Sony Sony WH-1000XM5,1.0,0.9,P004,0.9229,P002,0.882,False,False,True,True,1479.48,SUCCESS
+T013,Audio-Technica ATH-M50xBT2 (Side Swivel Earcups),Headphones,P005,Swivel Angle,True,P006,Bowers & Wilkins Bowers & Wilkins Px7 S2e,0.9925,0.9,P004,0.85,P001,0.8472,False,False,True,True,1625.86,SUCCESS
+T014,Bowers & Wilkins Px7 S2e (Fabric Finish Studio),Headphones,P006,Studio Neutral,True,P006,Bowers & Wilkins Bowers & Wilkins Px7 S2e,0.9925,0.9,P004,0.85,P001,0.8472,True,True,True,True,1539.42,SUCCESS
+T015,Bowers & Wilkins Px7 S2e (Low-Angle Leather Detail),Headphones,P006,Macro Detail,True,P005,Audio-Technica Audio-Technica ATH-M50xBT2,0.9934,0.9,P020,0.8142,P002,0.7856,False,False,True,True,1599.19,SUCCESS
+T016,Studio Condenser Microphone on Boom Arm (Near-Miss Audio),Headphones,OUT_OF_CATALOG,Sibling Domain (Microphone),False,P002,Bose Bose QuietComfort Ultra,0.8912,0.9,P004,0.8679,P001,0.8628,False,False,False,True,1757.63,SUCCESS
+T017,Desktop Bookshelf Studio Monitor Speakers (Near-Miss Audio),Headphones,OUT_OF_CATALOG,Sibling Domain (Studio Monitors),False,P004,Sennheiser Sennheiser Momentum 4 Wireless,0.8546,0.9,P001,0.8493,P002,0.8357,False,False,False,True,1552.79,SUCCESS
+T018,Portable Bluetooth Pill Speaker (Near-Miss Audio),Headphones,OUT_OF_CATALOG,Sibling Domain (Portable Speaker),False,P002,Bose Bose QuietComfort Ultra,0.7988,0.9,P003,0.7924,P001,0.7885,False,False,False,True,1600.06,SUCCESS
+T019,Professional Audio Mixer Board Console (Near-Miss Audio),Headphones,OUT_OF_CATALOG,Sibling Domain (Sound Mixer),False,P001,Sony Sony WH-1000XM5,0.7731,0.9,P004,0.7672,P009,0.7665,False,False,False,True,1588.73,SUCCESS
+T020,Electric Guitar Combo Amplifier (Near-Miss Audio),Headphones,OUT_OF_CATALOG,Sibling Domain (Guitar Amp),False,P013,Humanscale Humanscale Freedom,0.7388,0.9,P008,0.7094,P010,0.7064,False,False,False,True,1532.91,SUCCESS
+T021,In-Ear Wired Shure IEM Earphones (Near-Miss Audio),Headphones,OUT_OF_CATALOG,Sibling Domain (IEM Earphones),False,P005,Audio-Technica Audio-Technica ATH-M50xBT2,0.9934,0.9,P020,0.8142,P002,0.7856,False,False,True,False,1621.64,SUCCESS
+T022,Slim TV Home Theater Soundbar (Near-Miss Audio),Headphones,OUT_OF_CATALOG,Sibling Domain (Soundbar),False,P004,Sennheiser Sennheiser Momentum 4 Wireless,0.8546,0.9,P001,0.8493,P002,0.8357,False,False,False,True,1628.63,SUCCESS
+T023,USB Podcast Blue Yeti Microphone (Near-Miss Audio),Headphones,OUT_OF_CATALOG,Sibling Domain (USB Mic),False,P002,Bose Bose QuietComfort Ultra,0.8912,0.9,P004,0.8679,P001,0.8628,False,False,False,True,1590.84,SUCCESS
+T024,Rugged Two-Way Handheld Walkie-Talkie (Near-Miss Audio),Headphones,OUT_OF_CATALOG,Sibling Domain (Walkie-Talkie),False,P007,Herman Miller Herman Miller Aeron Chair,0.8296,0.9,P001,0.8183,P008,0.8079,False,False,False,True,1529.03,SUCCESS
+T025,Wooden Arc Headphone Display Stand (Near-Miss Audio),Headphones,OUT_OF_CATALOG,Sibling Domain (Accessory Stand),False,P002,Bose Bose QuietComfort Ultra,1.0,0.9,P003,0.8912,P001,0.882,False,False,True,False,1572.25,SUCCESS
+T026,Herman Miller Aeron Chair (Classic Graphite Studio),Chairs,P007,Studio Frontal,True,P007,Herman Miller Herman Miller Aeron Chair,1.0,0.9,P001,0.8345,P008,0.8241,True,True,True,True,1585.25,SUCCESS
+T027,Herman Miller Aeron Chair (Side Profile 45 Degree Angle),Chairs,P007,Side Angle,True,P012,Haworth Haworth Fern,0.8811,0.9,P013,0.8715,P011,0.8275,False,False,False,False,1711.57,SUCCESS
+T028,Herman Miller Aeron Chair (Cluttered Workspace Ambient),Chairs,P007,Cluttered Office,True,P008,Steelcase Steelcase Gesture,0.9972,0.9,P013,0.8716,P001,0.8437,False,False,True,True,1774.35,SUCCESS
+T029,Steelcase Gesture (Knit Fabric Neutral Background),Chairs,P008,Clean Studio,True,P008,Steelcase Steelcase Gesture,0.9972,0.9,P013,0.8716,P001,0.8437,True,True,True,True,2096.9,SUCCESS
+T030,Steelcase Gesture (Conference Room Dim Light),Chairs,P008,Dim Conference Room,True,P011,IKEA IKEA Markus,1.0,0.9,P013,0.8687,P010,0.8553,False,False,True,True,1848.0,SUCCESS
+T031,Secretlab Titan Evo (Gaming Setup with RGB Backlight),Chairs,P009,RGB Lighting,True,P009,Secretlab Secretlab Titan Evo,1.0,0.9,P007,0.7646,P008,0.7508,True,True,True,True,1569.27,SUCCESS
+T032,Secretlab Titan Evo (Reclined 135 Degree Angle),Chairs,P009,Reclined Posture,True,P010,Autonomous Autonomous ErgoChair Pro,0.9952,0.9,P011,0.8582,P013,0.8474,False,False,True,True,1566.02,SUCCESS
+T033,Autonomous ErgoChair Pro (White Frame Studio),Chairs,P010,White Studio,True,P010,Autonomous Autonomous ErgoChair Pro,0.9952,0.9,P011,0.8582,P013,0.8474,True,True,True,True,1528.53,SUCCESS
+T034,Autonomous ErgoChair Pro (Home Office Window Light),Chairs,P010,Window Backlight,True,P012,Haworth Haworth Fern,0.999,0.9,P013,0.8463,P011,0.8409,False,False,True,True,1648.2,SUCCESS
+T035,IKEA Markus (High Mesh Backrest Black),Chairs,P011,Frontal Angle,True,P011,IKEA IKEA Markus,1.0,0.9,P013,0.8687,P010,0.8553,True,True,True,True,1904.82,SUCCESS
+T036,IKEA Markus (Worn Office Floor Tilted View),Chairs,P011,Tilted Perspective,True,P012,Haworth Haworth Fern,0.8811,0.9,P013,0.8715,P011,0.8275,False,True,False,False,1488.41,SUCCESS
+T037,Haworth Fern (Digital Knit Wave Suspension),Chairs,P012,Clean Backrest View,True,P012,Haworth Haworth Fern,0.999,0.9,P013,0.8463,P011,0.8409,True,True,True,True,2018.83,SUCCESS
+T038,Haworth Fern (Executive Office Natural Wood Floor),Chairs,P012,Floor Ambient,True,P013,Humanscale Humanscale Freedom,1.0,0.9,P011,0.8687,P008,0.867,False,False,True,True,1676.51,SUCCESS
+T039,Humanscale Freedom (Dynamic Headrest Front),Chairs,P013,Front View,True,P013,Humanscale Humanscale Freedom,1.0,0.9,P011,0.8687,P008,0.867,True,True,True,True,1534.52,SUCCESS
+T040,Humanscale Freedom (Tilted Lumbar Profile Shot),Chairs,P013,Side Lumbar Profile,True,P012,Haworth Haworth Fern,0.999,0.9,P013,0.8463,P011,0.8409,False,True,True,True,1522.32,SUCCESS
+T041,Chesterfield Leather Living Room Sofa (Near-Miss Furniture),Chairs,OUT_OF_CATALOG,Sibling Domain (Sofa Couch),False,P011,IKEA IKEA Markus,0.8759,0.9,P013,0.8675,P008,0.846,False,False,False,True,1724.95,SUCCESS
+T042,Solid Wood Dining Room Chair (Near-Miss Furniture),Chairs,OUT_OF_CATALOG,Sibling Domain (Dining Chair),False,P012,Haworth Haworth Fern,0.8566,0.9,P013,0.7862,P002,0.7813,False,False,False,True,2099.24,SUCCESS
+T043,Tall Kitchen Counter Bar Stool (Near-Miss Furniture),Chairs,OUT_OF_CATALOG,Sibling Domain (Bar Stool),False,P012,Haworth Haworth Fern,0.8163,0.9,P013,0.7568,P002,0.7516,False,False,False,True,1754.12,SUCCESS
+T044,Plush Fabric Lounge Bean Bag (Near-Miss Furniture),Chairs,OUT_OF_CATALOG,Sibling Domain (Bean Bag),False,P011,IKEA IKEA Markus,1.0,0.9,P013,0.8687,P010,0.8553,False,False,True,False,1483.33,SUCCESS
+T045,Motorized Standing Office Desk (Near-Miss Furniture),Chairs,OUT_OF_CATALOG,Sibling Domain (Office Desk),False,P008,Steelcase Steelcase Gesture,0.898,0.9,P013,0.8627,P001,0.8417,False,False,False,True,1822.75,SUCCESS
+T046,Leather Lounge Armchair Recliner (Near-Miss Furniture),Chairs,OUT_OF_CATALOG,Sibling Domain (Armchair),False,P012,Haworth Haworth Fern,0.8811,0.9,P013,0.8715,P011,0.8275,False,False,False,True,2017.97,SUCCESS
+T047,Cast Iron Garden Park Bench (Near-Miss Furniture),Chairs,OUT_OF_CATALOG,Sibling Domain (Park Bench),False,P013,Humanscale Humanscale Freedom,0.7469,0.9,P008,0.7384,P001,0.7172,False,False,False,True,2175.07,SUCCESS
+T048,Folding Aluminum Step Ladder Stool (Near-Miss Furniture),Chairs,OUT_OF_CATALOG,Sibling Domain (Step Ladder),False,P008,Steelcase Steelcase Gesture,0.8584,0.9,P001,0.837,P007,0.8216,False,False,False,True,1700.48,SUCCESS
+T049,Round Velvet Pouf Ottoman Footstool (Near-Miss Furniture),Chairs,OUT_OF_CATALOG,Sibling Domain (Ottoman Pouf),False,P011,IKEA IKEA Markus,1.0,0.9,P013,0.8687,P010,0.8553,False,False,True,False,1978.05,SUCCESS
+T050,Modular Tall Wooden Bookshelf (Near-Miss Furniture),Chairs,OUT_OF_CATALOG,Sibling Domain (Bookcase),False,P001,Sony Sony WH-1000XM5,0.8068,0.9,P008,0.8039,P007,0.7989,False,False,False,True,1491.74,SUCCESS
+T051,Nike Air Max 270 (Red/Black Studio Lateral),Shoes,P014,Studio Profile,True,P014,Nike Nike Air Max 270,1.0,0.82,P019,0.8399,P017,0.7883,True,True,True,True,1564.01,SUCCESS
+T052,Nike Air Max 270 (Worn on City Asphalt Pavement),Shoes,P014,Worn on Street,True,P019,Salomon Salomon XT-6,0.8195,0.82,P016,0.7604,P014,0.747,False,True,False,False,1488.13,SUCCESS
+T053,Nike Air Max 270 (Overhead Lacing Angle with Shadow),Shoes,P014,Overhead Angle,True,P019,Salomon Salomon XT-6,1.0,0.82,P014,0.8398,P016,0.8273,False,True,True,True,1843.75,SUCCESS
+T054,Adidas Ultraboost Light (White Clean Studio),Shoes,P015,Studio Clean,True,P015,Adidas Adidas Ultraboost Light,0.9994,0.82,P017,0.9046,P016,0.7852,True,True,True,True,1764.98,SUCCESS
+T055,Adidas Ultraboost Light (Running Action on Wet Track),Shoes,P015,Wet Track Running,True,P001,Sony Sony WH-1000XM5,0.8502,0.9,P008,0.8183,P004,0.8018,False,False,False,False,1817.84,SUCCESS
+T056,Adidas Ultraboost Light (Continental Outsole Lug View),Shoes,P015,Outsole Profile,True,P017,On Running On Cloudmonster,0.9999,0.82,P015,0.9038,P016,0.8187,False,True,True,True,1553.36,SUCCESS
+T057,New Balance 990v6 (Grey Suede Studio Shot),Shoes,P016,Studio Suede,True,P016,New Balance New Balance 990v6,1.0,0.82,P019,0.8273,P017,0.8192,True,True,True,True,1500.86,SUCCESS
+T058,New Balance 990v6 (Worn with Denim on Concrete),Shoes,P016,Worn on Concrete,True,P018,Hoka Hoka Clifton 9,1.0,0.82,P016,0.7966,P015,0.762,False,True,True,True,1540.53,SUCCESS
+T059,On Cloudmonster (Helion CloudTec Monster Stack),Shoes,P017,Lateral Midsole,True,P017,On Running On Cloudmonster,0.9999,0.82,P015,0.9038,P016,0.8187,True,True,True,True,1555.75,SUCCESS
+T060,On Cloudmonster (Road Running Footstrike Sunset),Shoes,P017,Sunset Lighting,True,P016,New Balance New Balance 990v6,0.8267,0.82,P019,0.8031,P017,0.7946,False,True,True,True,1566.4,SUCCESS
+T061,Hoka Clifton 9 (Plush Maximalist Rocker Lateral),Shoes,P018,Clean Side Shot,True,P016,New Balance New Balance 990v6,0.8267,0.82,P019,0.8031,P017,0.7946,False,False,True,True,1582.0,SUCCESS
+T062,Hoka Clifton 9 (Morning Jog on Park Gravel Trail),Shoes,P018,Gravel Trail,True,P014,Nike Nike Air Max 270,1.0,0.82,P019,0.8399,P017,0.7883,False,False,True,True,1556.5,SUCCESS
+T063,Hoka Clifton 9 (Top-Down Toe Box Cushion Angle),Shoes,P018,Top Down Perspective,True,P001,Sony Sony WH-1000XM5,0.8502,0.9,P008,0.8183,P004,0.8018,False,False,False,False,1466.52,SUCCESS
+T064,Salomon XT-6 (TPU Film Overlay Quicklace Profile),Shoes,P019,Studio Profile,True,P019,Salomon Salomon XT-6,1.0,0.82,P014,0.8398,P016,0.8273,True,True,True,True,1518.64,SUCCESS
+T065,Salomon XT-6 (Rocky Mountain Trail Muddy Terrain),Shoes,P019,Muddy Trail Dirt,True,P018,Hoka Hoka Clifton 9,1.0,0.82,P016,0.7966,P015,0.762,False,False,True,True,1410.59,SUCCESS
+T066,Heavy Leather Work Boot / Timberland (Near-Miss Footwear),Shoes,OUT_OF_CATALOG,Sibling Domain (Work Boot),False,P008,Steelcase Steelcase Gesture,0.8111,0.9,P001,0.8087,P013,0.7964,False,False,False,True,1091.4,SUCCESS
+T067,High-Heel Stiletto Leather Pump (Near-Miss Footwear),Shoes,OUT_OF_CATALOG,Sibling Domain (High Heels),False,P012,Haworth Haworth Fern,0.7723,0.9,P013,0.7571,P003,0.7502,False,False,False,True,1043.02,SUCCESS
+T068,Yellow Rubber Rain Wellington Boot (Near-Miss Footwear),Shoes,OUT_OF_CATALOG,Sibling Domain (Rain Boot),False,P013,Humanscale Humanscale Freedom,0.7758,0.9,P012,0.7716,P025,0.7674,False,False,False,True,1148.35,SUCCESS
+T069,Beach Rubber Thong Flip-Flops (Near-Miss Footwear),Shoes,OUT_OF_CATALOG,Sibling Domain (Flip-Flops),False,P015,Adidas Adidas Ultraboost Light,0.8065,0.82,P003,0.7936,P012,0.7831,False,False,False,True,1542.79,SUCCESS
+T070,Four-Wheel Inline Rollerblade Skates (Near-Miss Footwear),Shoes,OUT_OF_CATALOG,Sibling Domain (Rollerblades),False,P008,Steelcase Steelcase Gesture,0.7239,0.9,P004,0.7233,P013,0.7218,False,False,False,True,1376.79,SUCCESS
+T071,Classic Oxford Leather Dress Shoe (Near-Miss Footwear),Shoes,OUT_OF_CATALOG,Sibling Domain (Dress Oxford),False,P008,Steelcase Steelcase Gesture,0.8133,0.9,P013,0.7956,P012,0.7877,False,False,False,True,1076.75,SUCCESS
+T072,Thermal Winter Ski Snowboard Boots (Near-Miss Footwear),Shoes,OUT_OF_CATALOG,Sibling Domain (Ski Boot),False,P025,Casio Casio G-Shock GA-2100 'CasiOak',0.7286,0.9,P013,0.7187,P003,0.717,False,False,False,True,1075.79,SUCCESS
+T073,Casual Poolside Slide Sandals (Near-Miss Footwear),Shoes,OUT_OF_CATALOG,Sibling Domain (Slides),False,P015,Adidas Adidas Ultraboost Light,0.8065,0.82,P003,0.7936,P012,0.7831,False,False,False,True,1078.74,SUCCESS
+T074,Pointed Toe Leather Ballet Flat (Near-Miss Footwear),Shoes,OUT_OF_CATALOG,Sibling Domain (Ballet Flat),False,P012,Haworth Haworth Fern,0.7723,0.9,P013,0.7571,P003,0.7502,False,False,False,True,1101.96,SUCCESS
+T075,Firm Ground Turf Soccer Football Cleats (Near-Miss Footwear),Shoes,OUT_OF_CATALOG,Sibling Domain (Soccer Cleats),False,P002,Bose Bose QuietComfort Ultra,0.7478,0.9,P004,0.7457,P015,0.7449,False,False,False,True,1107.51,SUCCESS
+T076,Apple Watch Ultra 2 (Titanium Orange Alpine Loop),Watches,P020,Studio Frontal,True,P020,Apple Apple Watch Ultra 2,0.9988,0.9,P023,0.8708,P021,0.8164,True,True,True,True,1249.72,SUCCESS
+T077,Apple Watch Ultra 2 (Worn on Wrist Trail Running),Watches,P020,Worn on Wrist,True,P021,Garmin Garmin Fenix 7 Pro Solar,0.9957,0.9,P023,0.9046,P020,0.8189,False,True,True,True,1138.81,SUCCESS
+T078,Apple Watch Ultra 2 (Magnetic Charging Puck on Wood),Watches,P020,Charging Flatlay,True,P023,Samsung Samsung Galaxy Watch 6 Classic,0.9973,0.9,P021,0.9062,P020,0.8709,False,True,True,True,1065.42,SUCCESS
+T079,Garmin Fenix 7 Pro Solar (Rugged Bezel Top Angle),Watches,P021,Rugged Studio,True,P021,Garmin Garmin Fenix 7 Pro Solar,0.9957,0.9,P023,0.9046,P020,0.8189,True,True,True,True,1120.57,SUCCESS
+T080,Garmin Fenix 7 Pro Solar (Bright Outdoor Sunlight Glare),Watches,P021,Direct Sunlight Glare,True,P020,Apple Apple Watch Ultra 2,0.9988,0.9,P023,0.8708,P021,0.8164,False,True,True,True,1195.2,SUCCESS
+T081,Garmin Fenix 7 Pro Solar (Hiking Mountain Grip Shot),Watches,P021,Hiking Ambient,True,P022,Seiko Seiko Prospex Speedtimer Solar Chronograph,0.9833,0.9,P024,0.8019,P020,0.7498,False,False,True,True,1117.27,SUCCESS
+T082,Seiko Prospex Speedtimer (Panda Chronograph Dial),Watches,P022,Clean Dial Studio,True,P022,Seiko Seiko Prospex Speedtimer Solar Chronograph,0.9833,0.9,P024,0.8019,P020,0.7498,True,True,True,True,1057.72,SUCCESS
+T083,Seiko Prospex Speedtimer (Side Pushers Profile on Leather),Watches,P022,Side Profile Macro,True,P024,Tissot Tissot PRX Powermatic 80,0.9941,0.9,P022,0.811,P021,0.7428,False,True,True,True,1119.04,SUCCESS
+T084,Samsung Galaxy Watch 6 Classic (Rotating Bezel),Watches,P023,Frontal Screen,True,P023,Samsung Samsung Galaxy Watch 6 Classic,0.9973,0.9,P021,0.9062,P020,0.8709,True,True,True,True,1038.24,SUCCESS
+T085,Samsung Galaxy Watch 6 Classic (Dim Bedside Night View),Watches,P023,Dim Night Ambient,True,P021,Garmin Garmin Fenix 7 Pro Solar,0.9957,0.9,P023,0.9046,P020,0.8189,False,True,True,True,1020.18,SUCCESS
+T086,Tissot PRX Powermatic 80 (Blue Waffle Dial Front),Watches,P024,Studio Dial,True,P024,Tissot Tissot PRX Powermatic 80,0.9941,0.9,P022,0.811,P021,0.7428,True,True,True,True,986.25,SUCCESS
+T087,Tissot PRX Powermatic 80 (Integrated Steel Bracelet Wrist),Watches,P024,Worn on Wrist,True,P022,Seiko Seiko Prospex Speedtimer Solar Chronograph,0.9833,0.9,P024,0.8019,P020,0.7498,False,True,True,True,1132.46,SUCCESS
+T088,Tissot PRX Powermatic 80 (Exhibition Caseback View),Watches,P024,Caseback Detail,True,P025,Casio Casio G-Shock GA-2100 'CasiOak',0.9848,0.9,P003,0.7357,P015,0.7305,False,False,True,True,1126.99,SUCCESS
+T089,Casio G-Shock GA-2100 CasiOak (All-Black Resin),Watches,P025,Clean Studio,True,P025,Casio Casio G-Shock GA-2100 'CasiOak',0.9848,0.9,P003,0.7357,P015,0.7305,True,True,True,True,1106.71,SUCCESS
+T090,Casio G-Shock GA-2100 CasiOak (Angled Octagonal Bezel),Watches,P025,Bezel Angled View,True,P020,Apple Apple Watch Ultra 2,0.9988,0.9,P023,0.8708,P021,0.8164,False,False,True,True,1162.8,SUCCESS
+T091,Digital LED Red Bedside Alarm Clock (Near-Miss Timepiece),Watches,OUT_OF_CATALOG,Sibling Domain (Alarm Clock),False,P013,Humanscale Humanscale Freedom,0.8406,0.9,P001,0.7959,P008,0.7928,False,False,False,True,1551.09,SUCCESS
+T092,Vintage Antique Brass Pocket Watch on Chain (Near-Miss Timepiece),Watches,OUT_OF_CATALOG,Sibling Domain (Pocket Watch),False,P013,Humanscale Humanscale Freedom,0.8406,0.9,P001,0.7959,P008,0.7928,False,False,False,True,1557.79,SUCCESS
+T093,Minimalist Scandinavian Wooden Wall Clock (Near-Miss Timepiece),Watches,OUT_OF_CATALOG,Sibling Domain (Wall Clock),False,P022,Seiko Seiko Prospex Speedtimer Solar Chronograph,0.8038,0.9,P020,0.7887,P001,0.7858,False,False,False,True,1504.43,SUCCESS
+T094,Narrow OLED Fitness Activity Tracker Band (Near-Miss Wearable),Watches,OUT_OF_CATALOG,Sibling Domain (Fitness Band),False,P023,Samsung Samsung Galaxy Watch 6 Classic,0.8823,0.9,P021,0.8822,P020,0.8491,False,False,False,True,1520.91,SUCCESS
+T095,Stainless Steel Link Chain Jewelry Bracelet (Near-Miss Accessory),Watches,OUT_OF_CATALOG,Sibling Domain (Metal Bracelet),False,P022,Seiko Seiko Prospex Speedtimer Solar Chronograph,0.7489,0.9,P025,0.7466,P012,0.7428,False,False,False,True,1699.09,SUCCESS
+T096,Antique Grandfather Standing Pendulum Clock (Near-Miss Timepiece),Watches,OUT_OF_CATALOG,Sibling Domain (Grandfather Clock),False,P013,Humanscale Humanscale Freedom,0.8406,0.9,P001,0.7959,P008,0.7928,False,False,False,True,1387.33,SUCCESS
+T097,Glass Hourglass Sand Timer with Brass Base (Near-Miss Timepiece),Watches,OUT_OF_CATALOG,Sibling Domain (Hourglass),False,P013,Humanscale Humanscale Freedom,0.8406,0.9,P001,0.7959,P008,0.7928,False,False,False,True,1485.71,SUCCESS
+T098,Handheld Referee Mechanical Stopwatch (Near-Miss Timepiece),Watches,OUT_OF_CATALOG,Sibling Domain (Stopwatch),False,P022,Seiko Seiko Prospex Speedtimer Solar Chronograph,0.9833,0.9,P024,0.8019,P020,0.7498,False,False,True,False,1513.75,SUCCESS
+T099,Titanium Smart Ring Health Sensor (Near-Miss Wearable),Watches,OUT_OF_CATALOG,Sibling Domain (Smart Ring),False,P025,Casio Casio G-Shock GA-2100 'CasiOak',0.7724,0.9,P022,0.7715,P003,0.7325,False,False,False,True,1620.94,SUCCESS
+T100,Retro Mechanical Desktop Flip Clock (Near-Miss Timepiece),Watches,OUT_OF_CATALOG,Sibling Domain (Flip Clock),False,P022,Seiko Seiko Prospex Speedtimer Solar Chronograph,0.8038,0.9,P020,0.7887,P001,0.7858,False,False,False,True,1432.32,SUCCESS

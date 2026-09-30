@@ -50,6 +50,13 @@ def get_embedding_model():
     return _EMBEDDING_MODEL
 
 
+_IMAGE_CACHE: dict[str, Image.Image] = {}
+_HTTP_SESSION = requests.Session()
+_HTTP_SESSION.headers.update({
+    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+})
+
+
 def load_image(image_input: Union[str, bytes, Path, Image.Image]) -> Image.Image:
     """Loads an image from various input types into a RGB PIL Image.
 
@@ -64,12 +71,18 @@ def load_image(image_input: Union[str, bytes, Path, Image.Image]) -> Image.Image
 
     if isinstance(image_input, (str, Path)):
         image_path_str = str(image_input)
+        if image_path_str in _IMAGE_CACHE:
+            return _IMAGE_CACHE[image_path_str].copy()
+
         if image_path_str.startswith(("http://", "https://")):
-            response = requests.get(image_path_str, timeout=15)
+            response = _HTTP_SESSION.get(image_path_str, timeout=20)
             response.raise_for_status()
-            return Image.open(BytesIO(response.content)).convert("RGB")
+            img = Image.open(BytesIO(response.content)).convert("RGB")
         else:
-            return Image.open(image_path_str).convert("RGB")
+            img = Image.open(image_path_str).convert("RGB")
+        
+        _IMAGE_CACHE[image_path_str] = img
+        return img.copy()
 
     if isinstance(image_input, (bytes, bytearray)):
         return Image.open(BytesIO(image_input)).convert("RGB")
