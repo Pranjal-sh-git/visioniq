@@ -21,7 +21,31 @@ VisionIQ adheres to Microsoft Responsible AI principles:
 - **Catalog-Mode Grounding**: Answers regarding indexed catalog items are strictly limited to verified Azure AI Search specification documents, ensuring zero hallucination on critical product metrics.
 - **Open-World Identification Grounding**: In open-world identification mode (when no catalog match exists), follow-up answers may draw on the model's general knowledge about the recognized brand/product in addition to the visually observed attributes, since strict grounding to only visual features isn't always sufficient for meaningful answers. This differs from catalog-mode answers, which are strictly limited to indexed specification data.
 
-## 6. Future Work
+## 6. Security / SSRF Protection
+
+### The Threat
+When accepting image URLs from untrusted users for product identification and embedding generation, backend services risk **Server-Side Request Forgery (SSRF)** attacks. Malicious actors could supply URLs pointing to internal infrastructure, cloud instance metadata endpoints (e.g. `169.254.169.254`), private RFC1918 networks, or localhost (`127.0.0.1`) to exfiltrate credentials, scan internal network ports, or trigger Denial of Service (DoS) attacks via decompression/memory bombs.
+
+### Protections Implemented
+- **Protocol Whitelisting**: Strictly restricts protocols to `http` and `https` (rejecting `file://`, `ftp://`, `gopher://`, `dict://`, etc.).
+- **DNS Resolution & IP Validation**: Resolves hostnames to all candidate IPv4 and IPv6 addresses before establishing a socket connection and blocks any URL resolving to:
+  - Loopback addresses (`127.0.0.0/8`, `::1`, `localhost`)
+  - Private RFC1918 subnets (`10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `fc00::/7`)
+  - Link-local addresses (`169.254.0.0/16`, `fe80::/10`)
+  - Explicit cloud metadata endpoints (`169.254.169.254`, `169.254.169.253`, `100.100.100.200`, `metadata.google.internal`)
+  - Unspecified, multicast, and reserved IP ranges (`0.0.0.0`, `::`, `224.0.0.0/4`, `240.0.0.0/4`)
+  - IPv4-mapped IPv6 representations (e.g. `::ffff:127.0.0.1`)
+- **Per-Hop Redirect Inspection**: Disables automatic HTTP client redirect following. Each redirect hop is captured, resolved, and independently re-validated against all SSRF rules before making the next connection, preventing open-redirect bypasses.
+- **Fail-Safe User Handling**: Rejections raise clear user-facing errors (`SSRFProtectionError` / HTTP 400 Bad Request) without leaking internal network or stack trace details.
+
+### Limits Enforced
+- **Maximum Image Download Size**: **10 MB** (`DEFAULT_MAX_IMAGE_SIZE_BYTES`). Responses exceeding `Content-Length` or streaming over 10MB are aborted immediately before memory decoding.
+- **Strict Request Timeouts**: **5.0s connect timeout** and **10.0s read timeout** to prevent slowloris/hanging attacks.
+- **Maximum Redirect Limit**: Maximum of **4 redirect hops**.
+
+---
+
+## 7. Future Work
 - Considered adding live web search (Grounding with Bing Search) to handle products released after the model's training cutoff. However, this feature requires a paid Azure subscription and is not available on free-tier/student subscriptions, so it was documented as future work rather than implemented in this iteration.
 
 

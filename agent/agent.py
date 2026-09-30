@@ -213,7 +213,7 @@ class VisionIQAgent:
                 messages=messages,
                 tools=self.tool_definitions,
                 tool_choice="auto",
-                max_completion_tokens=2000,
+                max_completion_tokens=300,  # Fast tool routing: function call JSON requires only ~50-80 tokens
             )
             logger.info(f"[AZURE OPENAI CALL] Deployment: {deployment} | Status: SUCCESS")
         except Exception as e:

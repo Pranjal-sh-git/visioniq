@@ -21,12 +21,15 @@ TEXT_MODEL_NAME = "all-MiniLM-L6-v2"
 
 
 def get_text_retrieval_model():
-    """Lazy-loads and returns the all-MiniLM-L6-v2 text embedding model."""
+    """Lazy-loads and returns the all-MiniLM-L6-v2 text embedding model with local cache preference."""
     global _TEXT_RETRIEVAL_MODEL
     if _TEXT_RETRIEVAL_MODEL is None:
         from sentence_transformers import SentenceTransformer
         logger.info(f"Loading dense text retrieval model: {TEXT_MODEL_NAME}")
-        _TEXT_RETRIEVAL_MODEL = SentenceTransformer(TEXT_MODEL_NAME)
+        try:
+            _TEXT_RETRIEVAL_MODEL = SentenceTransformer(TEXT_MODEL_NAME, model_kwargs={"local_files_only": True})
+        except Exception:
+            _TEXT_RETRIEVAL_MODEL = SentenceTransformer(TEXT_MODEL_NAME)
     return _TEXT_RETRIEVAL_MODEL
 
 

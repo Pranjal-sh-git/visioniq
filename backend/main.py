@@ -14,8 +14,12 @@ for directory in (str(BACKEND_DIR), str(PROJECT_ROOT)):
     if directory not in sys.path:
         sys.path.insert(0, directory)
 
+from contextlib import asynccontextmanager
+import logging
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+
+logger = logging.getLogger("visioniq.backend")
 
 try:
     from config import settings
@@ -28,10 +32,32 @@ except ImportError:
     from backend.routes.product import router as product_router
     from backend.routes.agent import router as agent_router
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Pre-warms local ML embedding models on server startup to eliminate cold-start latency for users."""
+    logger.info("Pre-warming VisionIQ local embedding models...")
+    try:
+        from services.product_search.embeddings import get_embedding_model
+        get_embedding_model()
+    except Exception as e:
+        logger.warning(f"Could not pre-warm CLIP model: {e}")
+
+    try:
+        from services.video.embeddings import get_text_retrieval_model
+        get_text_retrieval_model()
+    except Exception as e:
+        logger.warning(f"Could not pre-warm MiniLM model: {e}")
+
+    logger.info("VisionIQ server initialized and ready.")
+    yield
+
+
 app = FastAPI(
     title=settings.APP_NAME,
     description="Multimodal content intelligence agent API",
     version="0.1.0",
+    lifespan=lifespan,
 )
 
 # Enable CORS for frontend development

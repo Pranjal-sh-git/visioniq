@@ -65,14 +65,10 @@ def _image_to_data_uri(image: Union[str, bytes, Path, Image.Image]) -> str:
         if image.startswith("data:image/"):
             return image
         if image.startswith("http://") or image.startswith("https://"):
-            try:
-                req = urllib.request.Request(image, headers={"User-Agent": "VisionIQ/1.0"})
-                with urllib.request.urlopen(req, timeout=10) as resp:
-                    pil_img = Image.open(io.BytesIO(resp.read()))
-                    return _resize_and_compress_image(pil_img)
-            except Exception as e:
-                logger.warning(f"Failed to fetch and compress remote image URL: {e}. Falling back to URL string.")
-                return image
+            from services.security import safe_fetch_image
+            raw_bytes = safe_fetch_image(image)
+            pil_img = Image.open(io.BytesIO(raw_bytes))
+            return _resize_and_compress_image(pil_img)
 
         image_path = Path(image)
         if not image_path.exists():

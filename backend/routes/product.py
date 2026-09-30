@@ -127,7 +127,12 @@ async def identify_product_endpoint(
         }
     except HTTPException:
         raise
+    except HTTPException:
+        raise
     except Exception as e:
+        from services.security import SSRFProtectionError
+        if isinstance(e, SSRFProtectionError) or "SSRF" in str(e) or "URL rejected" in str(e):
+            raise HTTPException(status_code=400, detail=str(e))
         logger.exception("Error during product identification")
         raise HTTPException(status_code=500, detail=f"Product identification failed: {str(e)}")
 

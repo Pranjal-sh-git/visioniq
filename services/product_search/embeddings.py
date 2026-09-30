@@ -29,19 +29,27 @@ MODEL_NAME = "clip-ViT-B-32"
 
 
 def get_embedding_model():
-    """Lazy-loads and returns the CLIP image embedding model."""
+    """Lazy-loads and returns the CLIP image embedding model with local cache preference."""
     global _EMBEDDING_MODEL
     if _EMBEDDING_MODEL is None:
         try:
             from sentence_transformers import SentenceTransformer
             logger.info(f"Loading image embedding model: {MODEL_NAME}")
-            _EMBEDDING_MODEL = SentenceTransformer(MODEL_NAME)
+            try:
+                # Prefer local cache to prevent blocking HuggingFace HTTP metadata checks
+                _EMBEDDING_MODEL = SentenceTransformer(MODEL_NAME, model_kwargs={"local_files_only": True})
+            except Exception:
+                _EMBEDDING_MODEL = SentenceTransformer(MODEL_NAME)
         except ImportError:
             try:
                 from transformers import CLIPModel, CLIPProcessor
                 logger.info(f"Loading transformers CLIP model: openai/{MODEL_NAME}")
-                processor = CLIPProcessor.from_pretrained(f"openai/{MODEL_NAME}")
-                model = CLIPModel.from_pretrained(f"openai/{MODEL_NAME}")
+                try:
+                    processor = CLIPProcessor.from_pretrained(f"openai/{MODEL_NAME}", local_files_only=True)
+                    model = CLIPModel.from_pretrained(f"openai/{MODEL_NAME}", local_files_only=True)
+                except Exception:
+                    processor = CLIPProcessor.from_pretrained(f"openai/{MODEL_NAME}")
+                    model = CLIPModel.from_pretrained(f"openai/{MODEL_NAME}")
                 _EMBEDDING_MODEL = (model, processor)
             except Exception as e:
                 raise RuntimeError(
@@ -51,14 +59,10 @@ def get_embedding_model():
 
 
 _IMAGE_CACHE: dict[str, Image.Image] = {}
-_HTTP_SESSION = requests.Session()
-_HTTP_SESSION.headers.update({
-    "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-})
 
 
 def load_image(image_input: Union[str, bytes, Path, Image.Image]) -> Image.Image:
-    """Loads an image from various input types into a RGB PIL Image.
+    """Loads an image from various input types into a RGB PIL Image with SSRF protection.
 
     Args:
         image_input: Can be a local file path, URL string, raw bytes, or PIL Image.
@@ -75,9 +79,9 @@ def load_image(image_input: Union[str, bytes, Path, Image.Image]) -> Image.Image
             return _IMAGE_CACHE[image_path_str].copy()
 
         if image_path_str.startswith(("http://", "https://")):
-            response = _HTTP_SESSION.get(image_path_str, timeout=20)
-            response.raise_for_status()
-            img = Image.open(BytesIO(response.content)).convert("RGB")
+            from services.security import safe_fetch_image
+            image_bytes = safe_fetch_image(image_path_str)
+            img = Image.open(BytesIO(image_bytes)).convert("RGB")
         else:
             img = Image.open(image_path_str).convert("RGB")
         

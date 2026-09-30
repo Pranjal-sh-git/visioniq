@@ -689,7 +689,7 @@ def generate_video_summary(video_id: str, force_regenerate: bool = False) -> dic
                     {"role": "system", "content": sys_prompt},
                     {"role": "user", "content": user_prompt},
                 ],
-                max_completion_tokens=1500,
+                max_completion_tokens=500,  # Structured video summary JSON requires ~250 tokens
             )
 
             raw_content = (response.choices[0].message.content or "").strip()
