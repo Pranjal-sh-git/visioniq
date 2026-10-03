@@ -1,0 +1,57 @@
+id,split,question,product_id,qtype,gold_chunk_ids,gold_keywords,notes
+Q01,dev,What is the maximum battery life on a single charge?,P001,spec,P001_user_manual_001,30 hours,
+Q02,test,Do these headphones support active noise cancellation (ANC)?,P003,spec,P003_user_manual_001,Active Noise Cancellation,
+Q03,dev,Is the charging cable Type-C or Micro-USB?,P005,out_of_docs,,,VERIFY RELABELED
+Q04,dev,What is the maximum weight capacity of this chair?,P007,spec,P007_user_manual_001,159 kg (350 lbs),
+Q05,test,Are the armrests adjustable in 4D or just height?,P012,spec,P012_user_manual_001|P012_faq_001,4D armrests,
+Q06,dev,What material is the seat made of?,P010,spec,P010_user_manual_001,molded foam seat,
+Q07,dev,Are these shoes waterproof or just water-resistant?,P015,out_of_docs,,,VERIFY RELABELED
+Q08,test,What is the heel drop of these shoes in millimeters?,P017,spec,P017_user_manual_001,6mm,VERIFY
+Q09,dev,Do these shoes have a carbon fiber plate in the sole?,P019,out_of_docs,,,VERIFY RELABELED
+Q10,dev,Does the smartwatch have built-in GPS or does it use connected GPS?,P021,spec,P021_user_manual_001,Multisport GPS smartwatch|Multi-band GNSS with SatIQ,
+Q11,test,What is the screen size and resolution of this watch?,P023,spec,P023_user_manual_001,1.5-inch|480x480|Super AMOLED,
+Q12,test,Is the watch glass made of sapphire?,P025,out_of_docs,,,VERIFY RELABELED
+Q13,dev,How do I reset these headphones to factory settings?,P002,out_of_docs,,,RELABELED
+Q14,test,Headphones phone se connect nahi ho rahe pair kaise karu?,P004,procedural,P004_user_manual_001|P004_user_manual_003,,hinglish
+Q15,dev,How do I replace the ear cushions when they tear?,P006,procedural,P006_user_manual_002,,
+Q16,dev,The tilt mechanism is stuck how do I unlock it?,P008,procedural,P008_user_manual_003,,
+Q17,test,What is the correct way to assemble the wheelbase?,P011,procedural,P011_user_manual_002,,
+Q18,dev,Chair height adjust nahi ho rahi cylinder kaise theek karu?,P012,procedural,P012_user_manual_002|P012_user_manual_003,,hinglish
+Q19,dev,Can I wash these shoes in the washing machine?,P014,procedural,P014_user_manual_002,,
+Q20,test,How should I clean the suede material without ruining it?,P016,procedural,P016_user_manual_002,,
+Q21,dev,Flat feet ke liye laces baandhne ka koi specific technique hai?,P018,out_of_docs,,,hinglish VERIFY RELABELED
+Q22,test,How do I change the time format from 12-hour to 24-hour?,P020,out_of_docs,,,RELABELED
+Q23,dev,Smartwatch ka strap kaise detach karte hain?,P020,out_of_docs,,,hinglish RELABELED
+Q24,test,My screen is stuck on the logo how do I restart the watch?,P023,out_of_docs,,,RELABELED
+Q25,dev,Will using these headphones for 10 hours a day cause hearing loss?,P001,out_of_docs,,,
+Q26,test,Can I use these headphones as a mic for recording ASMR videos?,P004,out_of_docs,,,
+Q27,dev,Is this ergonomic chair guaranteed to fix my lower back pain?,P009,out_of_docs,,,
+Q28,dev,Meri height 6 foot 5 hai kya ye chair mere liye comfortable rahegi?,P007,out_of_docs,,,hinglish
+Q29,test,Will these running shoes help me reduce my 5K race time?,P015,out_of_docs,,,
+Q30,dev,Can I wear these trail running shoes to a formal office party?,P019,out_of_docs,,,
+Q31,test,Does the heart rate sensor accurately detect incoming heart attacks?,P021,out_of_docs,,,
+Q32,dev,Kya main is smartwatch par PUBG jaise heavy games khel sakta hu?,P023,out_of_docs,,,hinglish
+Q33,dev,Can I connect my PlayStation 5 to this projector?,,unknown_product,,,
+Q34,test,Is the Sony FX3 camera good for low light shooting?,,unknown_product,,,CHECK-NAME
+Q35,dev,Does the Sony WH-1000XM4 support multipoint Bluetooth?,,unknown_product,,,near-neighbor CHECK-NAME
+Q36,dev,How long is the warranty on the Bose QuietComfort 45?,,unknown_product,,,near-neighbor CHECK-NAME
+Q37,test,Mere purane HP laptop ki battery kahan aur kitne ki milegi?,,unknown_product,,,hinglish
+Q38,dev,What is the exact thread count on these Egyptian cotton bedsheets?,,unknown_product,,,
+Q39,test,Can I safely use this hair straightener on wet hair?,,unknown_product,,,
+Q40,dev,How do I adjust the lumbar support on the Herman Miller Embody?,,unknown_product,,,near-neighbor CHECK-NAME
+Q41,dev,Ek baar full charge karne par yeh kitne ghante tak chal sakte hain?,P005,spec,P005_user_manual_001,50 hours,LLM-DRAFTED hinglish
+Q42,test,How many hours will these play on a single charge?,P006,spec,P006_user_manual_001,30 hours,LLM-DRAFTED
+Q43,dev,Ye chair kitna wajan support kar sakta hai?,P013,spec,P013_user_manual_001,136 kg (300 lbs),LLM-DRAFTED hinglish
+Q44,test,How much weight can this chair support?,P008,spec,P008_faq_001,181 kg (400 lbs),LLM-DRAFTED
+Q45,dev,About how heavy are these sneakers in a men's size 9?,P014,spec,P014_user_manual_001,310g (Size 9),LLM-DRAFTED
+Q46,test,How heavy is a size 9 pair of these?,P016,spec,P016_user_manual_001,374g (Size 9),LLM-DRAFTED
+Q47,dev,Is watch ko full wind karne ke baad kitne ghante tak chal sakta hai?,P024,spec,P024_user_manual_001,80 hours|80-hour power reserve,LLM-DRAFTED hinglish
+Q48,test,About how long will the batteries keep this running before needing a replacement?,P025,spec,P025_user_manual_001,3 years on SR726W x 2|SR726W x 2,LLM-DRAFTED
+Q49,dev,AirPods Max mere phone se connect nahi ho rahe — pehle kaunse simple steps try karun?,P003,procedural,P003_faq_002,,LLM-DRAFTED hinglish
+Q50,test,My phone won’t show the headphones after I power them on — how do I make the headphones discoverable so I can pair them via Bluetooth?,P004,procedural,P004_user_manual_001,,LLM-DRAFTED
+Q51,dev,When I try to lean back the chair it feels stiff and won't recline — what quick checks can I do to try to get the recline working before I contact support?,P013,procedural,P013_user_manual_003,,LLM-DRAFTED
+Q52,test,Mesh back aur molded foam seat ko ghar par safely kaise clean karun? Kya mesh ko zyada paani se bhigona safe hai aur foam par daag padne par kya karna chahiye?,P010,procedural,P010_faq_001,,LLM-DRAFTED hinglish
+Q53,test,Can I wash my XT-6s in a washing machine or put them in a tumble dryer to dry them faster?,P019,procedural,P019_user_manual_003,,LLM-DRAFTED
+Q54,dev,"My PRX has stopped — can I restart it myself by winding the crown, and how far should I wind it so I don’t damage the movement?",P024,procedural,P024_usage_guide_002,,LLM-DRAFTED
+Q55,test,"If I wear the watch while swimming in the ocean or a pool, should I rinse it afterward and what's the proper way to dry it?",P020,procedural,P020_user_manual_002,,LLM-DRAFTED
+

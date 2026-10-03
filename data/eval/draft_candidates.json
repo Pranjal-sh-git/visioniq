@@ -1,0 +1,463 @@
+{
+  "C01": {
+    "question": "How many hours of playback can I expect on a full charge?",
+    "draft_tokens": {
+      "prompt": 407,
+      "completion": 226,
+      "total": 633
+    }
+  },
+  "C02": {
+    "question": "Ek baar full charge karne par yeh kitne ghante tak chal sakte hain?",
+    "draft_tokens": {
+      "prompt": 454,
+      "completion": 552,
+      "total": 1006
+    },
+    "label_proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P005_user_manual_001"
+      ],
+      "gold_keywords": [
+        "50 hours"
+      ],
+      "reason": "The product specification explicitly lists battery_life as \"50 hours\" in the catalog. The user manual chunk P005_user_manual_001 also states \"Battery life: 50 hours\", so the question is directly answerable from the provided documents."
+    },
+    "label_tokens": {
+      "prompt": 5189,
+      "completion": 602,
+      "total": 5791
+    }
+  },
+  "C03": {
+    "question": "How many hours will these play on a single charge?",
+    "draft_tokens": {
+      "prompt": 440,
+      "completion": 352,
+      "total": 792
+    },
+    "label_proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P006_user_manual_001"
+      ],
+      "gold_keywords": [
+        "30 hours"
+      ],
+      "reason": "The product specifications explicitly state the battery life as 'Battery life: 30 hours' in the user manual/specifications (chunk P006_user_manual_001). This directly answers the question."
+    },
+    "label_tokens": {
+      "prompt": 5321,
+      "completion": 591,
+      "total": 5912
+    }
+  },
+  "C04": {
+    "question": "How can I set these up so they stay connected to my phone and laptop at the same time and switch between them?",
+    "draft_tokens": {
+      "prompt": 5141,
+      "completion": 427,
+      "total": 5568
+    }
+  },
+  "C05": {
+    "question": "AirPods Max mere phone se connect nahi ho rahe — pehle kaunse simple steps try karun?",
+    "draft_tokens": {
+      "prompt": 5090,
+      "completion": 554,
+      "total": 5644
+    },
+    "label_proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P003_faq_002"
+      ],
+      "gold_keywords": [],
+      "reason": "Chunk P003_faq_002 explicitly lists simple troubleshooting steps for pairing failures: ensure sufficient battery, restart Bluetooth on the source device and retry pairing, try storing/removing the headphones from the Smart Case to trigger reconnect, and further actions if needed. These steps directly answer the user's request for initial steps to try."
+    },
+    "label_tokens": {
+      "prompt": 5657,
+      "completion": 677,
+      "total": 6334
+    }
+  },
+  "C06": {
+    "question": "My phone won’t show the headphones after I power them on — how do I make the headphones discoverable so I can pair them via Bluetooth?",
+    "draft_tokens": {
+      "prompt": 4701,
+      "completion": 688,
+      "total": 5389
+    },
+    "label_proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P004_user_manual_001"
+      ],
+      "gold_keywords": [],
+      "reason": "The user manual (P004_user_manual_001) explicitly states how to enter pairing: 'Power on the headphones. If they do not automatically enter pairing mode, use the dedicated Bluetooth control to enter pairing until the indicator shows the headphones are discoverable.' It also gives pairing steps for the source device, so this chunk directly answers how to make the headphones discoverable and pair them."
+    },
+    "label_tokens": {
+      "prompt": 5279,
+      "completion": 568,
+      "total": 5847
+    }
+  },
+  "C07": {
+    "question": "Ye chair kitna wajan support kar sakta hai?",
+    "draft_tokens": {
+      "prompt": 460,
+      "completion": 480,
+      "total": 940
+    },
+    "label_proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P013_user_manual_001"
+      ],
+      "gold_keywords": [
+        "136 kg (300 lbs)"
+      ],
+      "reason": "The product specification in the catalog and user_manual chunk P013_user_manual_001 explicitly states the maximum load: \"136 kg (300 lbs)\", which directly answers the question."
+    },
+    "label_tokens": {
+      "prompt": 5852,
+      "completion": 470,
+      "total": 6322
+    }
+  },
+  "C08": {
+    "question": "How much weight can this chair support?",
+    "draft_tokens": {
+      "prompt": 425,
+      "completion": 348,
+      "total": 773
+    },
+    "label_proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P008_faq_001"
+      ],
+      "gold_keywords": [
+        "181 kg (400 lbs)"
+      ],
+      "reason": "The product specifications explicitly list the maximum load as \"181 kg (400 lbs)\". This exact value appears in the catalog entry and is stated in chunk P008_faq_001 under fit and weight limits."
+    },
+    "label_tokens": {
+      "prompt": 5248,
+      "completion": 664,
+      "total": 5912
+    }
+  },
+  "C09": {
+    "question": "How much weight can this chair safely hold?",
+    "draft_tokens": {
+      "prompt": 443,
+      "completion": 477,
+      "total": 920
+    },
+    "label_proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P009_user_manual_001"
+      ],
+      "gold_keywords": [
+        "130 kg (285 lbs)"
+      ],
+      "reason": "The product specification explicitly lists the maximum safe load as \"130 kg (285 lbs)\" (found in the product catalog and reiterated in chunk P009_user_manual_001: \"Maximum safe load is 130 kg (285 lbs)\")."
+    },
+    "label_tokens": {
+      "prompt": 5066,
+      "completion": 605,
+      "total": 5671
+    }
+  },
+  "C10": {
+    "question": "When I try to lean back the chair it feels stiff and won't recline — what quick checks can I do to try to get the recline working before I contact support?",
+    "draft_tokens": {
+      "prompt": 5245,
+      "completion": 631,
+      "total": 5876
+    },
+    "label_proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P013_user_manual_003"
+      ],
+      "gold_keywords": [],
+      "reason": "The product documentation's Basic Troubleshooting (chunk P013_user_manual_003) explicitly lists quick checks for a stiff/non‑reclining chair: sit fully in the seat to engage the weight‑sensitive mechanism; check floor surface and caster condition; tighten visible fasteners; verify the chair is not overloaded (136 kg/300 lbs); confirm no obstructions at pivot points and remove debris; gently move the backrest to observe binding — and contact your dealer if binding persists. These steps directly answer the user's procedural question."
+    },
+    "label_tokens": {
+      "prompt": 5875,
+      "completion": 912,
+      "total": 6787
+    }
+  },
+  "C11": {
+    "question": "Mesh back aur molded foam seat ko ghar par safely kaise clean karun? Kya mesh ko zyada paani se bhigona safe hai aur foam par daag padne par kya karna chahiye?",
+    "draft_tokens": {
+      "prompt": 4783,
+      "completion": 577,
+      "total": 5360
+    },
+    "label_proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P010_faq_001"
+      ],
+      "gold_keywords": [],
+      "reason": "Chunk P010_faq_001 explicitly gives home-cleaning instructions: it says to \"Spot-clean with a damp cloth and mild detergent; avoid saturating the mesh.\" and for the seat: \"Wipe spills promptly with a damp cloth and mild soap. Avoid harsh solvents and do not soak the foam. For stubborn stains follow manufacturer-approved upholstery cleaners.\" These lines directly answer the questions about soaking mesh and treating foam stains."
+    },
+    "label_tokens": {
+      "prompt": 5377,
+      "completion": 635,
+      "total": 6012
+    }
+  },
+  "C12": {
+    "question": "The castors on my Markus have gotten sticky and won’t roll smoothly — how should I clean them and remove hair/debris to get them rolling again?",
+    "draft_tokens": {
+      "prompt": 4484,
+      "completion": 499,
+      "total": 4983
+    },
+    "label_proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P011_faq_001"
+      ],
+      "gold_keywords": [],
+      "reason": "Chunk P011_faq_001 explicitly states how to clean castors: 'Remove hair and debris from wheel axles, and clean with a dry brush or cloth. If castors become difficult to roll, check for trapped material and follow routine cleaning.' This directly answers how to remove hair/debris and restore rolling."
+    },
+    "label_tokens": {
+      "prompt": 5066,
+      "completion": 486,
+      "total": 5552
+    }
+  },
+  "C13": {
+    "question": "About how heavy are these sneakers in a men's size 9?",
+    "draft_tokens": {
+      "prompt": 432,
+      "completion": 544,
+      "total": 976
+    },
+    "label_proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P014_user_manual_001"
+      ],
+      "gold_keywords": [
+        "310g (Size 9)"
+      ],
+      "reason": "The product specification explicitly lists the weight as \"310g (Size 9)\" in the catalog and the user manual chunk P014_user_manual_001 also states \"Weight: 310g (Size 9)\"."
+    },
+    "label_tokens": {
+      "prompt": 5264,
+      "completion": 476,
+      "total": 5740
+    }
+  },
+  "C14": {
+    "question": "How heavy is a size 9 pair of these?",
+    "draft_tokens": {
+      "prompt": 433,
+      "completion": 414,
+      "total": 847
+    },
+    "label_proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P016_user_manual_001"
+      ],
+      "gold_keywords": [
+        "374g (Size 9)"
+      ],
+      "reason": "The product specs explicitly list the weight as \"374g (Size 9)\" in the catalog and P016_user_manual_001 contains the identical line: 'Weight: 374g (Size 9).' This directly answers the question."
+    },
+    "label_tokens": {
+      "prompt": 5483,
+      "completion": 479,
+      "total": 5962
+    }
+  },
+  "C15": {
+    "question": "How heavy is a size 9 pair of these shoes?",
+    "draft_tokens": {
+      "prompt": 440,
+      "completion": 352,
+      "total": 792
+    },
+    "label_proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P018_user_manual_001"
+      ],
+      "gold_keywords": [
+        "248g (Size 9)"
+      ],
+      "reason": "The product specification explicitly lists the weight as \"248g (Size 9)\" in the catalog entry; chunk P018_user_manual_001 contains the key specifications including \"Weight: 248g (Size 9)\", which directly answers the question."
+    },
+    "label_tokens": {
+      "prompt": 4759,
+      "completion": 482,
+      "total": 5241
+    }
+  },
+  "C16": {
+    "question": "Kya main Cloudmonster shoes ko washing machine me dhone sakta hoon, ya unko haath se hi saaf karna chahiye? Aur inhe kaise sahi tarike se sukhana hai?",
+    "draft_tokens": {
+      "prompt": 5060,
+      "completion": 515,
+      "total": 5575
+    },
+    "label_proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P017_usage_guide_002"
+      ],
+      "gold_keywords": [],
+      "reason": "Chunk P017_usage_guide_002 explicitly states cleaning guidance: 'Hand-wash the upper and sockliner with mild detergent and air dry away from direct heat or sunlight.' It also includes the 'Don't' caution: 'Don't machine-wash or dry at high heat,' directly answering whether machine washing is allowed and how to dry the shoes."
+    },
+    "label_tokens": {
+      "prompt": 5647,
+      "completion": 1004,
+      "total": 6651
+    }
+  },
+  "C17": {
+    "question": "Can I put the Ultraboost Light in a washing machine, or do I need to clean them by hand — and if machine washing is allowed, any special steps?",
+    "draft_tokens": {
+      "prompt": 4653,
+      "completion": 501,
+      "total": 5154
+    }
+  },
+  "C18": {
+    "question": "Can I wash my XT-6s in a washing machine or put them in a tumble dryer to dry them faster?",
+    "draft_tokens": {
+      "prompt": 4901,
+      "completion": 301,
+      "total": 5202
+    },
+    "label_proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P019_user_manual_003"
+      ],
+      "gold_keywords": [],
+      "reason": "The user manual chunk P019_user_manual_003 explicitly states: “Avoid machine washing and drying to preserve welded TPU film and integrated features.” and “Air dry at room temperature away from direct heat or sunlight. Do not tumble dry or place near heaters.” These lines directly answer both parts of the question."
+    },
+    "label_tokens": {
+      "prompt": 5520,
+      "completion": 483,
+      "total": 6003
+    }
+  },
+  "C19": {
+    "question": "If I fully charge it from light, how long will the watch keep running without needing more exposure?",
+    "draft_tokens": {
+      "prompt": 457,
+      "completion": 553,
+      "total": 1010
+    }
+  },
+  "C20": {
+    "question": "Is watch ko full wind karne ke baad kitne ghante tak chal sakta hai?",
+    "draft_tokens": {
+      "prompt": 469,
+      "completion": 361,
+      "total": 830
+    },
+    "label_proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P024_user_manual_001"
+      ],
+      "gold_keywords": [
+        "80 hours",
+        "80-hour power reserve"
+      ],
+      "reason": "The product specs explicitly state an 80-hour power reserve. Chunk P024_user_manual_001 lists 'Power reserve: 80 hours' (matches the catalog entry)."
+    },
+    "label_tokens": {
+      "prompt": 5292,
+      "completion": 721,
+      "total": 6013
+    }
+  },
+  "C21": {
+    "question": "About how long will the batteries keep this running before needing a replacement?",
+    "draft_tokens": {
+      "prompt": 458,
+      "completion": 547,
+      "total": 1005
+    },
+    "label_proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P025_user_manual_001"
+      ],
+      "gold_keywords": [
+        "3 years on SR726W x 2",
+        "SR726W x 2"
+      ],
+      "reason": "The product specifications and user manual explicitly state the battery life as \"3 years on SR726W x 2\" (see P025_user_manual_001), which directly answers the question."
+    },
+    "label_tokens": {
+      "prompt": 5154,
+      "completion": 734,
+      "total": 5888
+    }
+  },
+  "C22": {
+    "question": "My PRX has stopped — can I restart it myself by winding the crown, and how far should I wind it so I don’t damage the movement?",
+    "draft_tokens": {
+      "prompt": 4693,
+      "completion": 499,
+      "total": 5192
+    },
+    "label_proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P024_usage_guide_002"
+      ],
+      "gold_keywords": [],
+      "reason": "The usage guidance (P024_usage_guide_002) explicitly says you can restart a stopped PRX by 'gently winding the crown or by wearing it' and instructs to 'Wind carefully until slight resistance is felt—do not force,' which directly answers both parts of the question."
+    },
+    "label_tokens": {
+      "prompt": 5303,
+      "completion": 610,
+      "total": 5913
+    }
+  },
+  "C23": {
+    "question": "How tight should I wear the Fenix 7 Pro Solar for accurate heart‑rate and Pulse Ox readings, and do I need to stay still when taking a Pulse Ox measurement?",
+    "draft_tokens": {
+      "prompt": 4999,
+      "completion": 636,
+      "total": 5635
+    }
+  },
+  "C24": {
+    "question": "If I wear the watch while swimming in the ocean or a pool, should I rinse it afterward and what's the proper way to dry it?",
+    "draft_tokens": {
+      "prompt": 4729,
+      "completion": 880,
+      "total": 5609
+    },
+    "label_proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P020_user_manual_002"
+      ],
+      "gold_keywords": [],
+      "reason": "Chunk P020_user_manual_002 explicitly states: 'Rinse the watch with fresh water after exposure to saltwater, chlorine, or sweat. Use a soft, lint‑free cloth to dry.' This directly answers both parts (rinse after ocean/pool use and how to dry)."
+    },
+    "label_tokens": {
+      "prompt": 5355,
+      "completion": 480,
+      "total": 5835
+    }
+  }
+}

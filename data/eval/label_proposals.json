@@ -1,0 +1,469 @@
+{
+  "Q01": {
+    "proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P001_user_manual_001"
+      ],
+      "gold_keywords": [
+        "30 hours"
+      ],
+      "reason": "The product specifications explicitly list battery life as \"30 hours\" in the catalog; chunk P001_user_manual_001 contains the direct statement \"Battery life: 30 hours.\" This single chunk directly answers the question."
+    },
+    "tokens": {
+      "prompt": 5747,
+      "completion": 468,
+      "total": 6215
+    }
+  },
+  "Q02": {
+    "proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P003_user_manual_001"
+      ],
+      "gold_keywords": [
+        "Active Noise Cancellation"
+      ],
+      "reason": "The product catalog explicitly lists noise_cancellation as \"Active Noise Cancellation\" in the specifications, and chunk P003_user_manual_001 directly states the AirPods Max are designed with Active Noise Cancellation."
+    },
+    "tokens": {
+      "prompt": 5645,
+      "completion": 529,
+      "total": 6174
+    }
+  },
+  "Q03": {
+    "proposal": {
+      "answerable": false,
+      "gold_chunk_ids": [],
+      "gold_keywords": [],
+      "reason": "Not answerable from the provided catalog or document chunks. None of the chunks or the PRODUCTS.JSON entry explicitly state whether the charging cable is Type‑C or Micro‑USB. The FAQ and user manual note to consult the included documentation or Audio‑Technica support for charging connector details (see P005_faq_001 and P005_user_manual_001), but do not specify the connector type."
+    },
+    "tokens": {
+      "prompt": 5181,
+      "completion": 495,
+      "total": 5676
+    }
+  },
+  "Q04": {
+    "proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P007_user_manual_001"
+      ],
+      "gold_keywords": [
+        "159 kg (350 lbs)"
+      ],
+      "reason": "The PRODUCTS.JSON specifications include \"max_load\": \"159 kg (350 lbs)\" and user manual chunk P007_user_manual_001 explicitly states \"Maximum load capacity: 159 kg (350 lbs).\" These directly answer the question."
+    },
+    "tokens": {
+      "prompt": 5013,
+      "completion": 541,
+      "total": 5554
+    }
+  },
+  "Q05": {
+    "proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P012_faq_001"
+      ],
+      "gold_keywords": [
+        "4D armrests"
+      ],
+      "reason": "The product specifications explicitly list '4D armrests' (see PRODUCTS.JSON) and the FAQ chunk P012_faq_001 states the chair includes '4D armrests', directly answering that the armrests are 4D adjustable rather than only height-adjustable."
+    },
+    "tokens": {
+      "prompt": 5677,
+      "completion": 737,
+      "total": 6414
+    }
+  },
+  "Q06": {
+    "proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P010_user_manual_001"
+      ],
+      "gold_keywords": [
+        "molded foam seat"
+      ],
+      "reason": "The product materials are explicitly listed in the catalog/chunks; P010_user_manual_001 states: \"Materials: Breathable woven mesh, molded foam seat, nylon frame.\" The verbatim spec phrase in PRODUCTS.JSON is \"molded foam seat.\""
+    },
+    "tokens": {
+      "prompt": 5340,
+      "completion": 485,
+      "total": 5825
+    }
+  },
+  "Q07": {
+    "proposal": {
+      "answerable": false,
+      "gold_chunk_ids": [],
+      "gold_keywords": [],
+      "reason": "The provided catalog and document chunks do not explicitly state whether the shoes are 'waterproof' or 'water-resistant'. Related statements (e.g., 'Continental Better Rubber outsole provides grip on wet and dry surfaces' and that the 'PRIMEKNIT+ upper is a textile—prolonged exposure to heavy rain or standing water may affect comfort and drying time' and 'Don’t subject the shoes to prolonged immersion') appear in the docs but do not directly use or define 'waterproof' or 'water-resistant', so the question cannot be answered directly from the materials."
+    },
+    "tokens": {
+      "prompt": 5227,
+      "completion": 979,
+      "total": 6206
+    }
+  },
+  "Q08": {
+    "proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P017_user_manual_001"
+      ],
+      "gold_keywords": [
+        "6mm"
+      ],
+      "reason": "The product specifications in the catalog list the drop as \"6mm\", and chunk P017_user_manual_001 explicitly includes \"Drop: 6mm\" in the product overview."
+    },
+    "tokens": {
+      "prompt": 5612,
+      "completion": 525,
+      "total": 6137
+    }
+  },
+  "Q09": {
+    "proposal": {
+      "answerable": false,
+      "gold_chunk_ids": [],
+      "gold_keywords": [],
+      "reason": "The product catalog and all document chunks do not explicitly state whether the XT-6 includes or excludes a carbon fiber plate. The specifications list the chassis as \"Agile Chassis System (ACS) with EVA cushioning\" and other chunks describe ACS/EVA and outsole features, but none explicitly mention a carbon fiber plate (or explicitly state its absence). Therefore the question cannot be answered directly from the provided documents."
+    },
+    "tokens": {
+      "prompt": 5508,
+      "completion": 496,
+      "total": 6004
+    }
+  },
+  "Q10": {
+    "proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P021_user_manual_001"
+      ],
+      "gold_keywords": [
+        "Multisport GPS smartwatch",
+        "Multi-band GNSS with SatIQ"
+      ],
+      "reason": "The product overview in the user manual (chunk P021_user_manual_001) explicitly calls the device a \"Multisport GPS smartwatch\" and lists \"Multi-band GNSS with SatIQ\" as a sensor, which directly indicates built-in GPS. Those phrases also appear verbatim in the catalog entry."
+    },
+    "tokens": {
+      "prompt": 5622,
+      "completion": 754,
+      "total": 6376
+    }
+  },
+  "Q11": {
+    "proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P023_user_manual_001"
+      ],
+      "gold_keywords": [
+        "1.5-inch",
+        "480x480",
+        "Super AMOLED"
+      ],
+      "reason": "The product catalog explicitly lists the display as \"1.5-inch Super AMOLED (480x480), Sapphire Crystal\". The same specification is stated verbatim in chunk P023_user_manual_001 under Product overview, so the screen size and resolution are directly answerable from the provided documents."
+    },
+    "tokens": {
+      "prompt": 5663,
+      "completion": 686,
+      "total": 6349
+    }
+  },
+  "Q12": {
+    "proposal": {
+      "answerable": false,
+      "gold_chunk_ids": [],
+      "gold_keywords": [],
+      "reason": "The provided PRODUCTS.JSON and all corpus chunks do not state the crystal/glass material or use the term 'sapphire' (nor any alternative like 'mineral' or 'hesalite'). The exact answer is not explicitly present, so it cannot be answered from the supplied documents without inference."
+    },
+    "tokens": {
+      "prompt": 5148,
+      "completion": 281,
+      "total": 5429
+    }
+  },
+  "Q13": {
+    "proposal": {
+      "answerable": false,
+      "gold_chunk_ids": [],
+      "gold_keywords": [],
+      "reason": "None of the provided catalog entry or document chunks include a procedure or mention for performing a factory reset / \"reset to factory settings.\" The documents only show basic troubleshooting (power off/on, re-pairing, remove device from Bluetooth list, restart devices) (e.g. P002_user_manual_002, P002_faq_001) but do not provide any explicit factory-reset steps or the phrase \"factory reset\" or \"reset to factory settings.\" Therefore the exact procedural answer is not present in the corpus."
+    },
+    "tokens": {
+      "prompt": 5029,
+      "completion": 391,
+      "total": 5420
+    }
+  },
+  "Q14": {
+    "proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P004_user_manual_001",
+        "P004_user_manual_002"
+      ],
+      "gold_keywords": [],
+      "reason": "P004_user_manual_001 gives explicit pairing steps (power on, enter pairing mode, enable Bluetooth on phone, select 'Sennheiser Momentum 4 Wireless'). P004_user_manual_002 provides troubleshooting if pairing fails (ensure pairing mode/visibility, toggle Bluetooth, remove previous pairing and re-scan). These chunks directly answer how to pair when not connecting."
+    },
+    "tokens": {
+      "prompt": 5265,
+      "completion": 632,
+      "total": 5897
+    }
+  },
+  "Q15": {
+    "proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P006_user_manual_002"
+      ],
+      "gold_keywords": [],
+      "reason": "The product manual chunk P006_user_manual_002 explicitly states: 'Service: For repairs or replacement parts, contact an authorized Bowers & Wilkins service center or your retailer.' The corpus contains no step-by-step ear-cushion removal or replacement instructions, so the documented procedure is to contact an authorized service center or your retailer for replacement parts or service."
+    },
+    "tokens": {
+      "prompt": 5321,
+      "completion": 750,
+      "total": 6071
+    }
+  },
+  "Q16": {
+    "proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P008_user_manual_003"
+      ],
+      "gold_keywords": [],
+      "reason": "The troubleshooting chunk (P008_user_manual_003) explicitly advises to \"Adjust the tilt tension (Core Equalizer or tilt control) to a neutral position\" and states that \"If the mechanism does not respond, stop use and seek support from your dealer,\" which directly addresses how to unlock/resolve a stuck tilt mechanism."
+    },
+    "tokens": {
+      "prompt": 5251,
+      "completion": 615,
+      "total": 5866
+    }
+  },
+  "Q17": {
+    "proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P011_user_manual_002"
+      ],
+      "gold_keywords": [],
+      "reason": "The user_manual_002 chunk explicitly describes how to assemble the wheelbase: “Install castors and base: Insert each castor into the sockets of the steel star base until fully seated. Place the base on the floor and insert the gas lift (if provided) or mounting column into the base.” This directly answers the procedural question about assembling the wheelbase."
+    },
+    "tokens": {
+      "prompt": 5046,
+      "completion": 558,
+      "total": 5604
+    }
+  },
+  "Q18": {
+    "proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P012_user_manual_002",
+        "P012_user_manual_003"
+      ],
+      "gold_keywords": [],
+      "reason": "The user question asks how to fix a chair cylinder (seat height/pneumatic lift). The manual provides direct, actionable guidance: P012_user_manual_002 describes inserting/sliding the gas lift into the base and chair mechanism (reinstalling the cylinder), and P012_user_manual_003 (Basic Troubleshooting) explicitly addresses 'Problem: Seat will not raise or lower'—it advises to confirm correct use of the pneumatic lift lever, ensure the gas lift is fully seated in the base and chair mechanism, check load limits, and contact an authorized Haworth dealer if the mechanism remains unresponsive. These chunks directly answer the procedural question."
+    },
+    "tokens": {
+      "prompt": 5679,
+      "completion": 815,
+      "total": 6494
+    }
+  },
+  "Q19": {
+    "proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P014_user_manual_002"
+      ],
+      "gold_keywords": [],
+      "reason": "The product's maintenance & cleaning instructions explicitly state 'Do not machine wash or tumble dry.' in P014_user_manual_002, which directly answers the procedural question."
+    },
+    "tokens": {
+      "prompt": 5261,
+      "completion": 455,
+      "total": 5716
+    }
+  },
+  "Q20": {
+    "proposal": {
+      "answerable": true,
+      "gold_chunk_ids": [
+        "P016_user_manual_002"
+      ],
+      "gold_keywords": [],
+      "reason": "The user_manual maintenance & cleaning instructions (P016_user_manual_002) explicitly states how to clean pigskin suede: use a suede brush or soft cloth, use a suede-specific cleaner for stubborn marks, avoid saturating suede with water, air dry at room temperature, do not use direct heat, and do not machine wash or tumble dry."
+    },
+    "tokens": {
+      "prompt": 5483,
+      "completion": 619,
+      "total": 6102
+    }
+  },
+  "Q21": {
+    "proposal": {
+      "answerable": false,
+      "gold_chunk_ids": [],
+      "gold_keywords": [],
+      "reason": "The provided catalog and document chunks give general lacing and fit guidance (e.g., loosen laces, tighten progressively from forefoot to ankle, re-lace to relieve pressure, tighten midfoot for heel slip) but do not explicitly mention any lacing technique or specific instructions for 'flat feet' (flatfoot/overpronation). The exact question—whether there is a specific lacing technique for flat feet—is not directly answered in the documents, so it is not answerable from the provided material."
+    },
+    "tokens": {
+      "prompt": 4763,
+      "completion": 453,
+      "total": 5216
+    }
+  },
+  "Q22": {
+    "proposal": {
+      "answerable": false,
+      "gold_chunk_ids": [],
+      "gold_keywords": [],
+      "reason": "The provided product catalog and all document chunks do not include any instructions or information about changing the time format (12-hour vs 24-hour). Settings and controls are mentioned (e.g., Action Button in Settings → Action Button), but no chunk states how to change the watch's time format, so the question cannot be answered from the given documents."
+    },
+    "tokens": {
+      "prompt": 5343,
+      "completion": 356,
+      "total": 5699
+    }
+  },
+  "Q23": {
+    "proposal": {
+      "answerable": false,
+      "gold_chunk_ids": [],
+      "gold_keywords": [],
+      "reason": "The provided catalog entry and document chunks do not include any step-by-step instructions for detaching or removing the watch strap. They only mention band compatibility, fit, inspection, and replacing worn straps (e.g., P020_faq_001, P020_usage_guide_001, P020_user_manual_002), but no explicit procedure for how to detach the strap is given, so the question is not directly answerable from the documents."
+    },
+    "tokens": {
+      "prompt": 5338,
+      "completion": 442,
+      "total": 5780
+    }
+  },
+  "Q24": {
+    "proposal": {
+      "answerable": false,
+      "gold_chunk_ids": [],
+      "gold_keywords": [],
+      "reason": "The documents mention restarting the watch as a general troubleshooting step (see P023_faq_003, P023_user_manual_003, P023_faq_001), but none of the provided chunks give explicit, step-by-step instructions for restarting or force-restarting the watch when it is stuck on the logo. The exact method to restart the device is not stated in the corpus, so the question is not directly answerable from the provided content."
+    },
+    "tokens": {
+      "prompt": 5666,
+      "completion": 569,
+      "total": 6235
+    }
+  },
+  "Q25": {
+    "proposal": {
+      "answerable": false,
+      "gold_chunk_ids": [],
+      "gold_keywords": [],
+      "reason": "Not answerable: none of the provided product catalog entry or document chunks mention hearing loss, safe-listening limits, volume recommendations, or medical/health guidance. The documents only reference comfort and taking breaks for long sessions, but do not state whether using the headphones 10 hours a day causes hearing loss."
+    },
+    "tokens": {
+      "prompt": 5752,
+      "completion": 412,
+      "total": 6164
+    }
+  },
+  "Q26": {
+    "proposal": {
+      "answerable": false,
+      "gold_chunk_ids": [],
+      "gold_keywords": [],
+      "reason": "The documents list \"crystal-clear call microphones\" and \"onboard microphones\" (e.g., P004_user_manual_001, P004_faq_002, P004_usage_guide_001) and describe call use, but they do not explicitly state whether the headphones can be used as a microphone for recording videos or for ASMR specifically, nor do they state recording quality, stereo/ASMR capability, or guidance for using them as an external recording mic. Because the catalog/chunks do not directly answer the ASMR-recording capability, this question is out-of-docs and not answerable from the provided materials."
+    },
+    "tokens": {
+      "prompt": 5266,
+      "completion": 734,
+      "total": 6000
+    }
+  },
+  "Q27": {
+    "proposal": {
+      "answerable": false,
+      "gold_chunk_ids": [],
+      "gold_keywords": [],
+      "reason": "Not answerable: Nowhere in the product catalog entry or document chunks does Secretlab state the Titan Evo is guaranteed to fix lower back pain. The docs describe adjustable lumbar support (e.g., 4-way L-ADAPT Lumbar System) and give setup/usage guidance, and the warranty covers defects, but there is no explicit medical or therapeutic guarantee in the provided materials."
+    },
+    "tokens": {
+      "prompt": 5071,
+      "completion": 428,
+      "total": 5499
+    }
+  },
+  "Q28": {
+    "proposal": {
+      "answerable": false,
+      "gold_chunk_ids": [],
+      "gold_keywords": [],
+      "reason": "The documents and product entry do not state any height ranges or explicitly say whether a 6'5\" (195 cm) person will be comfortable. The catalog only notes the chair is available in sizes A, B, and C and recommends selecting the size that matches your body proportions and trying sizes with a dealer, but it gives no explicit guidance or height-to-size mapping to answer this question directly."
+    },
+    "tokens": {
+      "prompt": 5025,
+      "completion": 431,
+      "total": 5456
+    }
+  },
+  "Q29": {
+    "proposal": {
+      "answerable": false,
+      "gold_chunk_ids": [],
+      "gold_keywords": [],
+      "reason": "The catalog and document chunks describe features (Light BOOST midsole, Linear Energy Push, lightweight 299g, suitability for race preparation) that may support performance (see e.g. P015_user_manual_001, P015_usage_guide_001, P015_usage_guide_003), but none of the provided texts explicitly state that the shoes will reduce a user's 5K race time. The question requires a direct, stated claim or measurable outcome from the docs, which is not present, so it is not directly answerable from the supplied materials."
+    },
+    "tokens": {
+      "prompt": 5234,
+      "completion": 532,
+      "total": 5766
+    }
+  },
+  "Q30": {
+    "proposal": {
+      "answerable": false,
+      "gold_chunk_ids": [],
+      "gold_keywords": [],
+      "reason": "The product catalog and document chunks describe intended uses (trail running, technical terrain, gorpcore/urban-outdoor activities) but do not state whether the Salomon XT-6 is appropriate for a formal office party. The question asks for a style/social suitability judgement that is not directly or explicitly addressed in the provided documents, so it cannot be answered from the corpus without making inferences."
+    },
+    "tokens": {
+      "prompt": 5511,
+      "completion": 365,
+      "total": 5876
+    }
+  },
+  "Q31": {
+    "proposal": {
+      "answerable": false,
+      "gold_chunk_ids": [],
+      "gold_keywords": [],
+      "reason": "Not answerable: neither the PRODUCTS.JSON entry nor any corpus chunk makes any claim that the watch or its Elevate v5 optical heart rate sensor can detect incoming heart attacks or medical emergencies. The documents only list sensors and provide wear/accuracy guidance, so this specific medical-detection capability is not stated and cannot be inferred."
+    },
+    "tokens": {
+      "prompt": 5621,
+      "completion": 288,
+      "total": 5909
+    }
+  },
+  "Q32": {
+    "proposal": {
+      "answerable": false,
+      "gold_chunk_ids": [],
+      "gold_keywords": [],
+      "reason": "Not answerable from the provided docs: none of the catalog entry or chunks explicitly state whether heavy games (e.g., PUBG) can be played on the Galaxy Watch 6 Classic. The documents only note it runs 'Wear OS 4' and can run watch apps, but they do not mention gaming support, performance, or PUBG specifically, so the question is out-of-docs."
+    },
+    "tokens": {
+      "prompt": 5671,
+      "completion": 493,
+      "total": 6164
+    }
+  }
+}
