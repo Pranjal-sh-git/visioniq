@@ -27,6 +27,7 @@ opencv-python-headless>=4.9.0
 python-multipart>=0.0.9
 av>=11.0.0
 soundfile>=0.12.1
+tiktoken>=0.7.0
 
 
 # Testing
