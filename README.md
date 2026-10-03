@@ -131,6 +131,14 @@ Evaluated on **15 questions** (10 answerable in-video, 5 unanswerable out-of-vid
 
 ---
 
+## ⚡ Performance
+
+- **Startup**: ~110s -> ~15s (n=5 runs, Windows, live Azure)
+- **First video request stall**: ~99s removed
+- **Warm identify**: ~4s is dominated by the gpt-5-mini vision call
+
+---
+
 ## 🛡️ Security & SSRF Protection
 
 All image URL fetching flows (`identify_product`, visual embeddings, and open-world recognition) are protected by a dedicated security validation layer in [services/security.py](services/security.py):
@@ -204,6 +212,8 @@ visioniq/
 │   ├── api.md                  # REST API reference
 │   ├── evaluation.md           # Benchmark evaluation results and calibration analysis
 │   └── responsible-ai.md       # Safety, grounding guidelines, and SSRF threat model
+├── scripts/                    # Offline setup and model management
+│   └── download_models.py      # Pre-download models to HF cache for fast startup
 ├── tests/                      # Automated test and evaluation suites
 │   ├── test_ssrf_protection.py # 45 SSRF and security unit tests
 │   ├── test_routes.py          # FastAPI endpoint integration tests
@@ -249,7 +259,9 @@ AZURE_SEARCH_KEY=<your-search-api-key>
 AZURE_SEARCH_INDEX_NAME=product-catalog
 ```
 
-### 2. Backend Setup
+### 2. First-Time Setup: Model Download
+
+VisionIQ runs models with `local_files_only=True` to guarantee fast, deterministic startups without remote Hugging Face latency stalls or network dependency. On fresh machines, download the required models (`clip-ViT-B-32`, `all-MiniLM-L6-v2`, `openai/whisper-tiny`) into your local Hugging Face cache before starting the server:
 
 ```bash
 # Create and activate virtual environment
@@ -263,14 +275,22 @@ source .venv/bin/activate
 # Install dependencies
 pip install -r requirements.txt
 
-# Start backend server
+# Download required models into local HF cache (one-time setup)
+python scripts/download_models.py
+```
+
+> **Note**: If a model is missing from the local cache, the FastAPI server fails fast at startup with a clear notification (`Model X not cached. Run: python scripts/download_models.py`) instead of hanging or falling back silently. To permit online downloading during startup instead, set `ALLOW_MODEL_DOWNLOAD=1` in your `.env`.
+
+### 3. Start Backend Server
+
+```bash
 uvicorn backend.main:app --reload --port 8000
 ```
 - **Backend API**: `http://localhost:8000`
 - **Interactive Swagger Docs**: `http://localhost:8000/docs`
-- **Health Check**: `http://localhost:8000/api/health`
+- **Health Check & Readiness**: `http://localhost:8000/health/ready`
 
-### 3. Frontend Setup
+### 4. Frontend Setup
 
 In a separate terminal:
 

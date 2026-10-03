@@ -22,6 +22,11 @@ try:
 except ImportError:
     from config import settings
 
+try:
+    from backend.timing import profile_timer
+except ImportError:
+    from timing import profile_timer
+
 logger = logging.getLogger("visioniq.llm")
 
 _OPENAI_CLIENT: Optional[AzureOpenAI] = None
@@ -90,14 +95,15 @@ def generate_grounded_answer(
 
     try:
         print(f"[AZURE OPENAI CALLING] Base URL: {client.base_url} | Deployment: {deployment}")
-        response = client.chat.completions.create(
-            model=deployment,
-            messages=[
-                {"role": "system", "content": sys_prompt},
-                {"role": "user", "content": user_content},
-            ],
-            max_completion_tokens=400,  # Fast grounded answer generation: concise 2-3 sentences require ~100-200 tokens
-        )
+        with profile_timer("qa:llm_call_answer"):
+            response = client.chat.completions.create(
+                model=deployment,
+                messages=[
+                    {"role": "system", "content": sys_prompt},
+                    {"role": "user", "content": user_content},
+                ],
+                max_completion_tokens=400,  # Fast grounded answer generation: concise 2-3 sentences require ~100-200 tokens
+            )
         usage = response.usage
         usage_info = f"Total={usage.total_tokens}, Prompt={usage.prompt_tokens}, Completion={usage.completion_tokens}" if usage else "N/A"
         print(f"[AZURE OPENAI RESPONSE] ID: {response.id} | Model: {response.model} | Usage: {usage_info}")

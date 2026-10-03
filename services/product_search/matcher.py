@@ -29,6 +29,11 @@ except ImportError:
 
 from services.product_search.embeddings import generate_image_embedding, generate_text_embedding
 
+try:
+    from backend.timing import profile_timer
+except ImportError:
+    from timing import profile_timer
+
 logger = logging.getLogger(__name__)
 INDEX_NAME = "product-catalog"
 
@@ -55,19 +60,25 @@ def get_category_confidence_threshold(category: Optional[str]) -> float:
     return CATEGORY_CONFIDENCE_THRESHOLDS.get(category, DEFAULT_CONFIDENCE_THRESHOLD)
 
 
+_SEARCH_CLIENT: Optional[SearchClient] = None
+
+
 def get_search_client() -> SearchClient:
-    """Returns an authenticated SearchClient for the product-catalog index."""
-    endpoint = settings.AZURE_SEARCH_ENDPOINT
-    key = settings.AZURE_SEARCH_KEY
+    """Returns an authenticated SearchClient for the product-catalog index (cached singleton)."""
+    global _SEARCH_CLIENT
+    if _SEARCH_CLIENT is None:
+        endpoint = settings.AZURE_SEARCH_ENDPOINT
+        key = settings.AZURE_SEARCH_KEY
 
-    if not endpoint or not key:
-        raise ValueError("AZURE_SEARCH_ENDPOINT and AZURE_SEARCH_KEY must be configured.")
+        if not endpoint or not key:
+            raise ValueError("AZURE_SEARCH_ENDPOINT and AZURE_SEARCH_KEY must be configured.")
 
-    return SearchClient(
-        endpoint=endpoint,
-        index_name=INDEX_NAME,
-        credential=AzureKeyCredential(key),
-    )
+        _SEARCH_CLIENT = SearchClient(
+            endpoint=endpoint,
+            index_name=INDEX_NAME,
+            credential=AzureKeyCredential(key),
+        )
+    return _SEARCH_CLIENT
 
 
 def identify_product(
@@ -89,7 +100,8 @@ def identify_product(
         list[dict[str, Any]]: Top-k matching products with similarity scores, confidence flags, and metadata.
     """
     logger.info("Generating embedding for candidate image...")
-    image_vector = generate_image_embedding(image)
+    with profile_timer("identify:clip_embedding"):
+        image_vector = generate_image_embedding(image)
 
     search_client = get_search_client()
 
@@ -102,13 +114,14 @@ def identify_product(
     filter_expression = f"category eq '{category_filter}'" if category_filter else None
 
     logger.info(f"Querying Azure AI Search '{INDEX_NAME}' with top_k={top_k}...")
-    search_results = search_client.search(
-        search_text=None,
-        vector_queries=[vector_query],
-        filter=filter_expression,
-        select=["id", "name", "brand", "category", "description", "specifications", "features", "image_urls"],
-        top=top_k,
-    )
+    with profile_timer("identify:ai_search_query"):
+        search_results = list(search_client.search(
+            search_text=None,
+            vector_queries=[vector_query],
+            filter=filter_expression,
+            select=["id", "name", "brand", "category", "description", "specifications", "features", "image_urls"],
+            top=top_k,
+        ))
 
     matches = []
     for doc in search_results:

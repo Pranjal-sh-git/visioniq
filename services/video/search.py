@@ -55,22 +55,31 @@ CACHE_DIR = ROOT_DIR / "data" / "cache" / "video_analysis"
 
 VIDEO_CONFIDENCE_THRESHOLD = 0.50
 
+_SEARCH_INDEX_CLIENT: Optional[SearchIndexClient] = None
+_VIDEO_SEARCH_CLIENT: Optional[SearchClient] = None
+
 
 def get_search_index_client() -> SearchIndexClient:
-    """Instantiates SearchIndexClient from config."""
-    return SearchIndexClient(
-        endpoint=settings.AZURE_SEARCH_ENDPOINT,
-        credential=AzureKeyCredential(settings.AZURE_SEARCH_KEY),
-    )
+    """Instantiates or returns cached SearchIndexClient from config."""
+    global _SEARCH_INDEX_CLIENT
+    if _SEARCH_INDEX_CLIENT is None:
+        _SEARCH_INDEX_CLIENT = SearchIndexClient(
+            endpoint=settings.AZURE_SEARCH_ENDPOINT,
+            credential=AzureKeyCredential(settings.AZURE_SEARCH_KEY),
+        )
+    return _SEARCH_INDEX_CLIENT
 
 
 def get_video_search_client() -> SearchClient:
-    """Instantiates SearchClient for the video-segments index."""
-    return SearchClient(
-        endpoint=settings.AZURE_SEARCH_ENDPOINT,
-        index_name=VIDEO_INDEX_NAME,
-        credential=AzureKeyCredential(settings.AZURE_SEARCH_KEY),
-    )
+    """Instantiates or returns cached SearchClient for the video-segments index."""
+    global _VIDEO_SEARCH_CLIENT
+    if _VIDEO_SEARCH_CLIENT is None:
+        _VIDEO_SEARCH_CLIENT = SearchClient(
+            endpoint=settings.AZURE_SEARCH_ENDPOINT,
+            index_name=VIDEO_INDEX_NAME,
+            credential=AzureKeyCredential(settings.AZURE_SEARCH_KEY),
+        )
+    return _VIDEO_SEARCH_CLIENT
 
 
 def ensure_video_segments_index() -> SearchIndex:

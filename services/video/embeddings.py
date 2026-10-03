@@ -10,6 +10,7 @@ Why this model:
 """
 
 import logging
+import os
 from typing import Union
 import numpy as np
 
@@ -21,15 +22,21 @@ TEXT_MODEL_NAME = "all-MiniLM-L6-v2"
 
 
 def get_text_retrieval_model():
-    """Lazy-loads and returns the all-MiniLM-L6-v2 text embedding model with local cache preference."""
+    """Loads and returns the all-MiniLM-L6-v2 text embedding model with local cache enforcement unless ALLOW_MODEL_DOWNLOAD=1."""
     global _TEXT_RETRIEVAL_MODEL
     if _TEXT_RETRIEVAL_MODEL is None:
+        allow_download = os.getenv("ALLOW_MODEL_DOWNLOAD", "0").lower() in ("1", "true", "yes")
         from sentence_transformers import SentenceTransformer
         logger.info(f"Loading dense text retrieval model: {TEXT_MODEL_NAME}")
-        try:
-            _TEXT_RETRIEVAL_MODEL = SentenceTransformer(TEXT_MODEL_NAME, model_kwargs={"local_files_only": True})
-        except Exception:
+        if allow_download:
             _TEXT_RETRIEVAL_MODEL = SentenceTransformer(TEXT_MODEL_NAME)
+        else:
+            try:
+                _TEXT_RETRIEVAL_MODEL = SentenceTransformer(TEXT_MODEL_NAME, local_files_only=True)
+            except Exception:
+                raise RuntimeError(
+                    f"Model MiniLM ({TEXT_MODEL_NAME}) not cached. Run: python scripts/download_models.py"
+                ) from None
     return _TEXT_RETRIEVAL_MODEL
 
 

@@ -42,19 +42,39 @@ _ASR_PIPELINE = None
 
 
 def get_asr_pipeline():
-    """Lazy-loads Whisper Automatic Speech Recognition pipeline."""
+    """Loads and returns Whisper Automatic Speech Recognition pipeline with local cache enforcement unless ALLOW_MODEL_DOWNLOAD=1."""
     global _ASR_PIPELINE
     if _ASR_PIPELINE is None:
+        allow_download = os.getenv("ALLOW_MODEL_DOWNLOAD", "0").lower() in ("1", "true", "yes")
         try:
-            from transformers import pipeline
+            from transformers import AutoModelForSpeechSeq2Seq, AutoProcessor, pipeline
             logger.info("Loading Whisper ASR model (openai/whisper-tiny)...")
-            _ASR_PIPELINE = pipeline(
-                "automatic-speech-recognition",
-                model="openai/whisper-tiny",
-                chunk_length_s=30,
-                return_timestamps=True,
-            )
+            if allow_download:
+                _ASR_PIPELINE = pipeline(
+                    "automatic-speech-recognition",
+                    model="openai/whisper-tiny",
+                    chunk_length_s=30,
+                    return_timestamps=True,
+                )
+            else:
+                try:
+                    model = AutoModelForSpeechSeq2Seq.from_pretrained("openai/whisper-tiny", local_files_only=True)
+                    proc = AutoProcessor.from_pretrained("openai/whisper-tiny", local_files_only=True)
+                    _ASR_PIPELINE = pipeline(
+                        "automatic-speech-recognition",
+                        model=model,
+                        tokenizer=proc.tokenizer,
+                        feature_extractor=proc.feature_extractor,
+                        chunk_length_s=30,
+                        return_timestamps=True,
+                    )
+                except Exception:
+                    raise RuntimeError(
+                        "Model Whisper (openai/whisper-tiny) not cached. Run: python scripts/download_models.py"
+                    ) from None
         except Exception as e:
+            if "not cached" in str(e):
+                raise
             logger.warning(f"Whisper ASR pipeline could not be loaded: {e}")
             _ASR_PIPELINE = None
     return _ASR_PIPELINE

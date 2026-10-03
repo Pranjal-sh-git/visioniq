@@ -32,6 +32,11 @@ from agent.tools import (
 )
 from services.llm import get_azure_openai_client
 
+try:
+    from backend.timing import profile_timer
+except ImportError:
+    from timing import profile_timer
+
 logger = logging.getLogger("visioniq.agent")
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 
@@ -208,13 +213,14 @@ class VisionIQAgent:
         deployment = self.deployment_name
 
         try:
-            response = client.chat.completions.create(
-                model=deployment,
-                messages=messages,
-                tools=self.tool_definitions,
-                tool_choice="auto",
-                max_completion_tokens=300,  # Fast tool routing: function call JSON requires only ~50-80 tokens
-            )
+            with profile_timer("qa:llm_call_routing"):
+                response = client.chat.completions.create(
+                    model=deployment,
+                    messages=messages,
+                    tools=self.tool_definitions,
+                    tool_choice="auto",
+                    max_completion_tokens=300,  # Fast tool routing: function call JSON requires only ~50-80 tokens
+                )
             logger.info(f"[AZURE OPENAI CALL] Deployment: {deployment} | Status: SUCCESS")
         except Exception as e:
             logger.error(f"[AZURE OPENAI ERROR] Deployment '{deployment}' tool selection failed: {e}")

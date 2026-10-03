@@ -15,6 +15,11 @@ from services.product_search.matcher import (
 from services.vision.open_world_identifier import identify_product_open_world
 from services.rag.rag_service import retrieve_product_by_id
 
+try:
+    from backend.timing import profile_timer
+except ImportError:
+    from timing import profile_timer
+
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/product", tags=["Product Intelligence"])
@@ -38,14 +43,21 @@ async def identify_product_endpoint(
     confidence_threshold: float = Form(0.85),
 ):
     """Identifies products via Open-World Vision AI (gpt-5-mini) and suggests similar catalog items."""
+    with profile_timer("identify:request_parse"):
+        # Parameters parsed and validated by FastAPI
+        has_file = file is not None
+        has_url = bool(image_url)
+        has_query = bool(query)
+
     try:
         identified_product: Optional[dict[str, Any]] = None
         similar_catalog: list[dict[str, Any]] = []
 
         if file is not None:
-            file_path = UPLOAD_DIR / file.filename
-            with open(file_path, "wb") as buffer:
-                shutil.copyfileobj(file.file, buffer)
+            with profile_timer("identify:image_fetch"):
+                file_path = UPLOAD_DIR / file.filename
+                with open(file_path, "wb") as buffer:
+                    shutil.copyfileobj(file.file, buffer)
 
             # Step 1: Open-world vision identification via gpt-5-mini
             identified_product = identify_product_open_world(image=file_path)
@@ -59,6 +71,10 @@ async def identify_product_endpoint(
             )
 
         elif image_url:
+            with profile_timer("identify:image_fetch"):
+                # Remote URL image fetching handled inside identify_product_open_world / safe_fetch_image
+                pass
+
             # Step 1: Open-world vision identification via gpt-5-mini
             identified_product = identify_product_open_world(image_url=image_url)
 
@@ -114,17 +130,19 @@ async def identify_product_endpoint(
                     identified_product["is_catalog_match"] = True
                     identified_product["catalog_id"] = best_catalog_item["id"]
 
-        return {
-            "success": True,
-            "identified_product": identified_product,
-            "similar_catalog_products": similar_catalog,
-            "catalog_match": exact_catalog_match or (best_catalog_item if is_confident else None),
-            # Backwards compatibility fields for existing frontend & tests
-            "best_match": best_catalog_item,
-            "all_matches": similar_catalog,
-            "is_confident_match": is_confident,
-            "count": len(similar_catalog),
-        }
+        with profile_timer("identify:response_serialization"):
+            response_payload = {
+                "success": True,
+                "identified_product": identified_product,
+                "similar_catalog_products": similar_catalog,
+                "catalog_match": exact_catalog_match or (best_catalog_item if is_confident else None),
+                # Backwards compatibility fields for existing frontend & tests
+                "best_match": best_catalog_item,
+                "all_matches": similar_catalog,
+                "is_confident_match": is_confident,
+                "count": len(similar_catalog),
+            }
+        return response_payload
     except HTTPException:
         raise
     except HTTPException:

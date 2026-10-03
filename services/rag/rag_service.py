@@ -27,24 +27,35 @@ except ImportError:
 
 from services.llm import generate_grounded_answer
 
+try:
+    from backend.timing import profile_timer
+except ImportError:
+    from timing import profile_timer
+
 logger = logging.getLogger(__name__)
 INDEX_NAME = "product-catalog"
 
+_SEARCH_CLIENT: Optional[SearchClient] = None
+
 
 def get_search_client() -> SearchClient:
-    """Returns authenticated Azure SearchClient."""
-    return SearchClient(
-        endpoint=settings.AZURE_SEARCH_ENDPOINT,
-        index_name=INDEX_NAME,
-        credential=AzureKeyCredential(settings.AZURE_SEARCH_KEY),
-    )
+    """Returns authenticated Azure SearchClient (cached singleton)."""
+    global _SEARCH_CLIENT
+    if _SEARCH_CLIENT is None:
+        _SEARCH_CLIENT = SearchClient(
+            endpoint=settings.AZURE_SEARCH_ENDPOINT,
+            index_name=INDEX_NAME,
+            credential=AzureKeyCredential(settings.AZURE_SEARCH_KEY),
+        )
+    return _SEARCH_CLIENT
 
 
 def retrieve_product_by_id(product_id: str) -> Optional[dict[str, Any]]:
     """Retrieves a product directly by its ID from Azure AI Search."""
     search_client = get_search_client()
     try:
-        doc = search_client.get_document(key=product_id)
+        with profile_timer("qa:ai_search_query"):
+            doc = search_client.get_document(key=product_id)
         specs_raw = doc.get("specifications")
         specs = json.loads(specs_raw) if isinstance(specs_raw, str) else (specs_raw or {})
         doc["specifications"] = specs

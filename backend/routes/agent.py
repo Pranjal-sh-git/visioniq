@@ -7,6 +7,11 @@ from pydantic import BaseModel, Field
 
 from agent.agent import VisionIQAgent
 
+try:
+    from backend.timing import profile_timer
+except ImportError:
+    from timing import profile_timer
+
 logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/agent", tags=["Agent Orchestration"])
@@ -33,19 +38,27 @@ class AgentQueryRequest(BaseModel):
 @router.post("/query")
 async def query_agent_endpoint(request: AgentQueryRequest):
     """Executes the Microsoft Foundry Agent with genuine tool calling."""
-    if not request.prompt.strip():
-        raise HTTPException(status_code=400, detail="prompt cannot be empty.")
+    with profile_timer("qa:request_parse"):
+        prompt_text = request.prompt.strip()
+        if not prompt_text:
+            raise HTTPException(status_code=400, detail="prompt cannot be empty.")
+        p_id = request.product_id
+        v_id = request.video_id
+        m_url = request.media_url
+        p_info = request.product_info
 
     try:
         agent = get_agent()
         result = agent.run(
-            user_prompt=request.prompt,
-            product_id=request.product_id,
-            video_id=request.video_id,
-            media_url=request.media_url,
-            product_info=request.product_info,
+            user_prompt=prompt_text,
+            product_id=p_id,
+            video_id=v_id,
+            media_url=m_url,
+            product_info=p_info,
         )
-        return result
+        with profile_timer("qa:response_serialization"):
+            final_res = result
+        return final_res
     except Exception as e:
         logger.exception("Error executing VisionIQ agent run")
         raise HTTPException(status_code=500, detail=f"Agent execution failed: {str(e)}")

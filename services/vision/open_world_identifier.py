@@ -32,6 +32,11 @@ except ImportError:
 
 from services.llm import get_azure_openai_client
 
+try:
+    from backend.timing import profile_timer
+except ImportError:
+    from timing import profile_timer
+
 logger = logging.getLogger("visioniq.vision.open_world")
 
 # Maximum dimension (width/height) for vision LLM inference to minimize vision tokens
@@ -168,21 +173,22 @@ def identify_product_open_world(
 
     try:
         logger.info(f"[OPEN-WORLD IDENTIFY] Sending 512px-compressed image to Azure OpenAI ({deployment})...")
-        response = client.chat.completions.create(
-            model=deployment,
-            messages=[
-                {"role": "system", "content": system_instruction},
-                {
-                    "role": "user",
-                    "content": [
-                        {"type": "text", "text": prompt_text},
-                        {"type": "image_url", "image_url": {"url": data_uri}},
-                    ],
-                },
-            ],
-            max_completion_tokens=800,  # Covers reasoning tokens + concise JSON tokens
-            response_format={"type": "json_object"},
-        )
+        with profile_timer("identify:llm_call"):
+            response = client.chat.completions.create(
+                model=deployment,
+                messages=[
+                    {"role": "system", "content": system_instruction},
+                    {
+                        "role": "user",
+                        "content": [
+                            {"type": "text", "text": prompt_text},
+                            {"type": "image_url", "image_url": {"url": data_uri}},
+                        ],
+                    },
+                ],
+                max_completion_tokens=800,  # Covers reasoning tokens + concise JSON tokens
+                response_format={"type": "json_object"},
+            )
 
         raw_content = response.choices[0].message.content or "{}"
         parsed = json.loads(raw_content)

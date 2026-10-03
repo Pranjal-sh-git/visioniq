@@ -23,6 +23,8 @@ class Settings(BaseSettings):
         "http://localhost:5173",
         "http://127.0.0.1:5173",
     ]
+    # Model Caching & Offline Enforcement
+    ALLOW_MODEL_DOWNLOAD: bool = os.getenv("ALLOW_MODEL_DOWNLOAD", "0").lower() in ("1", "true", "yes")
 
     # Azure AI Foundry & Agent Service
     AZURE_FOUNDRY_ENDPOINT: str = os.getenv("AZURE_FOUNDRY_ENDPOINT", "")

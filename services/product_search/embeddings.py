@@ -14,6 +14,7 @@ Why this model:
 
 from io import BytesIO
 import logging
+import os
 from pathlib import Path
 from typing import Any, Union
 import numpy as np
@@ -29,29 +30,37 @@ MODEL_NAME = "clip-ViT-B-32"
 
 
 def get_embedding_model():
-    """Lazy-loads and returns the CLIP image embedding model with local cache preference."""
+    """Loads and returns the CLIP image embedding model with local cache enforcement unless ALLOW_MODEL_DOWNLOAD=1."""
     global _EMBEDDING_MODEL
     if _EMBEDDING_MODEL is None:
+        allow_download = os.getenv("ALLOW_MODEL_DOWNLOAD", "0").lower() in ("1", "true", "yes")
         try:
             from sentence_transformers import SentenceTransformer
             logger.info(f"Loading image embedding model: {MODEL_NAME}")
-            try:
-                # Prefer local cache to prevent blocking HuggingFace HTTP metadata checks
-                _EMBEDDING_MODEL = SentenceTransformer(MODEL_NAME, model_kwargs={"local_files_only": True})
-            except Exception:
+            if allow_download:
                 _EMBEDDING_MODEL = SentenceTransformer(MODEL_NAME)
+            else:
+                try:
+                    _EMBEDDING_MODEL = SentenceTransformer(MODEL_NAME, local_files_only=True)
+                except Exception:
+                    raise RuntimeError(f"Model CLIP ({MODEL_NAME}) not cached. Run: python scripts/download_models.py") from None
         except ImportError:
             try:
                 from transformers import CLIPModel, CLIPProcessor
                 logger.info(f"Loading transformers CLIP model: openai/{MODEL_NAME}")
-                try:
-                    processor = CLIPProcessor.from_pretrained(f"openai/{MODEL_NAME}", local_files_only=True)
-                    model = CLIPModel.from_pretrained(f"openai/{MODEL_NAME}", local_files_only=True)
-                except Exception:
+                if allow_download:
                     processor = CLIPProcessor.from_pretrained(f"openai/{MODEL_NAME}")
                     model = CLIPModel.from_pretrained(f"openai/{MODEL_NAME}")
+                else:
+                    try:
+                        processor = CLIPProcessor.from_pretrained(f"openai/{MODEL_NAME}", local_files_only=True)
+                        model = CLIPModel.from_pretrained(f"openai/{MODEL_NAME}", local_files_only=True)
+                    except Exception:
+                        raise RuntimeError(f"Model CLIP ({MODEL_NAME}) not cached. Run: python scripts/download_models.py") from None
                 _EMBEDDING_MODEL = (model, processor)
             except Exception as e:
+                if "not cached" in str(e):
+                    raise
                 raise RuntimeError(
                     f"Failed to load CLIP embedding model. Ensure `sentence-transformers` or `transformers` and `torch` are installed: {e}"
                 )
