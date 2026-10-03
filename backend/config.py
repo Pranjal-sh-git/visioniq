@@ -39,6 +39,7 @@ class Settings(BaseSettings):
     # Azure AI Search
     AZURE_SEARCH_ENDPOINT: str = os.getenv("AZURE_SEARCH_ENDPOINT", "")
     AZURE_SEARCH_KEY: str = os.getenv("AZURE_SEARCH_KEY", "")
+    AZURE_SEARCH_CHUNKS_INDEX: str = os.getenv("AZURE_SEARCH_CHUNKS_INDEX", "product-chunks")
 
     # Azure Content Understanding
     AZURE_CONTENT_UNDERSTANDING_ENDPOINT: str = os.getenv("AZURE_CONTENT_UNDERSTANDING_ENDPOINT", "")

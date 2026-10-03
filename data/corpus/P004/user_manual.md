@@ -21,7 +21,7 @@ Product overview
 
 In the Box
 - Sennheiser Momentum 4 Wireless headphones
-- USB-C charging cable
+- USB charging cable
 - Carrying pouch
 - Quick start guide and safety information
 - Warranty and regulatory information
